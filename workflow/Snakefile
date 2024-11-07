@@ -10,7 +10,7 @@ import pandas as pd
 
 configfile: "config/config.yaml"
 
-imd_traits = config.get('igad_paper').get('imd_traits')
+imd_traits = config.get('imd_traits')
 
 max_time = 120
 
