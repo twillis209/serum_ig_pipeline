@@ -1,20 +1,9 @@
-def get_url(name):
-    url = metadata_daf.loc[metadata_daf['abbrv'] == name, 'URL'].values[0]
-    return url
-
-def is_gz(name):
-    return metadata_daf.loc[metadata_daf['abbrv'] == name, 'is_gz'].values[0]
-
-def get_sha256sum(name):
-    sha256 = metadata_daf.loc[metadata_daf['abbrv'] == name, 'sha256'].values[0]
-    return sha256
-
 rule download_gwas:
     output:
-        ensure("resources/gwas/{download_name}.tsv.gz", sha256 = lambda wildcards: get_sha256sum(wildcards.download_name))
+        ensure("resources/gwas/{download_name}.tsv.gz", sha256 = lambda wildcards: config.get('gwas_datasets').get(wildcards.download_name).get('sha256'))
     params:
-        url = lambda w: get_url(w.download_name),
-        is_gz = lambda w: is_gz(w.download_name),
+        url = lambda w: config.get('gwas_datasets').get(w.download_name).get('url'),
+        is_gz = lambda w: config.get('gwas_datasets').get(w.download_name).get('is_gz'),
         uncompressed = "resources/gwas/{download_name}.tsv"
     resources:
         runtime = 8
@@ -37,6 +26,7 @@ rule download_human_vcf_and_rsid_reference:
                ),
         rsid = "resources/ebispot_harmoniser/reference/rsID.sql"
     params:
-        output_dir = "resources/ebispot_harmoniser/reference"
+        output_dir = "resources/ebispot_harmoniser/reference",
+        url = "ftp://ftp.ebi.ac.uk/pub/databases/gwas/harmonisation_resources/"
     shell:
-        "wget -r -P {params.output_dir} --no-parent --no-directories --continue ftp://ftp.ebi.ac.uk/pub/databases/gwas/harmonisation_resources/"
+        "wget -r -P {params.output_dir} --no-parent --no-directories --continue {params.url}"

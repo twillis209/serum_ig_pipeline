@@ -10,8 +10,6 @@ import pandas as pd
 
 configfile: "config/config.yaml"
 
-metadata_daf = pd.read_csv('resources/gwas/metadata/metadata_all_fields.tsv', sep = '\t')
-
 imd_traits = config.get('igad_paper').get('imd_traits')
 
 max_time = 120
@@ -21,9 +19,6 @@ def get_permute_time(wildcards, threads):
 
 def get_mem_mb(wildcards, threads):
     return 3300 * threads
-
-def get_metadata_field(key, column, key_field = 'abbrv'):
-    return metadata_daf[metadata_daf[key_field] == key][column].values[0]
 
 # Gets script path relative to location of Snakefile given by workflow.basedir
 def script_path(script):
