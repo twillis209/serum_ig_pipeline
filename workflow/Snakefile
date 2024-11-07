@@ -30,7 +30,7 @@ def env_path(env):
 include: 'rules/gwas/harmonise_gwas.smk'
 include: 'rules/gwas/gwas.smk'
 include: 'rules/sumher.smk'
-include: 'rules/gwas/iga_meta.smk'
+#include: 'rules/gwas/iga_meta.smk'
 include: 'rules/wildcard_constraints.smk'
 include: 'rules/ldsc.smk'
 include: 'rules/python/export.py'
@@ -60,9 +60,9 @@ include: 'rules/python/export.py'
 #                         'flip': ["rev", "ambig", "revcomp", "comp"]},
 #        retentions = lambda w: config.get('GWAS_tools').get('snps_to_retain')
 
-use rule rehead from gwas_pipeline as rehead with:
-    input:
-        "resources/gwas/{input_name}.tsv.gz"
+#use rule rehead from gwas_pipeline as rehead with:
+#    input:
+#        "resources/gwas/{input_name}.tsv.gz"
 
 module kGP_pipeline:
     snakefile: github("twillis209/1kGP_pipeline", path = "workflow/Snakefile", branch = 'conda')
