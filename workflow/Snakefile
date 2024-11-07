@@ -32,6 +32,7 @@ def script_path(script):
 def env_path(env):
     return os.path.join(workflow.basedir, "envs", env)
 
+include: 'rules/gwas/harmonise_gwas.smk'
 include: 'rules/gwas/gwas.smk'
 include: 'rules/sumher.smk'
 include: 'rules/gwas/iga_meta.smk'
@@ -39,30 +40,30 @@ include: 'rules/wildcard_constraints.smk'
 include: 'rules/ldsc.smk'
 include: 'rules/python/export.py'
 
-module gwas_pipeline:
-    snakefile: github("twillis209/GWAS_tools", path = "workflow/Snakefile", commit = "37e1724")
-    config: config["GWAS_tools"]
-
-# Ugly but this prevents import of redundant 1kGP rules
-use rule fix_alleles_and_id from gwas_pipeline as gwas_tools_fix_alleles_and_id
-use rule check_for_minimal_column_set from gwas_pipeline as gwas_tools_check_for_minimal_column_set
-use rule recalculate_missing_summary_statistics from gwas_pipeline as gwas_tools_recalculate_missing_summary_statistics
-use rule detect_build from gwas_pipeline as gwas_tools_detect_build
-use rule create_bed_file_for_liftover from gwas_pipeline as gwas_tools_create_bed_file_for_liftover
-use rule prepare_file_for_liftover from gwas_pipeline as gwas_tools_prepare_file_for_liftover
-use rule liftover from gwas_pipeline as gwas_tools_liftover
-use rule merge_liftovered_rows_with_summary_statistics from gwas_pipeline as gwas_tools_merge_liftovered_rows_with_summary_statistics
-use rule tabulate_allele_switches_using_1kG from gwas_pipeline as gwas_tools_tabulate_allele_switches_using_1kG
-use rule tabulate_allele_switches_using_hg38_1kG from gwas_pipeline as gwas_tools_tabulate_allele_switches_using_hg38_1kG
-
-use rule align_alleles_to_1kG from gwas_pipeline as gwas_tools_align_alleles_to_1kG with:
-    output:
-        "results/processed_gwas/{input_name}.tsv.gz"
-    params:
-        strand_policy = {'status': 'nonswitched',
-                         'codes_to_retain': ["rev", "revcomp", "comp", "nochange", "ambig"],
-                         'flip': ["rev", "ambig", "revcomp", "comp"]},
-        retentions = lambda w: config.get('GWAS_tools').get('snps_to_retain')
+#module gwas_pipeline:
+#    snakefile: github("twillis209/GWAS_tools", path = "workflow/Snakefile", commit = "37e1724")
+#    config: config["GWAS_tools"]
+#
+## Ugly but this prevents import of redundant 1kGP rules
+#use rule fix_alleles_and_id from gwas_pipeline as gwas_tools_fix_alleles_and_id
+#use rule check_for_minimal_column_set from gwas_pipeline as gwas_tools_check_for_minimal_column_set
+#use rule recalculate_missing_summary_statistics from gwas_pipeline as gwas_tools_recalculate_missing_summary_statistics
+#use rule detect_build from gwas_pipeline as gwas_tools_detect_build
+#use rule create_bed_file_for_liftover from gwas_pipeline as gwas_tools_create_bed_file_for_liftover
+#use rule prepare_file_for_liftover from gwas_pipeline as gwas_tools_prepare_file_for_liftover
+#use rule liftover from gwas_pipeline as gwas_tools_liftover
+#use rule merge_liftovered_rows_with_summary_statistics from gwas_pipeline as gwas_tools_merge_liftovered_rows_with_summary_statistics
+#use rule tabulate_allele_switches_using_1kG from gwas_pipeline as gwas_tools_tabulate_allele_switches_using_1kG
+#use rule tabulate_allele_switches_using_hg38_1kG from gwas_pipeline as gwas_tools_tabulate_allele_switches_using_hg38_1kG
+#
+#use rule align_alleles_to_1kG from gwas_pipeline as gwas_tools_align_alleles_to_1kG with:
+#    output:
+#        "results/processed_gwas/{input_name}.tsv.gz"
+#    params:
+#        strand_policy = {'status': 'nonswitched',
+#                         'codes_to_retain': ["rev", "revcomp", "comp", "nochange", "ambig"],
+#                         'flip': ["rev", "ambig", "revcomp", "comp"]},
+#        retentions = lambda w: config.get('GWAS_tools').get('snps_to_retain')
 
 use rule rehead from gwas_pipeline as rehead with:
     input:
