@@ -29,12 +29,13 @@ rule download_gwas:
         else:
             shell("exit -1")
 
-rule download_human_vcf_reference:
+rule download_human_vcf_and_rsid_reference:
     output:
-        expand("resources/ebispot_harmoniser/reference/homo_sapiens-chr{chrom}.{ext}",
-               chrom = [str(x) for x in range(1,23)]+['X', 'Y'],
+        vcf = expand("resources/ebispot_harmoniser/reference/homo_sapiens-chr{chrom}.{ext}",
+               chrom = [str(x) for x in range(1,23)]+['X', 'Y', 'MT'],
                ext = ["vcf.gz", "vcf.gz.tbi", "parquet"]
-               )
+               ),
+        rsid = "resources/ebispot_harmoniser/reference/rsID.sql"
     params:
         output_dir = "resources/ebispot_harmoniser/reference"
     shell:
