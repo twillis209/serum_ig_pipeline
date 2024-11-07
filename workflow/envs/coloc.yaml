@@ -1,0 +1,10 @@
+name: coloc
+channels:
+- conda-forge
+- bioconda
+- twillis209
+dependencies:
+- r-base >= 4.2.3
+- r-data.table >= 1.14.8
+- r-r.utils
+- r-coloc >= 5.2.3

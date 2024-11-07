@@ -1,0 +1,33 @@
+channels:
+- conda-forge
+- bioconda
+- twillis209
+dependencies:
+- pandas
+- scipy
+- requests
+- r-base
+- r-data.table >= 1.15
+- r-stringr
+- r-r.utils
+- r-tidyverse
+- r-ggplot2
+- r-ggtext
+- r-ggrepel
+- r-patchwork
+- r-kableextra >= 1.4
+- r-evd
+- r-fitdistrplus
+- r-ggcorrplot
+- r-pheatmap
+- r-xlsx
+- r-ggnewscale
+- bioconductor-genomicranges
+- r-ldlinkr
+- bioconductor-txdb.hsapiens.ucsc.hg38.knowngene
+- bioconductor-genomicfeatures
+- bioconductor-org.hs.eg.db
+- r-serum-ig-pipeline-code
+- r-httr
+- plink
+- plink2

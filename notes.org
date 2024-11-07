@@ -1,0 +1,12 @@
+* TODO Initialising the pipeline
+
+Probably best to do this by copying code from the =igad_paper_pipeline=, the =conda= version.
+
+- [ ] delete redundant =smk= files
+- [ ] delete redundant =conda= environments
+- [X] set R package with code for meta-analysis etc.
+- [ ] use EBISPOT pipeline? Seems more defensible than rolling my own
+
+
+* TODO estimating sdY in all data sets
+* TODO Z-score plots
