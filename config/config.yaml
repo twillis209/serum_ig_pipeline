@@ -85,7 +85,7 @@ iga:
 imd_traits: ['asthma-ex', 'hyperpara', 'hypothy', 'derm-ecz', 'pbc', 'addi', 'psc', 'ra', 'jia', 'sle', 'crohns', 't1d', 'ms', 'uc-delange', 'liu-decode-lyons-dennis-iga', 'igan']
 gwas_datasets:
   liu-iga:
-    sha256: "b254d67429b1241876fa5cafab5868fff093c81d259da315184c687ac13e5fdb"
+    sha256: "44a62f93daa4fc0cecabd144c3b8da1777999787fa8c87a4ca055adf47ecfa51"
     assembly: "hg19"
     is_gz: False
     url: "https://www.columbiamedicine.org/divisions/kiryluk/gwas/IgA/META.IGA.LEVELS.non-DECODE.txt"
