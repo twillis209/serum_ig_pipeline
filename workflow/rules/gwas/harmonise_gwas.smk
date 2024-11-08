@@ -35,3 +35,9 @@ rule download_gwas:
 # TODO rehead
 # https://ebispot.github.io/gwas-sumstats-harmoniser-documentation/Tutorials/Preparing-Input-Files
 # TODO
+rule install_gwas_ssf:
+    output:
+        "results/test.txt"
+    conda: env_path("gwas-sumstats-tools.yaml")
+    shell:
+        "touch {output}"
