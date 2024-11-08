@@ -1,3 +1,7 @@
 resources
 .snakemake
 results
+work
+logs
+.nextflow*
+submit_with*
