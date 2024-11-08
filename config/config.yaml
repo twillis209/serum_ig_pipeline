@@ -1,3 +1,5 @@
+ebispot_harmoniser:
+  version: v1.1.10
 GWAS_tools:
   extraneous_columns: ["af_cases_meta_hq" , "af_controls_meta_hq", "beta_meta_hq", "se_meta_hq", "pval_meta_hq", "pval_heterogeneity_hq", "af_cases_meta", "af_controls_meta", "beta_meta", "se_meta", "pval_meta", "pval_heterogeneity", "af_cases_AFR", "af_cases_AMR", "af_cases_CSA", "af_cases_EAS", "af_cases_EUR", "af_cases_MID", "af_controls_AFR", "af_controls_AMR", "af_controls_CSA", "af_controls_EAS", "af_controls_EUR", "af_controls_MID", "beta_AFR", "beta_AMR", "beta_CSA", "beta_EAS", "beta_MID", "se_AFR", "se_AMR", "se_CSA", "se_EAS", "se_MID", "pval_AFR", "pval_AMR", "pval_CSA", "pval_EAS", "pval_MID", "low_confidence_AFR", "low_confidence_AMR", "low_confidence_CSA", "low_confidence_EAS", "low_confidence_EUR", "low_confidence_MID", "nearest_genes", "neglog10_pval_meta_hq", "neglog10_pval_heterogeneity_hq", "neglog10_pval_meta", "neglog10_pval_heterogeneity", "neglog10_pval_AFR", "neglog10_pval_CSA", "neglog10_pval_EAS"]
   snps_to_retain: ['17:16991599:A:G', '17:16948873:G:A', '17:17045897:A:C', '17:17262322:T:G']

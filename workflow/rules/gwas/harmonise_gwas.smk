@@ -13,7 +13,7 @@ rule download_human_vcf_and_rsid_reference:
 
 rule download_gwas:
     output:
-        ensure("resources/gwas/{download_name}.tsv", sha256 = lambda wildcards: config.get('gwas_datasets').get(wildcards.download_name).get('sha256'))
+        temp(ensure("resources/gwas/{download_name}.tsv", sha256 = lambda wildcards: config.get('gwas_datasets').get(wildcards.download_name).get('sha256')))
     params:
         url = lambda w: config.get('gwas_datasets').get(w.download_name).get('url'),
         is_gz = lambda w: config.get('gwas_datasets').get(w.download_name).get('is_gz'),
@@ -46,9 +46,31 @@ rule format_gwas:
         sumstats = "resources/gwas/{download_name}.tsv",
         config = "results/gwas/gwas_ssf/{download_name}.json"
     output:
-        "results/gwas/gwas_ssf/{download_name}.tsv"
+        temp("results/gwas/gwas_ssf/{download_name}.tsv")
     resources:
         runtime = 20
     conda: env_path("gwas-sumstats-tools.yaml")
     shell: "gwas-ssf format {input.sumstats} --apply_config  --config_in {input.config} -o {output}"
 
+rule harmonise_gwas:
+    input:
+        config = "results/gwas/gwas_ssf/{download_name}.tsv-meta.yaml",
+        sumstats = "results/gwas/gwas_ssf/{download_name}.tsv"
+    output:
+        "results/gwas/gwas_harmoniser/{download_name}.tsv"
+    params:
+        ref = "resources/ebispot_harmoniser/reference",
+        version = config['ebispot_harmoniser']['version']
+    threads: 16
+    resources:
+        runtime = 120
+    handover: True
+    shell:
+        """
+        nextflow run EBISPOT/gwas-sumstats-harmoniser \
+        -r {params.version} \
+        --ref {params.ref} \
+        --harm \
+        --file {input.sumstats} \
+        -profile executor,singularity
+        """
