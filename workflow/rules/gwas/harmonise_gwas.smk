@@ -37,7 +37,7 @@ rule generate_gwas_format_report:
         "resources/gwas/{download_name}.tsv"
     output:
         "results/gwas/gwas_ssf/{download_name}.json"
-    conda: env_path("gwas-sumstats-tool.yaml")
+    conda: env_path("gwas-sumstats-tools.yaml")
     localrule: True
     shell: "gwas-ssf format {input} --generate_config --config_out {output}"
 
@@ -49,8 +49,6 @@ rule format_gwas:
         "results/gwas/gwas_ssf/{download_name}.tsv"
     resources:
         runtime = 20
-    conda: env_path("gwas-sumstats-tool.yaml")
+    conda: env_path("gwas-sumstats-tools.yaml")
     shell: "gwas-ssf format {input.sumstats} --apply_config  --config_in {input.config} -o {output}"
 
-# https://ebispot.github.io/gwas-sumstats-harmoniser-documentation/Tutorials/Preparing-Input-Files
-# TODO https://ebispot.github.io/gwas-sumstats-tools-documentation/#/CLI_format?id=_1-to-generate-a-configuration-file
