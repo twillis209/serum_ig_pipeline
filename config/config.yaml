@@ -88,8 +88,16 @@ imd_traits: ['asthma-ex', 'hyperpara', 'hypothy', 'derm-ecz', 'pbc', 'addi', 'ps
 gwas_datasets:
   liu-iga:
     sha256: "44a62f93daa4fc0cecabd144c3b8da1777999787fa8c87a4ca055adf47ecfa51"
-    assembly: "hg19"
     is_gz: False
     url: "https://www.columbiamedicine.org/divisions/kiryluk/gwas/IgA/META.IGA.LEVELS.non-DECODE.txt"
     cases: 0
     controls: 22229
+    gwas_ssf:
+        date_metadata_last_modified: 2024-11-08
+        genome_assembly: GRCh37
+        coordinate_system: 1-based
+        data_file_name: iga-liu.tsv
+        data_file_md5sum: b9bc99a0fc6da44d1cb71d75da9a63f5
+        file_type: GWAS-SSF v0.1
+        is_harmonised: false
+        is_sorted: false

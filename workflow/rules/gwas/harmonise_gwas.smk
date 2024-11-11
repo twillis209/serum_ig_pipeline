@@ -1,3 +1,5 @@
+import pathlib
+
 rule download_human_vcf_and_rsid_reference:
     output:
         vcf = expand("resources/ebispot_harmoniser/reference/homo_sapiens-chr{chrom}.{ext}",
@@ -41,6 +43,11 @@ rule generate_gwas_format_report:
     localrule: True
     shell: "gwas-ssf format {input} --generate_config --config_out {output}"
 
+rule write_gwas_meta_file:
+    output:
+    run:
+        pass
+
 rule format_gwas:
     input:
         sumstats = "resources/gwas/{download_name}.tsv",
@@ -57,10 +64,41 @@ rule harmonise_gwas:
         config = "results/gwas/gwas_ssf/{download_name}.tsv-meta.yaml",
         sumstats = "results/gwas/gwas_ssf/{download_name}.tsv"
     output:
-        "results/gwas/gwas_harmoniser/{download_name}.tsv"
+        # Bad but there are so many files to list here!
+	"results/gwas/gwas_sff/{download_name}/final/{download_name}.h.tsv.gz",
+	temp(directory("results/gwas/gwas_sff/work"))
     params:
-        ref = "resources/ebispot_harmoniser/reference",
-        version = config['ebispot_harmoniser']['version']
+        launch_dir = pathlib.Path("results/gwas/gwas_ssf"),
+        sumstats = lambda w: pathlib.Path(f"results/gwas/gwas_ssf/{w.download_name}.tsv").resolve(),
+        ref = pathlib.Path("resources/ebispot_harmoniser/reference").resolve(),
+        nf_config = pathlib.Path("config/harmoniser.config").resolve(),
+        version = config['ebispot_harmoniser']['version'],
+        profile = 'local,singularity'
+    threads: 12
+    resources:
+        runtime = 90
+    handover: True
+    shell:
+        """
+	cd {params.launch_dir}
+
+        nextflow \
+        -c {params.nf_config} \
+        run EBISPOT/gwas-sumstats-harmoniser \
+        -r {params.version} \
+        --ref {params.ref} \
+        --harm \
+        --file {params.sumstats} \
+        -profile {params.profile}
+        """
+
+rule test_harmonise_gwas:
+    output:
+        "random_name/final/random_name.h.tsv.gz"
+    params:
+        ref = pathlib.Path("resources/ebispot_harmoniser/reference").resolve(),
+        version = config['ebispot_harmoniser']['version'],
+        output_dir = pathlib.Path(".").resolve()
     threads: 16
     resources:
         runtime = 120
@@ -70,7 +108,7 @@ rule harmonise_gwas:
         nextflow run EBISPOT/gwas-sumstats-harmoniser \
         -r {params.version} \
         --ref {params.ref} \
-        --harm \
-        --file {input.sumstats} \
-        -profile executor,singularity
+        --output-dir {params.output_dir} \
+        -profile test,singularity
         """
+

@@ -5,3 +5,5 @@ work
 logs
 .nextflow*
 submit_with*
+submit_nf.sh
+singularity
