@@ -71,14 +71,13 @@ rule harmonise_gwas:
     output:
         # Bad but there are so many files to list here!
         "results/gwas/gwas_sff/{download_name}/final/{download_name}.h.tsv.gz",
-        #temp(directory("results/gwas/gwas_sff/work"))
     params:
         launch_dir = pathlib.Path("results/gwas/gwas_ssf"),
         sumstats = lambda w: pathlib.Path(f"results/gwas/gwas_ssf/{w.download_name}.tsv").resolve(),
         ref = pathlib.Path("resources/ebispot_harmoniser/reference").resolve(),
         nf_config = pathlib.Path("config/harmoniser.config").resolve(),
         version = config['ebispot_harmoniser']['version'],
-        profile = 'local,singularity'
+        profiles = 'local,singularity'
     threads: 12
     resources:
         runtime = 90
@@ -94,26 +93,5 @@ rule harmonise_gwas:
         --ref {params.ref} \
         --harm \
         --file {params.sumstats} \
-        -profile {params.profile}
+        -profile {params.profiles}
         """
-
-rule test_harmonise_gwas:
-    output:
-        "random_name/final/random_name.h.tsv.gz"
-    params:
-        ref = pathlib.Path("resources/ebispot_harmoniser/reference").resolve(),
-        version = config['ebispot_harmoniser']['version'],
-        output_dir = pathlib.Path(".").resolve()
-    threads: 16
-    resources:
-        runtime = 120
-    handover: True
-    shell:
-        """
-        nextflow run EBISPOT/gwas-sumstats-harmoniser \
-        -r {params.version} \
-        --ref {params.ref} \
-        --output-dir {params.output_dir} \
-        -profile test,singularity
-        """
-
