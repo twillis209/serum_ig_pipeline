@@ -20,7 +20,7 @@ rule download_gwas:
     params:
         url = lambda w: config.get('gwas_datasets').get(w.download_name).get('url'),
         is_gz = lambda w: config.get('gwas_datasets').get(w.download_name).get('is_gz'),
-        uncompressed = "resources/gwas/{download_name}.tsv.gz"
+        compressed = "resources/gwas/{download_name}.tsv.gz"
     resources:
         runtime = 8
     group: "gwas"
