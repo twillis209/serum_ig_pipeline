@@ -101,6 +101,21 @@ gwas_datasets:
         file_type: GWAS-SSF v0.1
         is_harmonised: false
         is_sorted: false
+  liu-decode-iga:
+    sha256: ""
+    is_gz: False
+    url: "https://www.columbiamedicine.org/divisions/kiryluk/gwas/IgA/META.IGA.LEVELS.ALL.COMBINED.txt"
+    cases: 0
+    controls: 41448
+    gwas_ssf:
+        date_metadata_last_modified: 2024-11-08
+        genome_assembly: GRCh37
+        coordinate_system: 1-based
+        data_file_name: liu-decode-iga.tsv
+        data_file_md5sum: ""
+        file_type: GWAS-SSF v0.1
+        is_harmonised: false
+        is_sorted: false
   dennis-iga:
     sha256: "9ffc96ec546fb2c886dde9e19ddce7602aaa611d817c8c25360438a000f52315"
     is_gz: True
@@ -113,6 +128,246 @@ gwas_datasets:
         coordinate_system: 1-based
         data_file_name: dennis-iga.tsv
         data_file_md5sum: 4cb00f352dc88df8d06d88c62e3d9a4a
+        file_type: GWAS-SSF v0.1
+        is_harmonised: false
+        is_sorted: false
+  dennis-igg:
+    sha256: ""
+    is_gz: True
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90012001-GCST90013000/GCST90012679/GCST90012679_buildGRCh37.tsv.gz"
+    cases: 0
+    controls: 3471
+    gwas_ssf:
+        date_metadata_last_modified: 2024-11-11
+        genome_assembly: GRCh37
+        coordinate_system: 1-based
+        data_file_name: dennis-igg.tsv
+        data_file_md5sum: ""
+        file_type: GWAS-SSF v0.1
+        is_harmonised: false
+        is_sorted: false
+  iga:
+    sha256: ""
+    is_gz: True
+    url: ""
+    cases: 0
+    controls: 7938
+    gwas_ssf:
+        date_metadata_last_modified: 2024-11-11
+        genome_assembly: GRCh37
+        coordinate_system: 1-based
+        data_file_name: iga.tsv
+        data_file_md5sum: ""
+        file_type: GWAS-SSF v0.1
+        is_harmonised: false
+        is_sorted: false
+  igg:
+    sha256: ""
+    is_gz: True
+    url: ""
+    cases: 0
+    controls: 7946
+    gwas_ssf:
+        date_metadata_last_modified: 2024-11-11
+        genome_assembly: GRCh37
+        coordinate_system: 1-based
+        data_file_name: igg.tsv
+        data_file_md5sum: ""
+        file_type: GWAS-SSF v0.1
+        is_harmonised: false
+        is_sorted: false
+  igm:
+    sha256: ""
+    is_gz: True
+    url: ""
+    cases: 0
+    controls: 8008
+    gwas_ssf:
+        date_metadata_last_modified: 2024-11-11
+        genome_assembly: GRCh37
+        coordinate_system: 1-based
+        data_file_name: igm.tsv
+        data_file_md5sum: ""
+        file_type: GWAS-SSF v0.1
+        is_harmonised: false
+        is_sorted: false
+  scepanovic-igg:
+    sha256: ""
+    is_gz: True
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST006001-GCST007000/GCST006357/harmonised/30053915-GCST006357-EFO_0004565-build37.f.tsv.gz"
+    cases: 0
+    controls: 1000
+    gwas_ssf:
+        date_metadata_last_modified: 2024-11-11
+        genome_assembly: GRCh37
+        coordinate_system: 1-based
+        data_file_name: scepanovic-igg.tsv
+        data_file_md5sum: ""
+        file_type: GWAS-SSF v0.1
+        is_harmonised: false
+        is_sorted: false
+  scepanovic-igm:
+    sha256: ""
+    is_gz: True
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST006001-GCST007000/GCST006359/harmonised/30053915-GCST006359-EFO_0004993-build37.f.tsv.gz"
+    cases: 0
+    controls: 1000
+    gwas_ssf:
+        date_metadata_last_modified: 2024-11-11
+        genome_assembly: GRCh37
+        coordinate_system: 1-based
+        data_file_name: scepanovic-igm.tsv
+        data_file_md5sum: ""
+        file_type: GWAS-SSF v0.1
+        is_harmonised: false
+        is_sorted: false
+  scepanovic-iga:
+    sha256: ""
+    is_gz: True
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST006001-GCST007000/GCST006360/harmonised/30053915-GCST006360-EFO_0004912-build37.f.tsv.gz"
+    cases: 0
+    controls: 1000
+    gwas_ssf:
+        date_metadata_last_modified: 2024-11-11
+        genome_assembly: GRCh37
+        coordinate_system: 1-based
+        data_file_name: scepanovic-iga.tsv
+        data_file_md5sum: ""
+        file_type: GWAS-SSF v0.1
+        is_harmonised: false
+        is_sorted: false
+  pietzner-igm:
+    sha256: ""
+    is_gz: True
+    url: ""
+    cases: 0
+    controls: 10708
+    gwas_ssf:
+        date_metadata_last_modified: 2024-11-11
+        genome_assembly: GRCh37
+        coordinate_system: 1-based
+        data_file_name: pietzner-igm.tsv
+        data_file_md5sum: ""
+        file_type: GWAS-SSF v0.1
+        is_harmonised: false
+        is_sorted: false
+  pietzner-iga:
+    sha256: ""
+    is_gz: True
+    url: ""
+    cases: 0
+    controls: 10708
+    gwas_ssf:
+        date_metadata_last_modified: 2024-11-11
+        genome_assembly: GRCh37
+        coordinate_system: 1-based
+        data_file_name: pietzner-iga.tsv
+        data_file_md5sum: ""
+        file_type: GWAS-SSF v0.1
+        is_harmonised: false
+        is_sorted: false
+  pietzner-igg:
+    sha256: ""
+    is_gz: True
+    url: ""
+    cases: 0
+    controls: 10708
+    gwas_ssf:
+        date_metadata_last_modified: 2024-11-11
+        genome_assembly: GRCh37
+        coordinate_system: 1-based
+        data_file_name: pietzner-iga.tsv
+        data_file_md5sum: ""
+        file_type: GWAS-SSF v0.1
+        is_harmonised: false
+        is_sorted: false
+  gudjonsson-igg:
+    sha256: ""
+    is_gz: True
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90088001-GCST90089000/GCST90088489/harmonised/35078996-GCST90088489-EFO_0007937-Build37.f.tsv.gz"
+    cases: 0
+    controls: 5356
+    gwas_ssf:
+        date_metadata_last_modified: 2024-11-11
+        genome_assembly: GRCh37
+        coordinate_system: 1-based
+        data_file_name: gudjonsson-igg.tsv
+        data_file_md5sum: ""
+        file_type: GWAS-SSF v0.1
+        is_harmonised: false
+        is_sorted: false
+  gudjonsson-iga:
+    sha256: ""
+    is_gz: True
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90086001-GCST90087000/GCST90086533/harmonised/35078996-GCST90086533-EFO_0007937-Build37.f.tsv.gz"
+    cases: 0
+    controls: 5358
+    gwas_ssf:
+        date_metadata_last_modified: 2024-11-11
+        genome_assembly: GRCh37
+        coordinate_system: 1-based
+        data_file_name: gudjonsson-iga.tsv
+        data_file_md5sum: ""
+        file_type: GWAS-SSF v0.1
+        is_harmonised: false
+        is_sorted: false
+  gudjonsson-igm:
+    sha256: ""
+    is_gz: True
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90088001-GCST90089000/GCST90088220/harmonised/35078996-GCST90088220-EFO_0007937-Build37.f.tsv.gz"
+    cases: 0
+    controls: 5362
+    gwas_ssf:
+        date_metadata_last_modified: 2024-11-11
+        genome_assembly: GRCh37
+        coordinate_system: 1-based
+        data_file_name: gudjonsson-igm.tsv
+        data_file_md5sum: ""
+        file_type: GWAS-SSF v0.1
+        is_harmonised: false
+        is_sorted: false
+  eldjarn-igg:
+    sha256: ""
+    is_gz: True
+    url: ""
+    cases: 0
+    controls: 35652
+    gwas_ssf:
+        date_metadata_last_modified: 2024-11-11
+        genome_assembly: GRCh37
+        coordinate_system: 1-based
+        data_file_name: eldjarn-igg.tsv
+        data_file_md5sum: ""
+        file_type: GWAS-SSF v0.1
+        is_harmonised: false
+        is_sorted: false
+  eldjarn-iga:
+    sha256: ""
+    is_gz: True
+    url: ""
+    cases: 0
+    controls: 35652
+    gwas_ssf:
+        date_metadata_last_modified: 2024-11-11
+        genome_assembly: GRCh37
+        coordinate_system: 1-based
+        data_file_name: eldjarn-iga.tsv
+        data_file_md5sum: ""
+        file_type: GWAS-SSF v0.1
+        is_harmonised: false
+        is_sorted: false
+  eldjarn-igm:
+    sha256: ""
+    is_gz: True
+    url: ""
+    cases: 0
+    controls: 35652
+    gwas_ssf:
+        date_metadata_last_modified: 2024-11-11
+        genome_assembly: GRCh37
+        coordinate_system: 1-based
+        data_file_name: eldjarn-igm.tsv
+        data_file_md5sum: ""
         file_type: GWAS-SSF v0.1
         is_harmonised: false
         is_sorted: false
