@@ -101,3 +101,18 @@ gwas_datasets:
         file_type: GWAS-SSF v0.1
         is_harmonised: false
         is_sorted: false
+  dennis-iga:
+    sha256: "9ffc96ec546fb2c886dde9e19ddce7602aaa611d817c8c25360438a000f52315"
+    is_gz: True
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90012001-GCST90013000/GCST90012678/GCST90012678_buildGRCh37.tsv.gz"
+    cases: 0
+    controls: 7677
+    gwas_ssf:
+        date_metadata_last_modified: 2024-11-11
+        genome_assembly: GRCh37
+        coordinate_system: 1-based
+        data_file_name: dennis-iga.tsv
+        data_file_md5sum: b9bc99a0fc6da44d1cb71d75da9a63f5
+        file_type: GWAS-SSF v0.1
+        is_harmonised: false
+        is_sorted: false
