@@ -96,7 +96,7 @@ gwas_datasets:
         date_metadata_last_modified: 2024-11-08
         genome_assembly: GRCh37
         coordinate_system: 1-based
-        data_file_name: iga-liu.tsv
+        data_file_name: liu-iga.tsv
         data_file_md5sum: b9bc99a0fc6da44d1cb71d75da9a63f5
         file_type: GWAS-SSF v0.1
         is_harmonised: false

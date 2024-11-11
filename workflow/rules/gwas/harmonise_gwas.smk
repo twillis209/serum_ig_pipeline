@@ -1,4 +1,5 @@
 import pathlib
+import yaml
 
 rule download_human_vcf_and_rsid_reference:
     output:
@@ -45,8 +46,12 @@ rule generate_gwas_format_report:
 
 rule write_gwas_meta_file:
     output:
+        "results/gwas/gwas_ssf/{download_name}.tsv-meta.yaml"
+    params:
+        data = lambda w: config.get('gwas_datasets').get(w.download_name).get('gwas_ssf')
     run:
-        pass
+        with open(output[0], 'w') as fh:
+            yaml.dump(params.data, fh, default_flow_style = False)
 
 rule format_gwas:
     input:
@@ -65,8 +70,8 @@ rule harmonise_gwas:
         sumstats = "results/gwas/gwas_ssf/{download_name}.tsv"
     output:
         # Bad but there are so many files to list here!
-	"results/gwas/gwas_sff/{download_name}/final/{download_name}.h.tsv.gz",
-	temp(directory("results/gwas/gwas_sff/work"))
+        "results/gwas/gwas_sff/{download_name}/final/{download_name}.h.tsv.gz",
+        #temp(directory("results/gwas/gwas_sff/work"))
     params:
         launch_dir = pathlib.Path("results/gwas/gwas_ssf"),
         sumstats = lambda w: pathlib.Path(f"results/gwas/gwas_ssf/{w.download_name}.tsv").resolve(),
@@ -80,7 +85,7 @@ rule harmonise_gwas:
     handover: True
     shell:
         """
-	cd {params.launch_dir}
+        cd {params.launch_dir}
 
         nextflow \
         -c {params.nf_config} \
