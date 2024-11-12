@@ -1,3 +1,5 @@
+executor: slurm
+jobs: 300
 local-cores: 4
 cores: 16
 resources:
@@ -6,9 +8,12 @@ resources:
 default-resources:
   runtime: 5
   mem_mb: threads * 3420
+  slurm_account: "mrc-bsu-sl2-cpu"
+  slurm_partition: cclake
 software-deployment-method: "apptainer"
 software-deployment-method: "conda"
 scheduler: greedy
 rerun-incomplete: True
 rerun-triggers: "mtime"
 notemp: True
+keep-going: True
