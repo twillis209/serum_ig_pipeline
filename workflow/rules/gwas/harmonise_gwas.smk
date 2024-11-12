@@ -70,7 +70,7 @@ rule harmonise_gwas:
         sumstats = "results/gwas/gwas_ssf/{download_name}.tsv"
     output:
         # Bad but there are so many files to list here!
-        "results/gwas/gwas_sff/{download_name}/final/{download_name}.h.tsv.gz",
+        "results/gwas/gwas_ssf/{download_name}/final/{download_name}.h.tsv.gz",
     params:
         launch_dir = pathlib.Path("results/gwas/gwas_ssf"),
         sumstats = lambda w: pathlib.Path(f"results/gwas/gwas_ssf/{w.download_name}.tsv").resolve(),
