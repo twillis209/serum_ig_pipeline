@@ -23,7 +23,7 @@ rule download_gwas:
         compressed = "resources/gwas/{download_name}.tsv.gz"
     resources:
         runtime = 8
-    group: "gwas"
+    group: "harmonise_gwas"
     run:
         if params.url:
             if params.is_gz:
@@ -37,43 +37,45 @@ rule download_gwas:
 
 rule generate_gwas_format_report:
     input:
-        "resources/gwas/{download_name}.tsv"
+        "resources/gwas/{trait}.tsv"
     output:
-        "results/gwas/gwas_ssf/{download_name}.json"
+        "results/gwas/gwas_ssf/{trait}.json"
     conda: env_path("gwas-sumstats-tools.yaml")
     localrule: True
     shell: "gwas-ssf format {input} --generate_config --config_out {output}"
 
 rule write_gwas_meta_file:
     output:
-        "results/gwas/gwas_ssf/{download_name}.tsv-meta.yaml"
+        "results/gwas/gwas_ssf/{trait}.tsv-meta.yaml"
     params:
-        data = lambda w: config.get('gwas_datasets').get(w.download_name).get('gwas_ssf')
+        data = lambda w: config.get('gwas_datasets').get(w.trait).get('gwas_ssf') 
+    localrule: True
     run:
         with open(output[0], 'w') as fh:
             yaml.dump(params.data, fh, default_flow_style = False)
 
 rule format_gwas:
     input:
-        sumstats = "resources/gwas/{download_name}.tsv",
-        config = "results/gwas/gwas_ssf/{download_name}.json"
+        sumstats = "resources/gwas/{trait}.tsv",
+        config = "results/gwas/gwas_ssf/{trait}.json"
     output:
-        temp("results/gwas/gwas_ssf/{download_name}.tsv")
+        temp("results/gwas/gwas_ssf/{trait}.tsv")
     resources:
         runtime = 20
+    group: "harmonise_gwas"
     conda: env_path("gwas-sumstats-tools.yaml")
     shell: "gwas-ssf format {input.sumstats} --apply_config  --config_in {input.config} -o {output}"
 
 rule harmonise_gwas:
     input:
-        config = "results/gwas/gwas_ssf/{download_name}.tsv-meta.yaml",
-        sumstats = "results/gwas/gwas_ssf/{download_name}.tsv"
+        config = "results/gwas/gwas_ssf/{trait}.tsv-meta.yaml",
+        sumstats = "results/gwas/gwas_ssf/{trait}.tsv"
     output:
         # Bad but there are so many files to list here!
-        "results/gwas/gwas_ssf/{download_name}/final/{download_name}.h.tsv.gz",
+        "results/gwas/gwas_ssf/{trait}/final/{trait}.h.tsv.gz",
     params:
         launch_dir = pathlib.Path("results/gwas/gwas_ssf"),
-        sumstats = lambda w: pathlib.Path(f"results/gwas/gwas_ssf/{w.download_name}.tsv").resolve(),
+        sumstats = lambda w: pathlib.Path(f"results/gwas/gwas_ssf/{w.trait}.tsv").resolve(),
         ref = pathlib.Path("resources/ebispot_harmoniser/reference").resolve(),
         nf_config = pathlib.Path("config/harmoniser.config").resolve(),
         version = config['ebispot_harmoniser']['version'],
@@ -81,6 +83,7 @@ rule harmonise_gwas:
     threads: 12
     resources:
         runtime = 90
+    group: "harmonise_gwas"
     handover: True
     shell:
         """
@@ -95,3 +98,7 @@ rule harmonise_gwas:
         --file {params.sumstats} \
         -profile {params.profiles}
         """
+
+rule harmonise_ig_gwas:
+    input:
+        expand("results/gwas/gwas_ssf/{trait}/final/{trait}.h.tsv.gz", trait = config.get('gwas_datasets'))

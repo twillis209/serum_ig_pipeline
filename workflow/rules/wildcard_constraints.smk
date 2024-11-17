@@ -1,7 +1,7 @@
 import re
 
-traits_to_skip_gwas_tools = ['liu-decode-lyons-dennis-iga', 'liu-decode-lyons-iga', 'bronson-finngen-igad', 'lyons-dennis-igg', 'lim-igad']
-pattern = '|'.join(re.escape(trait) for trait in traits_to_skip_gwas_tools)
+traits_not_for_download = [x for x in config.get('gwas_datasets') if not config.get('gwas_datasets').get(x).get('url')]
+pattern = '|'.join(re.escape(x) for x in traits_not_for_download)
 
 wildcard_constraints:
     snp_set = 'with_mhc|sans_mhc',
@@ -13,8 +13,7 @@ wildcard_constraints:
     window_size = "\\d+kb",
     flank_size = "\\d+kb",
     r2 = "0_\\d+",
-    download_name = '[a-z0-9\\-]+(?<!-gc)',
-    input_name = fr'^(?!.*(?:{pattern}))(?!.*-gc$).*$',
+    download_name = fr'^(?!.*(?:{pattern}))(?!.*-gc$).*$',
     maf = "\\d+",
     vmiss = "\\d+",
     post_vmiss = "\\d+",
