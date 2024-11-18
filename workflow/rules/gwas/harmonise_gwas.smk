@@ -80,7 +80,7 @@ rule harmonise_gwas:
         nf_config = pathlib.Path("config/harmoniser.config").resolve(),
         version = config['ebispot_harmoniser']['version'],
         profiles = 'local,singularity'
-    threads: 12
+    threads: 16
     resources:
         runtime = 90
     group: "harmonise_gwas"
