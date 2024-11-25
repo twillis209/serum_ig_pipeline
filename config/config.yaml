@@ -276,7 +276,7 @@ gwas_datasets:
         date_metadata_last_modified: 2024-11-11
         genome_assembly: GRCh37
         coordinate_system: 1-based
-        data_file_name: pietzner-iga.tsv
+        data_file_name: pietzner-igg.tsv
         data_file_md5sum: ""
         file_type: GWAS-SSF v0.1
         is_harmonised: false
