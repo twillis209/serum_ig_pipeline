@@ -92,7 +92,7 @@ rule harmonise_gwas:
         nextflow \
         -c {params.nf_config} \
         run EBISPOT/gwas-sumstats-harmoniser \
-        -r {params.version} \
+        -r v{params.version} \
         --ref {params.ref} \
         --harm \
         --file {params.sumstats} \
@@ -102,3 +102,31 @@ rule harmonise_gwas:
 rule harmonise_ig_gwas:
     input:
         expand("results/gwas/gwas_ssf/{trait}/final/{trait}.h.tsv.gz", trait = config.get('gwas_datasets'))
+
+rule estimate_sdY:
+    input:
+        sumstats = "results/gwas/gwas_ssf/{download_name}/final/{download_name}.h.tsv.gz",
+        maf = "results/1kG/hg38/eur/snps_only/005/merged.afreq",
+        prune = "results/1kG/hg38/eur/snps_only/005/qc/all/pruned/100kb_1_0_2/merged.prune.in"
+    output:
+        "results/gwas/gwas_ssf/sd_check/{download_name}_sdY.tsv"
+    params:
+        N = lambda w: config.get('gwas_datasets').get(w.download_name).get('controls'),
+        no_of_snps = 20000,
+        reps = 1
+    threads: 8
+    # TODO finish this script
+    script: script_path("harmonise_gwas/estimate_sdY.R")
+
+# TODO should have sdY standardisation here
+# TODO don't we need MAF for this? Would have to get decent estimates but whence?
+# TODO are there any new
+rule rescale_sumstats:
+    input:
+        sumstats = "results/gwas/gwas_ssf/{download_name}/final/{download_name}.h.tsv.gz",
+        sdY_est = "results/gwas/gwas_ssf/{download_name}/sdY.tsv"
+    output:
+        "results/gwas/{download_name}.tsv.gz"
+    run:
+        # TODO let's try polars, data.table in Python, or something
+        pass

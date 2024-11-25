@@ -20,6 +20,7 @@ def env_path(env):
     return os.path.join(workflow.basedir, "envs", env)
 
 include: 'rules/gwas/harmonise_gwas.smk'
+include: 'rules/gwas/prune_gwas_with_1kGP_data.smk'
 include: 'rules/gwas/gwas.smk'
 include: 'rules/sumher.smk'
 #include: 'rules/gwas/iga_meta.smk'
@@ -29,6 +30,6 @@ include: 'rules/python/export.py'
 
 module kGP_pipeline:
     snakefile: github("twillis209/1kGP_pipeline", path = "workflow/Snakefile", branch = 'conda')
-    config: config["GWAS_tools"]['1kGP_pipeline']
+    config: config['1kGP_pipeline']
 
 use rule * from kGP_pipeline as kGP_*

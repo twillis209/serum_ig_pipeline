@@ -43,6 +43,7 @@ rule calculate_human_default_taggings:
         """
         ldak --calc-tagging {params.out_stem} --bfile {params.in_stem} --ignore-weights YES --window-kb 1000 --power -0.25 --max-threads {threads} > {log.log_file}
         """
+
 rule calculate_ldak_thin_taggings_for_merged_gwas:
     input:
         multiext("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type}/merged", ".bed", ".bim", ".fam"),
