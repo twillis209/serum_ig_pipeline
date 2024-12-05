@@ -39,14 +39,14 @@ rule generate_gwas_format_report:
     input:
         "resources/gwas/{trait}.tsv"
     output:
-        "results/gwas/gwas_ssf/{trait}.json"
+        "results/gwas/gwas_ssf/{trait}/{trait}.json"
     conda: env_path("gwas-sumstats-tools.yaml")
     localrule: True
     shell: "gwas-ssf format {input} --generate_config --config_out {output}"
 
 rule write_gwas_meta_file:
     output:
-        "results/gwas/gwas_ssf/{trait}.tsv-meta.yaml"
+        "results/gwas/gwas_ssf/{trait}/{trait}.tsv-meta.yaml"
     params:
         data = lambda w: config.get('gwas_datasets').get(w.trait).get('gwas_ssf') 
     localrule: True
@@ -57,47 +57,51 @@ rule write_gwas_meta_file:
 rule format_gwas:
     input:
         sumstats = "resources/gwas/{trait}.tsv",
-        config = "results/gwas/gwas_ssf/{trait}.json"
+        config = "results/gwas/gwas_ssf/{trait}/{trait}.json"
     output:
-        temp("results/gwas/gwas_ssf/{trait}.tsv")
+        temp("results/gwas/gwas_ssf/{trait}/{trait}.tsv")
     resources:
-        runtime = 20
+        runtime = 30
     group: "harmonise_gwas"
     conda: env_path("gwas-sumstats-tools.yaml")
     shell: "gwas-ssf format {input.sumstats} --apply_config  --config_in {input.config} -o {output}"
 
 rule harmonise_gwas:
     input:
-        config = "results/gwas/gwas_ssf/{trait}.tsv-meta.yaml",
-        sumstats = "results/gwas/gwas_ssf/{trait}.tsv"
+        config = "results/gwas/gwas_ssf/{trait}/{trait}.tsv-meta.yaml",
+        sumstats = "results/gwas/gwas_ssf/{trait}/{trait}.tsv"
     output:
         # Bad but there are so many files to list here!
         "results/gwas/gwas_ssf/{trait}/final/{trait}.h.tsv.gz",
     params:
-        launch_dir = pathlib.Path("results/gwas/gwas_ssf"),
-        sumstats = lambda w: pathlib.Path(f"results/gwas/gwas_ssf/{w.trait}.tsv").resolve(),
+        launch_dir = lambda w: pathlib.Path(f"results/gwas/gwas_ssf/{w.trait}"),
+        pipeline_path = "/rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/gwas-sumstats-harmoniser",
+        sumstats = lambda w: pathlib.Path(f"results/gwas/gwas_ssf/{w.trait}/{w.trait}.tsv").resolve(),
         ref = pathlib.Path("resources/ebispot_harmoniser/reference").resolve(),
         nf_config = pathlib.Path("config/harmoniser.config").resolve(),
         version = config['ebispot_harmoniser']['version'],
-        profiles = 'local,singularity'
+        profiles = 'singularity'
     threads: 16
     resources:
-        runtime = 90
+        runtime = 120
     group: "harmonise_gwas"
-    handover: True
+    conda: env_path("gwas_harm.yml")
     shell:
         """
         cd {params.launch_dir}
 
         nextflow \
         -c {params.nf_config} \
-        run EBISPOT/gwas-sumstats-harmoniser \
-        -r v{params.version} \
+        run {params.pipeline_path} \
         --ref {params.ref} \
         --harm \
         --file {params.sumstats} \
         -profile {params.profiles}
         """
+
+rule prep_ig_gwas:
+    input:
+        expand("results/gwas/gwas_ssf/{trait}/{trait}.tsv", trait = config.get('gwas_datasets'))
 
 rule harmonise_ig_gwas:
     input:
