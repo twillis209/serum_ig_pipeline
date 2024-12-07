@@ -1,12 +1,493 @@
-* TODO Initialising the pipeline
+* The serum Ig paper <2024-11-02 Sat>
+** TODO Initialising the pipeline
 
 Probably best to do this by copying code from the =igad_paper_pipeline=, the =conda= version.
 
-- [ ] delete redundant =smk= files
-- [ ] delete redundant =conda= environments
-- [X] set R package with code for meta-analysis etc.
-- [ ] use EBISPOT pipeline? Seems more defensible than rolling my own
+- [X] delete redundant =smk= files
+- [X] delete redundant =conda= environments
+- [X] set up R package with code for meta-analysis etc.
+- [-] use EBISPOT pipeline? Seems more defensible than rolling my own
+  - [X] write out results to target directory; params.out_dir is not working
+  - [X] fix problem of =work= directory which is not cleaned up in =harmonise_gwas= rule
+  - [ ] cache EBISPOT/gwas-sumstats-harmoniser image once
+  - [ ] determine list of columns which are 'minimal' for our purposes
+  - [-] troubleshoot problematic sources
+    - [ ] check all headers for =rsid=-like column
+    - [-] eldjarn
+      - [ ] format all
+        - [ ] problem with not reformatting =otherAllele= to =other_allele=, need to handle this in some ad hoc way
+        - [ ] relabelling rsids to rsid
+          - [ ] should =gwas-ssf= handle this better?
+          - [ ] how are comma-separated rsIDs handled in this field? I.e. do we just drop everything with multiple rsIDs?
+      - [X] igm
+      - [X] igg
+      - [X] iga
+    - [X] EPIC
+      - [X] format all
+      - [X] igm
+      - [X] igg
+      - [X] iga
+    - [X] pietzner
+    - [X] scepanovic
+    - [X] gudjonsson
+    - [X] dennis
+- [ ] suggestions for =gwas-ssf=
+  - [ ] handle =otherAllele= to =other_allele=, see =eldjarn-iga=
+  - [ ] handle =chr= prefix in chrom column
+    - [ ] run through validate step to see if this triggers anything
+  - [ ] =rsids= handling
+- [-] =sdY= standardisation is going to have to take place after harmonisation
+  - [X] code to estimate sdY
+  - [ ] copy over requisite 1kGP =merged.afreq= and =prune.in=
+  - [ ] merge harmonised stats with LD-pruned set with MAF
+  - [ ] write down the fact we used European 1kGP3 MAFs to estimate the sdY values for the sake of the Methods; this is an issue wrt. Icelandic samples
+
+*** TODO Harmonised columns
+
+- chromosome
+- base_pair_location
+- variant_id
+- rsid
+- effect_allele
+- other_allele
+- effect_allele_frequency (I believe this is usually absent, isn't calculated from reference)
+- beta
+- standard_error
+- p_value
+
+I believe there are =hm_=-prefixed columns, too.
+
+*** Troubleshooting
+**** TODO =pietzner-igg= stopping short <2024-11-18 Mon>
+
+Is this because it doesn't need to be harmonised? Is the =meta.yml= configuring the run incorrectly?
+
+Job stops after =ten_percent_counts=. The next step is =ten_percent_counts_sum=. This is invoked at line 51 in =major_direction.nf=.
+
+Able to map most variants to build.
+
+Maybe because the input file is not sorted? No, =liu-iga.tsv= was not sorted but I could process it. I had misnamed it as =pietzner-iga= in the =meta.yaml= file but I do not think that would change anything.
+
+Running with =local= executor has it stop at =ten_percent_counts=.
+
+Running with =executor= executor has it fail on =ten_percent_counts_sum=. See the relevant =.nextflow.log= next.
+
+Running with =conda,singularity= (rather than =local,conda=) actually did allow it to progress, but then it failed for want of =pandas= in the environment.
+
+Creating the =gwas_harm= environment; nextflow isn't available in this environment, though. Having to modify the version of PyYAML that they suggest.
+
+Running with just the =conda= profile: stops at =ten_percent_counts=. Doing the same for 1-22 gets me to =concatenate_chr_splits=, at which point it fails on =chrMT=; this was when I ran the local checkout of the pipeline.
+
+=pietzner-igg= is a big file; maybe run with more memory?
+
+Now debugging by running my own fork of the pipeline.
+#+begin_src
+ten_to_sum=ten_percent_counts.out
+                      .ten_sc
+                      .groupTuple(by: 0)
+                      .branch{pass:it[1].size()==nchr}
+                      .map{it[0]}
+#+end_src
+
+The =branch= is the problem: I set the =chromlist= to =21,22=, checked that =nchr= was 2, and then got to the =branch= to find... tails off here. Was it 25?
+
+We have chromosomes 1-23 in the file, I wonder if that is the issue. We still get =1 of 25= etc. in the =ten_percent_counts= step, stops after this, apparently =chromlist= makes no difference.
+
+Running with =conda= and no =chromlist= gets it past the =ten_percent_counts_sum=.
+
+What if I filtered it so we had only chromosomes 1-22?
+
+Maybe I could fix that step later in the pipeline that doesn't allow concatenation of the empty file?
+
+#+begin_quote
+executor >  local (51)
+[86/3c7586] NFC…ap_to_build (pietzner-igg) | 1 of 1 ✔
+[32/205e9e] NFC…counts (pietzner-igg_chr7) | 25 of 25 ✔
+[78/60c970] NFC…_counts_sum (pietzner-igg) | 1 of 1 ✔
+[-        ] NFC…ion:generate_strand_counts -
+[-        ] NFC…on:summarise_strand_counts -
+[9b/c9ec06] NFC…zation (pietzner-igg_chr7) | 15 of 25
+[-        ] NFC…arm:concatenate_chr_splits -
+[-        ] NFC…LOGHARM:quality_control:qc -
+[-        ] NFC…_control:harmonization_log -
+[-        ] NFC…y_control:update_meta_yaml -
+ERROR ~ Error executing process > 'NFCORE_GWASCATALOGHARM:GWASCATALOGHARM:main_harm:harmonization (pietzner-igg_chrMT)'
+
+Caused by:
+  Process `NFCORE_GWASCATALOGHARM:GWASCATALOGHARM:main_harm:harmonization (pietzner-igg_chrMT)` terminated with an error exit status (1)
 
 
-* TODO estimating sdY in all data sets
-* TODO Z-score plots
+Command executed:
+
+  coordinate_system=$(grep coordinate_system pietzner-igg.tsv-meta.yaml | awk -F ":" '{print $2}' | tr -d "[:blank:]" )
+  if test -z "$coordinate_system"; then coordinate="1-based"; else coordinate=$coordinate_system; fi
+  
+  header_args=$(utils.py -f MT.merged -harm_args);
+  
+  main_pysam.py     --sumstats MT.merged     --vcf /rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/resources/ebispot_harmoniser/reference/homo_sapiens-chrMT.vcf.gz     --hm_sumstats chrMT.merged_unsorted.hm     --hm_statfile chrMT.merged.log.tsv.gz     $header_args     --na_rep_in NA     --na_rep_out NA     --coordinate $coordinate     --palin_mode forward;
+  
+  chr=$(awk -v RS='     ' '/chromosome/{print NR; exit}' chrMT.merged_unsorted.hm)
+  pos=$(awk -v RS='     ' '/base_pair_location/{print NR; exit}' chrMT.merged_unsorted.hm)
+  
+  head -n1 chrMT.merged_unsorted.hm > chrMT.merged.hm;
+  tail -n+2 chrMT.merged_unsorted.hm | sort -n -k$chr -k$pos -T$PWD >> chrMT.merged.hm
+
+Command exit status:
+  1
+
+Command output:
+  (empty)
+
+Command error:
+  Traceback (most recent call last):
+    File "/rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/gwas-sumstats-harmoniser/bin/main_pysam.py", line 780, in <module>                                                
+      main()
+    File "/rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/gwas-sumstats-harmoniser/bin/main_pysam.py", line 34, in main                                                     
+      out_header = SumStatsTable(sumstats_file=args.sumstats)._set_header_order()
+    File "/rds/project/rds-csoP2nj6Y6Y/tw395/mambaforge/envs/gwas_harm/lib/python3.9/site-packages/gwas_sumstats_tools/interfaces/data_table.py", line 188, in _set_header_order              
+      header_order.extend([h for h in self.FIELDS_OPTIONAL if h in self.header()])
+    File "/rds/project/rds-csoP2nj6Y6Y/tw395/mambaforge/envs/gwas_harm/lib/python3.9/site-packages/gwas_sumstats_tools/interfaces/data_table.py", line 188, in <listcomp>                     
+      header_order.extend([h for h in self.FIELDS_OPTIONAL if h in self.header()])
+    File "/rds/project/rds-csoP2nj6Y6Y/tw395/mambaforge/envs/gwas_harm/lib/python3.9/site-packages/gwas_sumstats_tools/interfaces/data_table.py", line 226, in header                         
+      if self.is_table_content():
+    File "/rds/project/rds-csoP2nj6Y6Y/tw395/mambaforge/envs/gwas_harm/lib/python3.9/site-packages/gwas_sumstats_tools/interfaces/data_table.py", line 105, in is_table_content               
+      return etl.nrows(self.head_table(nrows=1)) > 0
+    File "/rds/project/rds-csoP2nj6Y6Y/tw395/mambaforge/envs/gwas_harm/lib/python3.9/site-packages/petl/util/counting.py", line 22, in nrows                                                  
+      return sum(1 for _ in data(table))
+    File "/rds/project/rds-csoP2nj6Y6Y/tw395/mambaforge/envs/gwas_harm/lib/python3.9/site-packages/petl/util/counting.py", line 22, in <genexpr>                                              
+      return sum(1 for _ in data(table))
+    File "/rds/project/rds-csoP2nj6Y6Y/tw395/mambaforge/envs/gwas_harm/lib/python3.9/site-packages/petl/transform/basics.py", line 751, in iterrowslice                                       
+      it = iter(source)
+  TypeError: 'NoneType' object is not iterable
+
+Work dir:
+  /rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/results/gwas/gwas_ssf/work/df/4e35b098446f858482b55c44073655                                            
+
+Tip: view the complete command output by changing to the process work dir and entering the command `cat .command.out`                                                                         
+
+ -- Check '.nextflow.log' file for details
+
+#+end_quote
+
+Need to edit the above to run the =header_args= and =main_pysam.py= lines. Probably easier to get the paths etc. by writing the commands in a script.
+
+It's definitely the =main_pysam.py= script that is causing problems:
+#+begin_src
+if args.hm_sumstats:
+      out_handle = open_gzip(args.hm_sumstats, "wb")
+      out_header = SumStatsTable(sumstats_file=args.sumstats)._set_header_order()
+      tag_neg_log_10_p_value=False
+      if "neg_log_10_p_value" in out_header:
+          out_header.remove("neg_log_10_p_value")
+          tag_neg_log_10_p_value=True
+#+end_src
+
+Problem is that there are no rows in =MT.merged=, the file to which =args.sumstats=.
+
+***** Creating issue
+
+Note:
+- x of 25 when I'm only specifying 1-22
+- stops after =ten_percent_counts=
+- if they ask why I'm not restricting it to 1-22, say it's because I got further with the default setting and got an explicit error rather than an orderly exit after the =ten_percent_counts= stage
+
+**** DONE Fixing =gwas_harm= environment
+
+Looks like some of the pip dependencies conflict with those of the updated =gwas-sumstats-tools=
+
+****** PR
+
+- reference Vietnamese guy's PR, say doing the same but with the latest release of =gwas-sumstats-tools=
+- updated =PyYAML=, =requests=, and specified a version for =numpy=, issue previously encountered https://github.com/EBISPOT/gwas-sumstats-tools/issues/45
+
+***** Looking at this issue for =eldjarn-igg=
+
+The =eldjarn-igg= data set progressed to writing out =ten_percent_total_strand_count.tsv=:
+#+begin_quote
+Palindromic variant     0
+Forward strand variant  0
+Reverse strand variant  0
+No VCF record found     0
+Invalid variant for harmonisation       0
+palin_mode      drop
+#+end_quote
+
+This file is written out by =ten_percent_counts_sum.nf=. Looks like all the variants are in teh =1_map_to_build/unmapped= file!
+
+**** Test job also stopping short <2024-12-04 Wed>
+
+Job stopping at =ten_percent_counts= as before.
+
+This happened when I ran:
+#+begin_src
+nextflow -c /rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/config/harmoniser.config run /rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/gwas-sumstats-harmoniser --ref /rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/resources/ebispot_harmoniser/reference -profile test,conda
+#+end_src
+
+Not sure why it does not work with =conda=: stopping after the =ten_percent_counts= step. Maybe because I'm rerunning it before deleting the previous output?
+
+Trying to reproduce this with default settings (i.e. =test,singularity=) after dropping the =-c= argument but still running my local checkout of the harmoniser (65714615).
+#+begin_src
+nextflow run /rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/gwas-sumstats-harmoniser --ref /rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/resources/ebispot_harmoniser/reference -profile test,singularity
+#+end_src
+
+#+begin_src
+executor >  local (26)
+[25/26245c] NFC…map_to_build (random_name) | 1 of 1 ✔
+[a4/039746] NFC…_counts (random_name_chrX) | 25 of 25 ✔
+[-        ] NFC…ion:ten_percent_counts_sum -
+[-        ] NFC…ion:generate_strand_counts -
+[-        ] NFC…on:summarise_strand_counts -
+[-        ] NFC…RM:main_harm:harmonization -
+[-        ] NFC…arm:concatenate_chr_splits -
+[-        ] NFC…LOGHARM:quality_control:qc -
+[-        ] NFC…_control:harmonization_log -
+[-        ] NFC…y_control:update_meta_yaml -
+Completed at: 04-Dec-2024 21:48:45
+Duration    : 17m 47s
+CPU hours   : 0.3
+Succeeded   : 26
+#+end_src
+
+This still happens if I run it in a separate directory, =test=.
+
+Running with the repo version (65726143):
+#+begin_src
+nextflow run EBISPOT/gwas-sumstats-harmoniser --ref /rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/resources/ebispot_harmoniser/reference -r $release_version -profile test,singularity
+#+end_src
+
+Hadn't set =release_version= (v1.1.10).
+
+Had to delete the =.nextflow= directory to get this running; would this help with the other jobs?
+
+Ok, =conda= version does not work even with this! Stops at =ten_percent_counts=.
+
+I can run these on my own machine, might be due to the cluster.
+
+***** Running the =test= locally
+
+This works?
+#+begin_src
+  (base) tomw@toms-tpd:~/cam/serum_ig_pipeline$ sudo nextflow run EBISPOT/gwas-sumstats-harmoniser -r v1.1.10 -profile test,singularity
+Nextflow 24.10.2 is available - Please consider updating your version to it
+
+ N E X T F L O W   ~  version 24.10.0
+
+Pulling EBISPOT/gwas-sumstats-harmoniser ...
+ downloaded from https://github.com/EBISPOT/gwas-sumstats-harmoniser.git
+Launching `https://github.com/EBISPOT/gwas-sumstats-harmoniser` [special_pike] DSL2 - revision: 436c17a91c [v1.1.10]
+
+Start harmonising files
+Harmonizing the file /root/.nextflow/assets/EBISPOT/gwas-sumstats-harmoniser/test_data/random_name.tsv
+[-        ] process > NFCORE_GWASCATALOGHARM:GWASCATALOGHARM:major_direction:map_to_build            -
+executor >  local (10)
+[dd/b4e1e8] process > NFCORE_GWASCATALOGHARM:GWASCATALOGHARM:major_direction:map_to_build (random_name)             [100%] 1 of 1 ✔
+[08/76cf43] process > NFCORE_GWASCATALOGHARM:GWASCATALOGHARM:major_direction:ten_percent_counts (random_name_chr1)  [100%] 2 of 2 ✔
+[8c/2a1791] process > NFCORE_GWASCATALOGHARM:GWASCATALOGHARM:major_direction:ten_percent_counts_sum (random_name)   [100%] 1 of 1 ✔
+[-        ] process > NFCORE_GWASCATALOGHARM:GWASCATALOGHARM:major_direction:generate_strand_counts                 -
+[-        ] process > NFCORE_GWASCATALOGHARM:GWASCATALOGHARM:major_direction:summarise_strand_counts                -
+[74/814d7d] process > NFCORE_GWASCATALOGHARM:GWASCATALOGHARM:main_harm:harmonization (random_name_chr22)            [100%] 2 of 2 ✔
+[30/577ac7] process > NFCORE_GWASCATALOGHARM:GWASCATALOGHARM:main_harm:concatenate_chr_splits (random_name)         [100%] 1 of 1 ✔
+[c1/8f7d1b] process > NFCORE_GWASCATALOGHARM:GWASCATALOGHARM:quality_control:qc (random_name)                       [100%] 1 of 1 ✔
+[65/fdb023] process > NFCORE_GWASCATALOGHARM:GWASCATALOGHARM:quality_control:harmonization_log (random_name)        [100%] 1 of 1 ✔
+[5d/7422ca] process > NFCORE_GWASCATALOGHARM:GWASCATALOGHARM:quality_control:update_meta_yaml (random_name)         [100%] 1 of 1 ✔
+Completed at: 04-Dec-2024 18:03:32
+Duration    : 1m 29s
+CPU hours   : (a few seconds)
+Succeeded   : 10
+#+end_src
+
+When I run my checkout, it finishes those missing jobs too when run with =singularity=.
+
+**** Running =eldjarn-iga= <2024-12-05 Thu>
+
+#+begin_src
+[e1/8b66a5] NFC…nization_log (eldjarn-iga) | 1 of 1, failed: 1 ✘
+[-        ] NFC…y_control:update_meta_yaml -
+ERROR ~ Error executing process > 'NFCORE_GWASCATALOGHARM:GWASCATALOGHARM:quality_control:harmonization_log (eldjarn-iga)'
+
+Caused by:
+  Process `NFCORE_GWASCATALOGHARM:GWASCATALOGHARM:quality_control:harmonization_log (eldjarn-iga)` terminated with an error exit status (1)
+
+
+Command executed:
+
+  # Generating running log
+  log_script.sh     -r "/rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/resources/ebispot_harmoniser/reference/homo_sapiens-chr15.vcf.gz"     -i eldjarn-ig
+a.tsv     -c ten_percent_total_strand_count.tsv     -d report.txt     -h harmonised.tsv     -u unmapped     -o eldjarn-iga.running.log     -p v1.1.10
+  
+  N=$(awk -v RS='       ' '/hm_code/{print NR; exit}' harmonised.qc.tsv)
+  sed 1d harmonised.qc.tsv| awk -F "    " '{print $'"$N"'}' | creat_log.py >> eldjarn-iga.running.log
+  
+  # extract harmonise result
+  result=$(grep Result eldjarn-iga.running.log | cut -f2)
+  
+  # Prepare the gzip data
+  chr=$(awk -v RS='     ' '/chromosome/{print NR; exit}' harmonised.qc.tsv)
+  pos=$(awk -v RS='     ' '/base_pair_location/{print NR; exit}' harmonised.qc.tsv)
+  
+  cat harmonised.qc.tsv | bgzip -c > eldjarn-iga.h.tsv.gz
+  tabix -c N -S 1 -f -s $chr -b $pos -e $pos eldjarn-iga.h.tsv.gz
+
+Command exit status:
+  1
+
+Command output:
+  /rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/resources/ebispot_harmoniser/reference/homo_sapiens-chr15.vcf.gz,eldjarn-iga.tsv,ten_percent_total_strand_count.tsv,report.txt,harmonised.tsv,unmapped,,,eldjarn-iga.running.log,v1.1.10
+
+Command error:
+  INFO:    Environment variable SINGULARITYENV_TMP is set, but APPTAINERENV_TMP is preferred
+  INFO:    Environment variable SINGULARITYENV_TMPDIR is set, but APPTAINERENV_TMPDIR is preferred
+  INFO:    Environment variable SINGULARITYENV_NXF_TASK_WORKDIR is set, but APPTAINERENV_NXF_TASK_WORKDIR is preferred
+  /rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/resources/ebispot_harmoniser/reference/homo_sapiens-chr15.vcf.gz,eldjarn-iga.tsv,ten_percent_total_strand_count.tsv,report.txt,harmonised.tsv,unmapped,,,eldjarn-iga.running.log,v1.1.10
+  awk: line 1: syntax error at or near }
+  Traceback (most recent call last):
+    File "/bin/creat_log.py", line 43, in <module>
+      success_ratio=success_all/all
+  ZeroDivisionError: division by zero
+  
+
+#+end_src
+
+Looks like the issue is that the chromosome values are prefixed with =chr=.
+
+Now running after fixing =chr= issue: 65782694.
+
+Only 2,474,741 rows in the harmonised file, though. =10_percent_ratio= ('forward sites ratio') was 0.54, which meant palindromic variants were dropped. Only harmonised 7.81% of sites. 79.93% of input variants dropped as no match in the reference VCF, but far more were still mapped to hg38.
+
+#+begin_src
+  X	NA	G	A	0.0974	0.092386	NA	0.291759	chrX:156029849:G:A	.	A	0.53498	30695	0.00198	NA	NA
+X	NA	C	C	-0.0513	0.123768	NA	0.678518	chrX:156029857:C:C	.	C	0.16844	30695	0.00094	NA	NA
+X	NA	G	C	0.0513	0.123768	NA	0.678518	chrX:156029857:G:C	rs1384946096	C	0.16844	30695	0.00094	NA	NA
+X	NA	C	CTTAGGG	-0.0061	0.063531	NA	0.923508	chrX:156029886:C:CTTAGGG	rs1440518544	CTTAGGG	0.03456	30695	0.00348	NA	NA
+X	NA	T	T	0.0029	0.060766	NA	0.961936	chrX:156029888:T:T	.	T	0.01685	30695	0.00355	NA	NA
+X	NA	*	T	-0.0029	0.059369	NA	0.961041	chrX:156029888:*:T	.	T	0.01726	30695	0.00355	NA	NA
+X	NA	C	G	1.0176	0.434783	NA	0.019259	chrX:156029914:C:G	rs1301486121	G	1.71537	30695	0.00022	NA	NA
+X	NA	C	G	-0.0193	0.05453	NA	0.723388	chrX:156029926:C:G	rs1378190828	G	0.14063	30694	0.0051	NA	NA
+X	NA	A	G	-0.0351	0.056235	NA	0.532518	chrX:156029943:A:G	rs868390234	G	0.27367	30694	0.0049	NA	NA
+X	NA	A	G	-0.0351	0.05618	NA	0.532119	chrX:156029949:A:G	rs867012337	G	0.27399	30694	0.0049	NA	NA
+#+end_src
+
+If I grep for the position of the last variant in the above subset of rows, I get a match for alleles, rsID, etc.
+
+#+begin_src
+  snakemake) [tw395@login-q-1 reference]$ zcat homo_sapiens-chrX.vcf.gz | grep "156029949"
+X	156029949	rs1381077572	G	GG	.	.	dbSNP_151;TSA=insertion
+X	156029949	rs867012337	A	C,G	.	.	dbSNP_151;TSA=SNV;E_Freq;E_TOPMed;E_gnomAD
+
+#+end_src
+
+Would it be any different if I relabelled the =rsids= column? Running this as 65787288. This works!
+
+***** =other_allele= not relabelled properly <2024-12-05 Thu>
+
+The =eldjarn-iga.json= file 'relabels' =otherAllele= as =otherAllele= rather than =other_allele=.
+
+#+begin_quote
+Chrom   Pos     Name    rsids   effectAllele    otherAllele     Beta    Pval    minus_log10_pval        SE      N       ImpMAF
+#+end_quote
+
+=effectAllele= is handled correctly.
+
+****** PR for this issue
+
+Would need to edit header schema. =otherAllele= is absent, but perhaps the matching checks for capitalised/uncapitalised versions.
+
+
+***** =rsid= column where multiple rsIDs are present <2024-12-06 Fri>
+
+There are 1,252,336 rows in the file with the comma-delimited rsIDs (33,449,991 rows in total).
+
+=unmapped= has 445,802 rows, 49,740 instances of commas (more than one in some fields).
+
+I lose just over 20% sites in total from 33.5M variants. Hmmm...
+
+#+begin_quote
+6. Failed harmonisation
+
+21.63% ( 7139118 of 33004201 ) sites failed to harmonise.
+
+hm_code Number  Percentage      Explanation
+15      3370190 10.21%  No matching variants in reference VCF; Cannot harmonise
+14      3767139 11.41%  Required fields are not known; Cannot harmonise
+16      1789    0.01%   Multiple matching variants in reference VCF (ambiguous); Cannot harmonise
+
+#+end_quote
+
+Are we losing those code 15's for a good reason? Looking at the files in =4_harmonization=, looks like a lot of those I am losing are indels, SNPs missing information.
+
+**** TODO Is =rsid=-like column present elsewhere? <2024-12-06 Fri>
+
+#+begin_src
+  dennis-iga.tsv
+chromosome	variant_id	base_pair_location	A1	A2	N	AF1	BETA	SE	p_value
+dennis-igg.tsv
+chromosome	variant_id	base_pair_location	A1	A2	N	AF1	BETA	SE	p_value
+eldjarn-iga.tsv
+Chrom	Pos	Name	rsids	effectAllele	otherAllele	Beta	Pval	minus_log10_pval	SE	N	ImpMAF
+eldjarn-igg.tsv
+Chrom	Pos	Name	rsids	effectAllele	otherAllele	Beta	Pval	minus_log10_pval	SE	N	ImpMAF
+eldjarn-igm.tsv
+Chrom	Pos	Name	rsids	effectAllele	otherAllele	Beta	Pval	minus_log10_pval	SE	N	ImpMAF
+gudjonsson-iga.tsv
+variant_id	p_value	chromosome	base_pair_location	effect_allele	other_allele	effect_allele_frequency	beta	standard_error	odds_ratio	ci_lower	ci_upper
+gudjonsson-igg.tsv
+variant_id	p_value	chromosome	base_pair_location	effect_allele	other_allele	effect_allele_frequency	beta	standard_error	odds_ratio	ci_lower	ci_upper
+gudjonsson-igm.tsv
+variant_id	p_value	chromosome	base_pair_location	effect_allele	other_allele	effect_allele_frequency	beta	standard_error	odds_ratio	ci_lower	ci_upper
+iga.tsv
+chr	rsid	pos	REF	ALT	all_AA	all_AB	all_BB	maf	hwe	p_value	beta	se	info_impute	impute	N
+igg.tsv
+chr	rsid	pos	REF	ALT	all_AA	all_AB	all_BB	maf	hwe	p_value	beta	se	info_impute	impute	N
+igm.tsv
+chr	rsid	pos	REF	ALT	all_AA	all_AB	all_BB	maf	hwe	p_value	beta	se	info_impute	impute	N
+liu-decode-iga.tsv
+SNP	CHR	BP_hg19	A1	A2	BETA	SE	P
+liu-iga.tsv
+SNP	CHR	BP_hg19	A1	A2	BETA	SE	P
+pietzner-iga.tsv
+rsid	MarkerName	Allele1	Allele2	Freq1	FreqSE	MinFreq	MaxFreq	Effect	StdErr	Pvalue	Direction	HetISq	HetChiSq	HetDf	HetPVal	TotalSampleSize	chr	pos
+pietzner-igg.tsv
+rsid	MarkerName	Allele1	Allele2	Freq1	FreqSE	MinFreq	MaxFreq	Effect	StdErr	Pvalue	Direction	HetISq	HetChiSq	HetDf	HetPVal	TotalSampleSize	chr	pos
+pietzner-igm.tsv
+rsid	MarkerName	Allele1	Allele2	Freq1	FreqSE	MinFreq	MaxFreq	Effect	StdErr	Pvalue	Direction	HetISq	HetChiSq	HetDf	HetPVal	TotalSampleSize	chr	pos
+scepanovic-iga.tsv
+chromosome	base_pair_location	variant_id	other_allele	effect_allele	effect_allele_frequency	test	obs_ct	beta	standard_error	t_stat	p_value	ci_upper	odds_ratio	ci_lower
+scepanovic-igg.tsv
+chromosome	base_pair_location	variant_id	other_allele	effect_allele	effect_allele_frequency	test	obs_ct	beta	standard_error	t_stat	p_value	ci_upper	ci_lower	odds_ratio
+scepanovic-igm.tsv
+chromosome	base_pair_location	variant_id	other_allele	effect_allele	effect_allele_frequency	test	obs_ct	beta	standard_error	t_stat	p_value	odds_ratio	ci_lower	ci_upper
+
+#+end_src
+
+Ensuring that we've handled these columns correctly where necessary:
+- [-] eldjarn
+  - [ ] missing rows where we have multiple rsIDs; how come we don't just use coordinates there?
+- [ ] EPIC
+- [ ] pietzner
+
+*** Notes on harmoniser pipeline
+**** Process
+
+***** =map_to_build=
+
+Updates variant's position by mapping rsID to Ensembl reference. If not possible, liftover is used.
+
+Variants which cannot be mapped are put in =1_map_to_build/unmapped=.
+
+***** =ten_sc=
+
+This infers strand orientation by using a 'strand consensus approach' in order to deal with palindromic variants. It looks at 10% of non-palindromic variants, selected at random, comparing them to the Ensembl VCF reference.
+
+** TODO estimating sdY in all data sets
+
+** TODO Z-score plots
+
+** Content for the paper
+
+*** Introduction
+
+Idea that the study of common-variant architecture of physiological trait might inform understanding of traits in which dysregulation of the same antibody isotypes is implicated. Could cite our IgAD paper here but that seems a bit obnoxious; Kiryluk/Liu paper talked about IgAN.
+
+*** Methods
+
+Re: sdY estimation, I used a prune of the 1kGP panel of SNPs with MAF > 0.005 in Europeans rather than a panel of SNPs specific to each data set.
