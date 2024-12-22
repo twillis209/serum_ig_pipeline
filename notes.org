@@ -1,5 +1,5 @@
 * The serum Ig paper <2024-11-02 Sat>
-** TODO Initialising the pipeline
+** TODO Setting up the pipeline
 
 Probably best to do this by copying code from the =igad_paper_pipeline=, the =conda= version.
 
@@ -12,13 +12,18 @@ Probably best to do this by copying code from the =igad_paper_pipeline=, the =co
   - [ ] cache EBISPOT/gwas-sumstats-harmoniser image once
   - [ ] determine list of columns which are 'minimal' for our purposes
   - [-] troubleshoot problematic sources
-    - [ ] check all headers for =rsid=-like column
+    - [-] check all headers for =rsid=-like column
     - [-] eldjarn
-      - [ ] format all
-        - [ ] problem with not reformatting =otherAllele= to =other_allele=, need to handle this in some ad hoc way
-        - [ ] relabelling rsids to rsid
+      - [-] format all
+        - [-] problem with not reformatting =otherAllele= to =other_allele=
+          - [ ] fix programmatically
+          - [X] handle in ad hoc manner
+            - [X] iga
+            - [X] igg
+            - [X] igm
+        - [-] relabelling rsids to rsid
           - [ ] should =gwas-ssf= handle this better?
-          - [ ] how are comma-separated rsIDs handled in this field? I.e. do we just drop everything with multiple rsIDs?
+          - [X] how are comma-separated rsIDs handled in this field? I.e. do we just drop everything with multiple rsIDs?
       - [X] igm
       - [X] igg
       - [X] iga
@@ -33,9 +38,11 @@ Probably best to do this by copying code from the =igad_paper_pipeline=, the =co
     - [X] dennis
 - [ ] suggestions for =gwas-ssf=
   - [ ] handle =otherAllele= to =other_allele=, see =eldjarn-iga=
+    - maybe the issue is due to there being both =other_allele= and =otherAllele= in the raw file?
   - [ ] handle =chr= prefix in chrom column
     - [ ] run through validate step to see if this triggers anything
   - [ ] =rsids= handling
+- [ ] submit PR for fix to concatenation issue
 - [-] =sdY= standardisation is going to have to take place after harmonisation
   - [X] code to estimate sdY
   - [ ] copy over requisite 1kGP =merged.afreq= and =prune.in=
@@ -212,7 +219,7 @@ Invalid variant for harmonisation       0
 palin_mode      drop
 #+end_quote
 
-This file is written out by =ten_percent_counts_sum.nf=. Looks like all the variants are in teh =1_map_to_build/unmapped= file!
+This file is written out by =ten_percent_counts_sum.nf=. Looks like all the variants are in the =1_map_to_build/unmapped= file!
 
 **** Test job also stopping short <2024-12-04 Wed>
 
@@ -392,7 +399,6 @@ Chrom   Pos     Name    rsids   effectAllele    otherAllele     Beta    Pval    
 
 Would need to edit header schema. =otherAllele= is absent, but perhaps the matching checks for capitalised/uncapitalised versions.
 
-
 ***** =rsid= column where multiple rsIDs are present <2024-12-06 Fri>
 
 There are 1,252,336 rows in the file with the comma-delimited rsIDs (33,449,991 rows in total).
@@ -414,6 +420,50 @@ hm_code Number  Percentage      Explanation
 #+end_quote
 
 Are we losing those code 15's for a good reason? Looking at the files in =4_harmonization=, looks like a lot of those I am losing are indels, SNPs missing information.
+
+Does the coordinate-based step in =map_to_build.py= save any rows with multiple rsIDs? There should be some in the =eldjarn-iga= output file:
+#+begin_quote
+> dat[, .N, by = hm_coordinate_conversion]
+   hm_coordinate_conversion        N
+                     <char>    <int>
+1:                       lo   118768
+2:                       rs 25746315
+> dat[rsid %like% ',']
+Empty data.table (0 rows and 17 cols): chromosome,base_pair_location,effect_allele,other_allele,beta,standard_error...
+#+end_quote
+
+Maybe the rsID is updated? Apparently so, I get 6,717 rows, e.g.
+#+begin_quote
+> merged[!is.na(rsid.y)][, .(chromosome, base_pair_location, rsid.x, rsid.y)]
+      chromosome base_pair_location       rsid.x
+          <char>              <int>       <char>
+   1:          1          112568861  rs377429784
+   2:          1          151781328  rs550995792
+   3:          1          166716818  rs143243322
+   4:         10           91154560  rs780262309
+   5:         11             197169    rs5789177
+  ---                                           
+6713:          9           39093202  rs375232468
+6714:          9           39152534 rs1198576337
+6715:          9           39209599  rs372042997
+6716:          9           39465460 rs1437888070
+6717:          9          102285530   rs78170949
+                                   rsid.y
+                                   <char>
+   1:             rs377429784,rs869255253
+   2: rs1491351417,rs550995792,rs60652277
+   3:              rs143243322,rs60040574
+   4:             rs750427664,rs780262309
+   5:                 rs3839961,rs5789177
+  ---                                    
+6713:              rs375232468,rs60208177
+6714:              rs1198576337,rs4062758
+6715:              rs372042997,rs60690302
+6716:             rs1437888070,rs77517622
+6717:              rs398096568,rs78170949
+#+end_quote
+
+Well, good job, EBI, this was a problem I did not need to fix, I think.
 
 **** TODO Is =rsid=-like column present elsewhere? <2024-12-06 Fri>
 
@@ -461,7 +511,7 @@ chromosome	base_pair_location	variant_id	other_allele	effect_allele	effect_allel
 
 Ensuring that we've handled these columns correctly where necessary:
 - [-] eldjarn
-  - [ ] missing rows where we have multiple rsIDs; how come we don't just use coordinates there?
+  - [ ] missing rows where we have multiple rsIDs; how come we don't just use coordinates there? Apparently =map_to_build= does do this.
 - [ ] EPIC
 - [ ] pietzner
 
@@ -477,6 +527,41 @@ Variants which cannot be mapped are put in =1_map_to_build/unmapped=.
 ***** =ten_sc=
 
 This infers strand orientation by using a 'strand consensus approach' in order to deal with palindromic variants. It looks at 10% of non-palindromic variants, selected at random, comparing them to the Ensembl VCF reference.
+
+***** What is relevant to the handling of rsID synonyms? <2024-12-20 Fri>
+
+****** =make_synonym_table.py=
+
+This script is invoked in =make_local_synonyms_table=, used to create =rsID.sql=. Can we use the information in that?
+
+=basic_qc_nf.py= takes the =rsID.sql= file as its 'synonyms' database.
+
+#+begin_src
+sqlite> .schema
+CREATE TABLE variation_synonym (
+    variation_id int(10)  NOT NULL,
+    name varchar(255) DEFAULT NULL
+    );
+CREATE INDEX rsid_idx on variation_synonym (name);
+CREATE INDEX syn_idx on variation_synonym (variation_id);
+sqlite> PRAGMA table_info(variation_synonym)
+   ...> 
+   ...> ;
+0|variation_id|int(10)|1||0
+1|name|varchar(255)|0|NULL|0
+#+end_src
+
+It looks like this doesn't store alternatives, the following did not return any rows:
+
+#+begin_src
+sqlite> select * from variation_synonym where name like '%,%' limit 1;
+#+end_src
+
+****** =vcf= file
+
+This stores rsIDs and some are duplicated for a given position.
+
+****** Selecting the best rsIDs from duplicates
 
 ** TODO estimating sdY in all data sets
 
