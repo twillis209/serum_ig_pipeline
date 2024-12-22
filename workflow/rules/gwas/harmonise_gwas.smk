@@ -81,11 +81,12 @@ rule harmonise_gwas:
         nf_config = pathlib.Path("config/harmoniser.config").resolve(),
         version = config['ebispot_harmoniser']['version'],
         profiles = 'singularity'
-    threads: 16
+    threads: 20
     resources:
-        runtime = 120
+        runtime = 180
     group: "harmonise_gwas"
     conda: env_path("gwas_harm.yml")
+    handover: True
     shell:
         """
         cd {params.launch_dir}
