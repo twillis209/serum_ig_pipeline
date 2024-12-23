@@ -32,10 +32,10 @@ theme_set(theme_bw()+
 
 colorblind_palette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
-chr_col <- snakemake@params[['chr_col']]
-bp_col <- snakemake@params[['bp_col']]
-p_col <- snakemake@params[['p_col']]
-snp_col <- snakemake@params[['snp_col']]
+chr_col <- snakemake@config$chr_col
+bp_col <- snakemake@config$bp_col
+p_col <- snakemake@config$p_col
+snp_col <- snakemake@config$id_col
 
 gwas_dat <- fread(snakemake@input[['gwas']], sep = '\t', select = c(chr_col, bp_col, p_col, snp_col))
 

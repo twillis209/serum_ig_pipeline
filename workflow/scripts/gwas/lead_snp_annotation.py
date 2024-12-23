@@ -3,11 +3,11 @@ import json
 import pandas as pd
 import re
 
-chr_col = snakemake.params.chr_col
-bp_col = snakemake.params.bp_col
-snp_col = snakemake.params.snp_col
-ref_col = snakemake.params.ref_col
-alt_col = snakemake.params.alt_col
+chr_col = snakemake.config.chr_col
+bp_col = snakemake.config.bp_col
+snp_col = snakemake.config.id_col
+ref_col = snakemake.config.ref_col
+alt_col = snakemake.config.alt_col
 
 # NB: Based on the sample script provided by Open Targets Genetics here: https://genetics-docs.opentargets.org/data-access/graphql-api#available-endpoints
 

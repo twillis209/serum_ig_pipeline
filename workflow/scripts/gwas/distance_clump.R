@@ -2,14 +2,14 @@ library(data.table)
 setDTthreads(snakemake@threads)
 library(magrittr)
 
-chr_col <- snakemake@params[['chr_col']]
-bp_col <- snakemake@params[['bp_col']]
-ref_col <- snakemake@params[['ref_col']]
-alt_col <- snakemake@params[['alt_col']]
-snp_col <- snakemake@params[['snp_col']]
-p_col <- snakemake@params[['p_col']]
-beta_col <- snakemake@params[['beta_col']]
-se_col <- snakemake@params[['se_col']]
+chr_col <- snakemake@params$chr_col
+bp_col <- snakemake@params$bp_col
+ref_col <- snakemake@params$ref_col
+alt_col <- snakemake@params$alt_col
+snp_col <- snakemake@params$snp_col
+p_col <- snakemake@params$p_col
+beta_col <- snakemake@params$beta_col
+se_col <- snakemake@params$se_col
 
 distance_window <- snakemake@params[['distance_window']]
 index_threshold <- snakemake@params[['index_threshold']]

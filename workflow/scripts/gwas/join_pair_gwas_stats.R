@@ -2,14 +2,14 @@ library(data.table)
 
 gwas_file_a <- snakemake@input[['A']]
 gwas_file_b <- snakemake@input[['B']]
-chr_col <- snakemake@params[['chr_col']]
-bp_col <- snakemake@params[['bp_col']]
-ref_col <- snakemake@params[['ref_col']]
-alt_col <- snakemake@params[['alt_col']]
-p_col <- snakemake@params[['p_col']]
-beta_col <- snakemake@params[['beta_col']]
-se_col <- snakemake@params[['se_col']]
-id_col <- snakemake@params[['id_col']]
+chr_col <- snakemake@config$chr_col
+bp_col <- snakemake@config$bp_col
+ref_col <- snakemake@config$ref_col
+alt_col <- snakemake@config$alt_col
+p_col <- snakemake@config$p_col
+beta_col <- snakemake@config$beta_col
+se_col <- snakemake@config$se_col
+id_col <- snakemake@config$id_col
 output_file <- snakemake@output[['AB']]
 mhc <- snakemake@params[['mhc']]
 join <- snakemake@params[['join']]

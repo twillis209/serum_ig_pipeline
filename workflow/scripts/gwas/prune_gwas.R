@@ -1,10 +1,10 @@
 library(data.table)
 setDTthreads(snakemake@threads)
 
-chr_col <- snakemake@params[['chr_col']]
-bp_col <- snakemake@params[['bp_col']]
-ref_col <- snakemake@params[['ref_col']]
-alt_col <- snakemake@params[['alt_col']]
+chr_col <- snakemake@config$chr_col
+bp_col <- snakemake@config$bp_col
+ref_col <- snakemake@config$ref_col
+alt_col <- snakemake@config$alt_col
 
 gwas_dat <- fread(snakemake@input[['gwas_file']], sep = '\t', header = T)
 

@@ -7,10 +7,10 @@ gwas_file <- snakemake@input[['gwas_file']]
 
 bim_file <- snakemake@input[['bim_file']]
 
-chr_col <- snakemake@params[['chr_col']]
-bp_col <- snakemake@params[['bp_col']]
-ref_col <- snakemake@params[['ref_col']]
-alt_col <- snakemake@params[['alt_col']]
+chr_col <- snakemake@config$chr_col
+bp_col <- snakemake@config$bp_col
+ref_col <- snakemake@config$ref_col
+alt_col <- snakemake@config$alt_col
 tmpdir <- snakemake@resources[['tmpdir']]
 
 gwas_dat <- fread(gwas_file, sep = '\t', header = T, select = c(chr_col, bp_col, ref_col, alt_col), tmpdir = tmpdir)

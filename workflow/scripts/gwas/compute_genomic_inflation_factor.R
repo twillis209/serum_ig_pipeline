@@ -1,9 +1,9 @@
 library(data.table)
 setDTthreads(snakemake@threads)
 
-chr_col <- snakemake@params[['chr_col']]
-bp_col <- snakemake@params[['bp_col']]
-p_col <- snakemake@params[['p_col']]
+chr_col <- snakemake@config$chr_col
+bp_col <- snakemake@config$bp_col
+p_col <- snakemake@config$p_col
 
 dat <- fread(snakemake@input[[1]], sep = '\t', select = c(chr_col, bp_col, p_col))
 
@@ -18,7 +18,7 @@ if(!is.null(snakemake@wildcards[['variant_set']])) {
 gif_dat <- data.table()
 
 for(x in snakemake@params[['percentiles']]) {
-  lambda <- quantile(qchisq(dat[[snakemake@params[['p_col']]]], lower.tail = F, df = 1), probs = x/100, na.rm = T)/qchisq(x/100, df = 1)
+  lambda <- quantile(qchisq(dat[[p_col]], lower.tail = F, df = 1), probs = x/100, na.rm = T)/qchisq(x/100, df = 1)
 
   gif_dat[, paste('lambda_0', x, sep = '_') := lambda]
 }
