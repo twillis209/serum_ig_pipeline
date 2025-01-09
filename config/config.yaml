@@ -50,14 +50,23 @@ ebispot_harmoniser:
       chr21: "574209ba9edbfda028651e631041e67bdf340fdd2d19d655c38ea3fff0287a25"
       chr22: "70ff24cfd01eab24c6f4c6e825f55a2b3475ff595f6e12e179c4ef06b9cc4df6"
       chrX: "f42c786cba67ff74c30e9bd37254b5a605a5957cfe3a5dc54e7dd41d9c9d8edc"
+# sumstats cols produced by EBISPOT harmoniser
+chr_col: 'chromosome'
+bp_col: 'base_pair_location'
+ref_col: 'other_allele'
+alt_col: 'effect_allele'
+p_col: 'p_value'
+beta_col: 'beta'
+se_col: 'standard_error'
+rsid_col: 'rsid'
+id_col: 'variant_id'
 # NB: some redundancy here to cover alternative names for known loci
-iga:
+epic-iga:
   known_iga_gwas_loci: ["ANKRD55", "IL6ST", "ASCC2|MTMR3", "ATP5PBP6|FILNC1", "CITED2", "CTF1", "DYSF|RPS20P10", "ELL2", "FADS1|FADS2", "GALNT12|NME2P3", "GPATCH2", "HDAC7", "HORMAD2|LIF", "IL1R1", "LINC02655|RPS7P9", "LITAF", "OVOL1|RELA", "POU2AF1", "RUNX2", "RUNX3", "RUNX3|MIR4425", "SH2B3", "ATXN2", "TMEM258", "TNFSF13", "TNFSF15", "TNFSF4|TNFSF18", "TNFSF8", "TRAF3", "ZP3|SSC4D"]
   all: ["RUNX3", "FCGR2B", "TNFSF4", "INAVA", "FADS2", "EFEMP2", "POU2AF1", "HDAC7", "SH2B3", "TRAF3", "LITAF", "CFAP119", "TNFSF13", "TNFRSF13B", "SANBR", "IL1R2", "UQCR10", "ANKRD55", "ELL2", "RUNX2", "PRDM1", "CITED2", "IKZF1", "DTX2", "IRF5", "TNFSF8"]
   novel: ["FCGR2B", "TNFRSF13B|NT5M", "INAVA", "SANBR", "PRDM1", "IKZF1", "IRF5", "TNFSF12|TNFSF13"]
   # Novel and non-novel alike
   iei_genes: ['IL6ST', 'FCGR2B|FCGR3A', "TNFRSF13B", 'POU2AF1', 'TRAF3', 'IKZF1', 'TNFSF13']
-
 imd_traits: ['asthma-ex', 'hyperpara', 'hypothy', 'derm-ecz', 'pbc', 'addi', 'psc', 'ra', 'jia', 'sle', 'crohns', 't1d', 'ms', 'uc-delange', 'liu-decode-lyons-dennis-iga', 'igan']
 gwas_datasets:
   liu-iga:
@@ -67,12 +76,12 @@ gwas_datasets:
     cases: 0
     controls: 22229
     gwas_ssf:
-        date_metadata_last_modified: 2024-11-08
+        date_metadata_last_modified: "2024-11-08"
         genome_assembly: GRCh37
-        coordinate_system: 1-based
+        coordinate_system: "1-based"
         data_file_name: liu-iga.tsv
         data_file_md5sum: b9bc99a0fc6da44d1cb71d75da9a63f5
-        file_type: GWAS-SSF v0.1
+        file_type: "GWAS-SSF v0.1"
         is_harmonised: false
         is_sorted: false
   liu-decode-iga:
@@ -82,12 +91,12 @@ gwas_datasets:
     cases: 0
     controls: 41448
     gwas_ssf:
-        date_metadata_last_modified: 2024-11-08
+        date_metadata_last_modified: "2024-11-08"
         genome_assembly: GRCh37
-        coordinate_system: 1-based
+        coordinate_system: "1-based"
         data_file_name: liu-decode-iga.tsv
         data_file_md5sum: ""
-        file_type: GWAS-SSF v0.1
+        file_type: "GWAS-SSF v0.1"
         is_harmonised: false
         is_sorted: false
   dennis-iga:
@@ -97,12 +106,12 @@ gwas_datasets:
     cases: 0
     controls: 7677
     gwas_ssf:
-        date_metadata_last_modified: 2024-11-11
+        date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
-        coordinate_system: 1-based
+        coordinate_system: "1-based"
         data_file_name: dennis-iga.tsv
         data_file_md5sum: 4cb00f352dc88df8d06d88c62e3d9a4a
-        file_type: GWAS-SSF v0.1
+        file_type: "GWAS-SSF v0.1"
         is_harmonised: false
         is_sorted: false
   dennis-igg:
@@ -112,57 +121,57 @@ gwas_datasets:
     cases: 0
     controls: 3471
     gwas_ssf:
-        date_metadata_last_modified: 2024-11-11
+        date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
         coordinate_system: 1-based
         data_file_name: dennis-igg.tsv
         data_file_md5sum: ""
-        file_type: GWAS-SSF v0.1
+        file_type: "GWAS-SSF v0.1"
         is_harmonised: false
         is_sorted: false
-  iga:
+  epic-iga:
     sha256: "7c477637437832d323abbc4d947a2097ed6714e2f079b0efa57d428e48e510d6"
     is_gz: True
     url: ""
     cases: 0
     controls: 7938
     gwas_ssf:
-        date_metadata_last_modified: 2024-11-11
+        date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
-        coordinate_system: 1-based
+        coordinate_system: "1-based"
         data_file_name: iga.tsv
         data_file_md5sum: ""
-        file_type: GWAS-SSF v0.1
+        file_type: "GWAS-SSF v0.1"
         is_harmonised: false
         is_sorted: false
-  igg:
+  epic-igg:
     sha256: "e2ccea19e475497ad75d0a0cad778b2075092aa4fad7a280b75a1aa7cf0319bb"
     is_gz: True
     url: ""
     cases: 0
     controls: 7946
     gwas_ssf:
-        date_metadata_last_modified: 2024-11-11
+        date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
-        coordinate_system: 1-based
+        coordinate_system: "1-based"
         data_file_name: igg.tsv
         data_file_md5sum: ""
-        file_type: GWAS-SSF v0.1
+        file_type: "GWAS-SSF v0.1"
         is_harmonised: false
         is_sorted: false
-  igm:
+  epic-igm:
     sha256: "d24ebe56b8b13a8c8959b6d4c3b942475612e1f3bd7e54ac6e4f35057c4d17b1"
     is_gz: True
     url: ""
     cases: 0
     controls: 8008
     gwas_ssf:
-        date_metadata_last_modified: 2024-11-11
+        date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
-        coordinate_system: 1-based
+        coordinate_system: "1-based"
         data_file_name: igm.tsv
         data_file_md5sum: ""
-        file_type: GWAS-SSF v0.1
+        file_type: "GWAS-SSF v0.1"
         is_harmonised: false
         is_sorted: false
   scepanovic-igg:
@@ -172,12 +181,12 @@ gwas_datasets:
     cases: 0
     controls: 1000
     gwas_ssf:
-        date_metadata_last_modified: 2024-11-11
+        date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
-        coordinate_system: 1-based
+        coordinate_system: "1-based"
         data_file_name: scepanovic-igg.tsv
         data_file_md5sum: ""
-        file_type: GWAS-SSF v0.1
+        file_type: "GWAS-SSF v0.1"
         is_harmonised: false
         is_sorted: false
   scepanovic-igm:
@@ -187,12 +196,12 @@ gwas_datasets:
     cases: 0
     controls: 1000
     gwas_ssf:
-        date_metadata_last_modified: 2024-11-11
+        date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
-        coordinate_system: 1-based
+        coordinate_system: "1-based"
         data_file_name: scepanovic-igm.tsv
         data_file_md5sum: ""
-        file_type: GWAS-SSF v0.1
+        file_type: "GWAS-SSF v0.1"
         is_harmonised: false
         is_sorted: false
   scepanovic-iga:
@@ -202,12 +211,12 @@ gwas_datasets:
     cases: 0
     controls: 1000
     gwas_ssf:
-        date_metadata_last_modified: 2024-11-11
+        date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
-        coordinate_system: 1-based
+        coordinate_system: "1-based"
         data_file_name: scepanovic-iga.tsv
         data_file_md5sum: ""
-        file_type: GWAS-SSF v0.1
+        file_type: "GWAS-SSF v0.1"
         is_harmonised: false
         is_sorted: false
   pietzner-igm:
@@ -217,12 +226,12 @@ gwas_datasets:
     cases: 0
     controls: 10708
     gwas_ssf:
-        date_metadata_last_modified: 2024-11-11
+        date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
-        coordinate_system: 1-based
+        coordinate_system: "1-based"
         data_file_name: pietzner-igm.tsv
         data_file_md5sum: ""
-        file_type: GWAS-SSF v0.1
+        file_type: "GWAS-SSF v0.1"
         is_harmonised: false
         is_sorted: false
   pietzner-iga:
@@ -232,12 +241,12 @@ gwas_datasets:
     cases: 0
     controls: 10708
     gwas_ssf:
-        date_metadata_last_modified: 2024-11-11
+        date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
-        coordinate_system: 1-based
+        coordinate_system: "1-based"
         data_file_name: pietzner-iga.tsv
         data_file_md5sum: ""
-        file_type: GWAS-SSF v0.1
+        file_type: "GWAS-SSF v0.1"
         is_harmonised: false
         is_sorted: false
   pietzner-igg:
@@ -247,12 +256,12 @@ gwas_datasets:
     cases: 0
     controls: 10708
     gwas_ssf:
-        date_metadata_last_modified: 2024-11-11
+        date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
-        coordinate_system: 1-based
+        coordinate_system: "1-based"
         data_file_name: pietzner-igg.tsv
         data_file_md5sum: ""
-        file_type: GWAS-SSF v0.1
+        file_type: "GWAS-SSF v0.1"
         is_harmonised: false
         is_sorted: false
   gudjonsson-igg:
@@ -262,12 +271,12 @@ gwas_datasets:
     cases: 0
     controls: 5356
     gwas_ssf:
-        date_metadata_last_modified: 2024-11-11
+        date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
-        coordinate_system: 1-based
+        coordinate_system: "1-based"
         data_file_name: gudjonsson-igg.tsv
         data_file_md5sum: ""
-        file_type: GWAS-SSF v0.1
+        file_type: "GWAS-SSF v0.1"
         is_harmonised: false
         is_sorted: false
   gudjonsson-iga:
@@ -277,12 +286,12 @@ gwas_datasets:
     cases: 0
     controls: 5358
     gwas_ssf:
-        date_metadata_last_modified: 2024-11-11
+        date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
-        coordinate_system: 1-based
+        coordinate_system: "1-based"
         data_file_name: gudjonsson-iga.tsv
         data_file_md5sum: ""
-        file_type: GWAS-SSF v0.1
+        file_type: "GWAS-SSF v0.1"
         is_harmonised: false
         is_sorted: false
   gudjonsson-igm:
@@ -292,12 +301,12 @@ gwas_datasets:
     cases: 0
     controls: 5362
     gwas_ssf:
-        date_metadata_last_modified: 2024-11-11
+        date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
-        coordinate_system: 1-based
+        coordinate_system: "1-based"
         data_file_name: gudjonsson-igm.tsv
         data_file_md5sum: ""
-        file_type: GWAS-SSF v0.1
+        file_type: "GWAS-SSF v0.1"
         is_harmonised: false
         is_sorted: false
   eldjarn-igg:
@@ -307,12 +316,12 @@ gwas_datasets:
     cases: 0
     controls: 35652
     gwas_ssf:
-        date_metadata_last_modified: 2024-11-11
+        date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
-        coordinate_system: 1-based
+        coordinate_system: "1-based"
         data_file_name: eldjarn-igg.tsv
         data_file_md5sum: ""
-        file_type: GWAS-SSF v0.1
+        file_type: "GWAS-SSF v0.1"
         is_harmonised: false
         is_sorted: false
   eldjarn-iga:
@@ -322,12 +331,12 @@ gwas_datasets:
     cases: 0
     controls: 35652
     gwas_ssf:
-        date_metadata_last_modified: 2024-11-11
+        date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
-        coordinate_system: 1-based
+        coordinate_system: "1-based"
         data_file_name: eldjarn-iga.tsv
         data_file_md5sum: ""
-        file_type: GWAS-SSF v0.1
+        file_type: "GWAS-SSF v0.1"
         is_harmonised: false
         is_sorted: false
   eldjarn-igm:
@@ -337,11 +346,11 @@ gwas_datasets:
     cases: 0
     controls: 35652
     gwas_ssf:
-        date_metadata_last_modified: 2024-11-11
+        date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
-        coordinate_system: 1-based
+        coordinate_system: "1-based"
         data_file_name: eldjarn-igm.tsv
         data_file_md5sum: ""
-        file_type: GWAS-SSF v0.1
+        file_type: "GWAS-SSF v0.1"
         is_harmonised: false
         is_sorted: false
