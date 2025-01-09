@@ -515,6 +515,56 @@ Ensuring that we've handled these columns correctly where necessary:
 - [ ] EPIC
 - [ ] pietzner
 
+**** TODO Using config to specify column labels <2024-12-23 Mon>
+
+#+begin_quote
+gwas/plot_gwas_manhattan.R:chr_col <- snakemake@params[['chr_col']]
+gwas/plot_gwas_manhattan.R:bp_col <- snakemake@params[['bp_col']]
+gwas/plot_gwas_manhattan.R:p_col <- snakemake@params[['p_col']]
+gwas/plot_gwas_manhattan.R:snp_col <- snakemake@params[['snp_col']]
+gwas/lead_snp_annotation.py:chr_col = snakemake.params.chr_col
+gwas/lead_snp_annotation.py:bp_col = snakemake.params.bp_col
+gwas/lead_snp_annotation.py:snp_col = snakemake.params.snp_col
+gwas/lead_snp_annotation.py:ref_col = snakemake.params.ref_col
+gwas/lead_snp_annotation.py:alt_col = snakemake.params.alt_col
+gwas/join_pair_gwas_stats.R:chr_col <- snakemake@params[['chr_col']]
+gwas/join_pair_gwas_stats.R:bp_col <- snakemake@params[['bp_col']]
+gwas/join_pair_gwas_stats.R:ref_col <- snakemake@params[['ref_col']]
+gwas/join_pair_gwas_stats.R:alt_col <- snakemake@params[['alt_col']]
+gwas/join_pair_gwas_stats.R:p_col <- snakemake@params[['p_col']]
+gwas/join_pair_gwas_stats.R:beta_col <- snakemake@params[['beta_col']]
+gwas/join_pair_gwas_stats.R:se_col <- snakemake@params[['se_col']]
+gwas/join_pair_gwas_stats.R:id_col <- snakemake@params[['id_col']]
+gwas/make_plink_range.R:chr_col <- snakemake@params[['chr_col']]
+gwas/make_plink_range.R:bp_col <- snakemake@params[['bp_col']]
+gwas/make_plink_range.R:ref_col <- snakemake@params[['ref_col']]
+gwas/make_plink_range.R:alt_col <- snakemake@params[['alt_col']]
+gwas/distance_clump.R:chr_col <- snakemake@params[['chr_col']]
+gwas/distance_clump.R:bp_col <- snakemake@params[['bp_col']]
+gwas/distance_clump.R:ref_col <- snakemake@params[['ref_col']]
+gwas/distance_clump.R:alt_col <- snakemake@params[['alt_col']]
+gwas/distance_clump.R:snp_col <- snakemake@params[['snp_col']]
+gwas/distance_clump.R:p_col <- snakemake@params[['p_col']]
+gwas/distance_clump.R:beta_col <- snakemake@params[['beta_col']]
+gwas/distance_clump.R:se_col <- snakemake@params[['se_col']]
+ldsc_and_sumher/preprocess_sumstats.R:chr_col <- snakemake@params[['chr_col']]
+ldsc_and_sumher/preprocess_sumstats.R:bp_col <- snakemake@params[['bp_col']]
+ldsc_and_sumher/preprocess_sumstats.R:ref_col <- snakemake@params[['ref_col']]
+ldsc_and_sumher/preprocess_sumstats.R:alt_col <- snakemake@params[['alt_col']]
+ldsc_and_sumher/preprocess_sumstats.R:p_col <- snakemake@params[['p_col']]
+ldsc_and_sumher/preprocess_sumstats.R:beta_col <- snakemake@params[['beta_col']]
+ldsc_and_sumher/preprocess_sumstats.R:snp_col <- snakemake@params[['snp_col']]
+ldsc_and_sumher/process_sum_stats_for_merged_gwas.R:chr_col <- snakemake@params[['chr_col']]
+ldsc_and_sumher/process_sum_stats_for_merged_gwas.R:bp_col <- snakemake@params[['bp_col']]
+ldsc_and_sumher/process_sum_stats_for_merged_gwas.R:ref_col <- snakemake@params[['ref_col']]
+ldsc_and_sumher/process_sum_stats_for_merged_gwas.R:alt_col <- snakemake@params[['alt_col']]
+ldsc_and_sumher/process_sum_stats_for_merged_gwas.R:beta_a_col <- snakemake@params[['beta_a_col']]
+ldsc_and_sumher/process_sum_stats_for_merged_gwas.R:beta_b_col <- snakemake@params[['beta_b_col']]
+ldsc_and_sumher/process_sum_stats_for_merged_gwas.R:se_a_col <- snakemake@params[['se_a_col']]ldsc_and_sumher/process_sum_stats_for_merged_gwas.R:se_b_col <- snakemake@params[['se_b_col']]
+#+end_quote
+
+Need to replace the likes of =snakemake@params[['chr_col']]= with =snakemake@config$chr_col=
+
 *** Notes on harmoniser pipeline
 **** Process
 
@@ -562,6 +612,25 @@ sqlite> select * from variation_synonym where name like '%,%' limit 1;
 This stores rsIDs and some are duplicated for a given position.
 
 ****** Selecting the best rsIDs from duplicates
+
+*** How do I have the harmoniser running on CSD3 as of <2024-12-22 Sun>?
+
+I run =gwas-ssf= then the likes of:
+#+begin_src
+cd /rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/results/gwas/gwas_ssf/eldjarn-iga
+
+conda activate gwas_harm
+
+nextflow -c /rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/config/harmoniser.config run /rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/gwas-sumstats-harmoniser --ref /rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/resources/ebispot_harmoniser/reference --harm --file /rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/results/gwas/gwas_ssf/eldjarn-iga/eldjarn-iga.tsv -profile singularity
+#+end_src
+
+NB:
+
+1. my =harmoniser.config=
+2. my fork of the =gwas-sumstats-harmoniser=
+3. =singularity= profile
+
+Re: 2, if my fix to the strand counts step was merged in through a PR, I could probably revert to using the public version.
 
 ** TODO estimating sdY in all data sets
 
