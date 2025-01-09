@@ -17,6 +17,10 @@ prune_dat[, c('chr', 'bp', 'REF', 'ALT') := tstrsplit(V1, ':')]
 prune_dat[, chr := as.character(chr)]
 prune_dat[, bp := as.integer(bp)]
 
+maf_dat <- fread(snakemake@input$maf_file, select = c('ID', 'ALT_FREQS'))
+
+prune_dat <- merge(prune_dat, maf_dat, by.x = 'V1', by.y = 'ID', all.x = T)
+
 merged_dat <- merge(gwas_dat, prune_dat, by.x = c(chr_col, bp_col, ref_col, alt_col), by.y = c('chr', 'bp', 'REF', 'ALT'))
 
 fwrite(merged_dat, file = snakemake@output[[1]], sep = '\t', col.names = T, row.names = F, quote = F)

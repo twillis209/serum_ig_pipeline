@@ -1,3 +1,4 @@
+name: serum-ig-pipeline-global
 channels:
 - conda-forge
 - bioconda
@@ -20,5 +21,6 @@ dependencies:
 - r-pheatmap
 - r-ggnewscale
 - r-ldlinkr
-- r-serum-ig-pipeline-code
+- r-serum-ig-pipeline-code == 0.2.1
 - r-httr
+- r-locuszoomr

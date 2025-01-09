@@ -1,44 +1,18 @@
-rule run_lyons_and_liu_iga_meta_analysis:
+rule merge_iga_gwas:
     input:
-        lyons = "results/processed_gwas/iga.tsv.gz",
-        liu = "results/processed_gwas/liu-iga.tsv.gz",
-        liu_decode = "results/processed_gwas/liu-decode-iga.tsv.gz",
-        dennis = "results/processed_gwas/dennis-iga.tsv.gz"
+        epic = "resources/harmonised_gwas/epic-iga.tsv.gz",
+        liu = "resources/harmonised_gwas/liu-iga.tsv.gz",
+        dennis = "resources/harmonised_gwas/dennis-iga.tsv.gz",
+        pietzner = "resources/harmonised_gwas/pietzner-iga.tsv.gz",
+        eldjarn = "resources/harmonised_gwas/eldjarn-iga.tsv.gz",
+        gudjonsson = "resources/harmonised_gwas/gudjonsson-iga.tsv.gz",
+        scepanovic = "resources/harmonised_gwas/scepanovic-iga.tsv.gz"
     output:
-        liu_lyons = "results/iga_meta/without_decode/without_dennis/meta_prescreen.tsv.gz",
-        liu_decode_lyons = "results/iga_meta/with_decode/without_dennis/meta_prescreen.tsv.gz",
-        liu_decode_lyons_dennis = "results/iga_meta/with_decode/with_dennis/meta_prescreen.tsv.gz",
-        merged = "results/iga_meta/with_decode/with_dennis/all_sum_stats.tsv.gz"
-    params:
-        chr_col = 'CHR38',
-        bp_col = 'BP38',
-        ref_col = 'REF',
-        alt_col = 'ALT',
-        beta_col = 'BETA',
-        se_col = 'SE',
-        p_col = 'P'
-    threads: 8
+        "results/iga_meta/merged_gwas.tsv.gz"
+    threads: 16
     resources:
-        runtime = 10
-    group: "gwas"
-    script:
-        script_path("iga_meta/run_meta_analysis.R")
-
-rule copy_iga_meta_to_processed_gwas:
-    input:
-        liu_lyons = "results/iga_meta/without_decode/without_dennis/meta_prescreen.tsv.gz",
-        liu_decode_lyons = "results/iga_meta/with_decode/without_dennis/meta_prescreen.tsv.gz",
-        liu_decode_lyons_dennis = "results/iga_meta/with_decode/with_dennis/meta_prescreen.tsv.gz"
-    output:
-        liu_lyons = "results/processed_gwas/liu-lyons-iga.tsv.gz",
-        liu_decode_lyons = "results/processed_gwas/liu-decode-lyons-iga.tsv.gz",
-        liu_decode_lyons_dennis = "results/processed_gwas/liu-decode-lyons-dennis-iga.tsv.gz"
-    localrule: True
-    shell: """
-        cp {input.liu_lyons} {output.liu_lyons}
-        cp {input.liu_decode_lyons} {output.liu_decode_lyons}
-        cp {input.liu_decode_lyons_dennis} {output.liu_decode_lyons_dennis}
-    """
+        runtime = 20
+    script: script_path("merge_named_gwas_inputs.R")
 
 use rule compute_genomic_inflation_factor as compute_genomic_inflation_factors_for_iga_meta with:
     input:
@@ -46,9 +20,6 @@ use rule compute_genomic_inflation_factor as compute_genomic_inflation_factors_f
     output:
         "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{variant_set}_gif.tsv"
     params:
-        chr_col = 'CHR38',
-        bp_col = 'BP38',
-        p_col = 'P',
         percentiles = [10, 20, 50, 75],
         controls = lambda w: get_metadata_field('liu-decode-lyons-iga', 'N0') if w.decode_inclusion == 'with_decode' else get_metadata_field('liu-lyons-iga', 'N0'),
         cases = lambda w: get_metadata_field('liu-decode-lyons-iga', 'N1') if w.decode_inclusion == 'with_decode' else get_metadata_field('liu-lyons-iga', 'N1')
@@ -67,12 +38,6 @@ checkpoint distance_clump_iga_meta:
         "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/lead_snps.distance_clumped"
     params:
         mhc = lambda wildcards: False, #if wildcards.snp_set == 'sans_mhc' else True,
-        chr_col = 'CHR38',
-        bp_col = 'BP38',
-        ref_col = 'REF',
-        alt_col = 'ALT',
-        snp_col = 'SNPID',
-        p_col = 'P',
         index_threshold = lambda wildcards: 5e-8 if wildcards.threshold == 'gws' else 1e-5,
         distance_window = 2e6,
         snps_to_ignore = ['17:7581494:G:A']

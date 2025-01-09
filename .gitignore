@@ -7,3 +7,4 @@ logs
 submit_with*
 submit_nf.sh
 singularity
+submit_eldjarn-iga_nf.sh submit_eldjarn-igg_nf.sh submit_eldjarn-igm_nf.sh submit_test_nf.sh submit_without_scheduling.sh submit_with_scheduling.sh

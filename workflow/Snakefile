@@ -1,5 +1,3 @@
-conda: "envs/global.yaml"
-
 from snakemake.utils import min_version
 min_version("8.20")
 
@@ -19,13 +17,15 @@ def script_path(script):
 def env_path(env):
     return os.path.join(workflow.basedir, "envs", env)
 
-include: 'rules/gwas/harmonise_gwas.smk'
+conda: env_path("global.yaml")
+
 include: 'rules/gwas/prune_gwas_with_1kGP_data.smk'
 include: 'rules/gwas/gwas.smk'
+include: 'rules/gwas/phenotype_standardisation.smk'
 include: 'rules/sumher.smk'
-#include: 'rules/gwas/iga_meta.smk'
 include: 'rules/wildcard_constraints.smk'
 include: 'rules/ldsc.smk'
+
 include: 'rules/python/export.py'
 
 module kGP_pipeline:
