@@ -75,6 +75,7 @@ gwas_datasets:
     url: "https://www.columbiamedicine.org/divisions/kiryluk/gwas/IgA/META.IGA.LEVELS.non-DECODE.txt"
     cases: 0
     controls: 22229
+    sdY_est: 1.1675795
     gwas_ssf:
         date_metadata_last_modified: "2024-11-08"
         genome_assembly: GRCh37
@@ -90,6 +91,7 @@ gwas_datasets:
     url: "https://www.columbiamedicine.org/divisions/kiryluk/gwas/IgA/META.IGA.LEVELS.ALL.COMBINED.txt"
     cases: 0
     controls: 41448
+    sdY_est: 1.5899747
     gwas_ssf:
         date_metadata_last_modified: "2024-11-08"
         genome_assembly: GRCh37
@@ -105,6 +107,7 @@ gwas_datasets:
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90012001-GCST90013000/GCST90012678/GCST90012678_buildGRCh37.tsv.gz"
     cases: 0
     controls: 7677
+    sdY_est: 0.9110791
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -120,6 +123,7 @@ gwas_datasets:
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90012001-GCST90013000/GCST90012679/GCST90012679_buildGRCh37.tsv.gz"
     cases: 0
     controls: 3471
+    sdY_est: 0.9345117
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -135,6 +139,7 @@ gwas_datasets:
     url: ""
     cases: 0
     controls: 7938
+    sdY_est: 0.4996091
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -150,6 +155,7 @@ gwas_datasets:
     url: ""
     cases: 0
     controls: 7946
+    sdY_est: 0.2871838
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -165,6 +171,7 @@ gwas_datasets:
     url: ""
     cases: 0
     controls: 8008
+    sdY_est: 0.5358721
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -180,6 +187,7 @@ gwas_datasets:
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST006001-GCST007000/GCST006357/harmonised/30053915-GCST006357-EFO_0004565-build37.f.tsv.gz"
     cases: 0
     controls: 1000
+    sdY_est: 0.0788076
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -195,6 +203,7 @@ gwas_datasets:
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST006001-GCST007000/GCST006359/harmonised/30053915-GCST006359-EFO_0004993-build37.f.tsv.gz"
     cases: 0
     controls: 1000
+    sdY_est: 0.1933939
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -210,6 +219,7 @@ gwas_datasets:
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST006001-GCST007000/GCST006360/harmonised/30053915-GCST006360-EFO_0004912-build37.f.tsv.gz"
     cases: 0
     controls: 1000
+    sdY_est: 0.1712270
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -225,6 +235,7 @@ gwas_datasets:
     url: ""
     cases: 0
     controls: 10708
+    sdY_est: 0.9821195
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -240,6 +251,7 @@ gwas_datasets:
     url: ""
     cases: 0
     controls: 10708
+    sdY_est: 1.0155681
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -255,6 +267,7 @@ gwas_datasets:
     url: ""
     cases: 0
     controls: 10708
+    sdY_est: 1.0145151
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -270,6 +283,7 @@ gwas_datasets:
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90088001-GCST90089000/GCST90088489/harmonised/35078996-GCST90088489-EFO_0007937-Build37.f.tsv.gz"
     cases: 0
     controls: 5356
+    sdY_est: 0.9441563
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -285,6 +299,7 @@ gwas_datasets:
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90086001-GCST90087000/GCST90086533/harmonised/35078996-GCST90086533-EFO_0007937-Build37.f.tsv.gz"
     cases: 0
     controls: 5358
+    sdY_est: 0.9342935
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -300,6 +315,7 @@ gwas_datasets:
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90088001-GCST90089000/GCST90088220/harmonised/35078996-GCST90088220-EFO_0007937-Build37.f.tsv.gz"
     cases: 0
     controls: 5362
+    sdY_est: 0.9793915
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -315,6 +331,7 @@ gwas_datasets:
     url: ""
     cases: 0
     controls: 35652
+    sdY_est: 1.0449364
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -330,6 +347,7 @@ gwas_datasets:
     url: ""
     cases: 0
     controls: 35652
+    sdY_est: 1.1091828
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -345,6 +363,7 @@ gwas_datasets:
     url: ""
     cases: 0
     controls: 35652
+    sdY_est: 1.0969310
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
