@@ -21,8 +21,8 @@ Probably best to do this by copying code from the =igad_paper_pipeline=, the =co
             - [X] iga
             - [X] igg
             - [X] igm
-        - [-] relabelling rsids to rsid
-          - [ ] should =gwas-ssf= handle this better?
+        - [X] relabelling rsids to rsid (Hmmmm probably shouldn't, actually! Has ;-delimited values)
+          - [X] should =gwas-ssf= handle this better?
           - [X] how are comma-separated rsIDs handled in this field? I.e. do we just drop everything with multiple rsIDs?
       - [X] igm
       - [X] igg
@@ -633,6 +633,178 @@ NB:
 Re: 2, if my fix to the strand counts step was merged in through a PR, I could probably revert to using the public version.
 
 ** TODO estimating sdY in all data sets
+
+** Study inclusion
+
+*** Scepanovic and sdY estimates <2025-01-10 Fri>
+
+There are only 1,000 subjects in this study, so inclusion is hardly critical to the power of the meta-analysis.
+
+[[https://genomemedicine.biomedcentral.com/articles/10.1186/s13073-018-0568-8#Sec2][From the paper]]:
+
+#+begin_quote
+For single-variant association analyses, we only considered SNPs with a MAF of > 5% (N = 5,699,237). We used PLINK (v1.9) [24] to perform logistic regression for binary phenotypes (serostatus: antibody positive versus negative) and linear regression for continuous traits (log10-transformed quantitative measurements of antibody levels in seropositive donors). The first two principal components of a PCA based on genetic data, age and sex, were used as covariates in all tests. In order to correct for baseline difference in IgG production in individuals, total IgG levels were included as covariates when examining associations with antigen-specific antibody levels, total IgM, IgE, and IgA levels. From a total of 53 additional variables additional co-variates, selected by using elastic net [25] and stability selection [26] as detailed elsewhere [16], were included in some analyses (Additional file 1: Table S3). For all genome-wide association studies, we used a genome-wide significant threshold (Pthreshold < 2.6 × 10−9) corrected for the number of antigens and immunoglobulin classes tested (N = 19). For specific HLA analyses, we used PLINK (v1.07) [27] to perform conditional haplotype-based association tests and multivariate omnibus tests at multi-allelic amino acid positions.
+#+end_quote
+
+I would need an estimate of the standard deviation of Y to restandardise the summary statistics. I think it's not worth it.
+
+They do give this number, however:
+
+#+begin_quote
+To characterize the variability in humoral immune responses between healthy individuals, we measured total IgG, IgM, IgA, and IgE levels in the plasma of the 1000 donors of the Milieu Interieur (MI) cohort. After log10 transformation, total IgG, IgM, IgA, and IgE levels showed normal distributions, with a median ± sd of 1.02 ± 0.08 g/l, 0.01 ± 0.2 g/l, 0.31 ± 0.18 g/l, and 1.51 ± 0.62 UI/ml, respectively
+#+end_quote
+
+Note that these are on the log10 scale, too. The sdY.est procedure recovered the SD values pretty well:
+
+| Isotype | Median |   SD | Median sdY.est |
+|---------+--------+------+----------------|
+| IgG     |   1.02 | 0.08 |          0.079 |
+| IgM     |   0.01 |  0.2 |          0.193 |
+| IgA     |   0.31 | 0.18 |          0.171 |
+
+*** What about the scale of the other summary statistics? <2025-01-10 Fri>
+
+sdY estimates:
+
+#+begin_quote
+           dataset median(sdY.est)
+ 1:        liu-iga 1.1675795
+ 2: liu-decode-iga 1.5899747
+ 3:     dennis-iga 0.9110791
+ 4:     dennis-igg 0.9345117
+ 5:       epic-iga 0.4996091
+ 6:       epic-igg 0.2871838
+ 7:       epic-igm 0.5358721
+ 8: scepanovic-igg 0.0788076
+ 9: scepanovic-igm 0.1933939
+10: scepanovic-iga 0.1712270
+11:   pietzner-igm 0.9821195
+12:   pietzner-iga 1.0155681
+13:   pietzner-igg 1.0145151
+14: gudjonsson-igg 0.9441563
+15: gudjonsson-iga 0.9342935
+16: gudjonsson-igm 0.9793915
+17:    eldjarn-igg 1.0449364
+18:    eldjarn-iga 1.1091828
+19:    eldjarn-igm 1.0969310
+#+end_quote
+
+| Study      | Scale           | Notes                                                                 |
+|------------+-----------------+-----------------------------------------------------------------------|
+| Dennis     | standard normal | rank-based INT, sdY.est values suggestive of standardised Y           |
+| Liu        | standard normal | standard-normalised residuals from regression of log Y on age and sex |
+| EPIC       | log             |                                                                       |
+| Pietzner   | standard normal | rank-based INT                                                        |
+| Gudjonsson | Box-Cox         | Box-Cox transformation                                                |
+| Eldjarn    | standard normal | rank-based INT                                                        |
+| Scepanovic | log10           |                                                                       |
+
+NB: 'INT' is inverse normal transformation, so on the scale of a standard normal. See Fig1b in the Dennis paper for where I saw this.
+
+I suppose these are all ways of getting response variable values to be approximately ~ N(0,1). log10 and log scales differ by log(10), so standardising the betas and SEs should take care of this.
+
+**** Dennis
+
+#+begin_quote
+In our primary analysis, we transformed lab values to fit the normal distribution to improve the performance of the linear regression models [21]. We applied the rank-based inverse normal quantile transformation to all labs, which ensured trait normality by replacing the value of each observation with its quantile from the standard normal distribution. The inverse normal quantile transformation thus preserved the rank ordering of observations, but not the values themselves, and model coefficients therefore are uninterpretable on the original scale.
+#+end_quote
+
+**** Liu
+
+#+begin_quote
+Multi-ancestry cohorts were classified into ancestry-specific strata based on global principal component analysis. In each sub-cohort, serum IgA levels were log-transformed and expressed as standard-normalized residuals from regression of log-transformed IgA levels against age and sex. We performed genome-wide association testing in each cohort for the markers that were imputed at high quality (
+) using a linear regression model under additive coding of the dosage genotypes, and with adjustment for cohort-specific significant principal components (PCs) of ancestry78. To quantify potential inflation of type I error due to stratification or technical artifacts, we estimated the genomic inflation factor for each cohort but detected no substantial inflation with lambda <1.05 in each individual study. We performed a fixed-effects as well as TransMeta random effects meta-analysis to combine the results of all 17 individual cohort summary statistics using METAL79 and TransMeta21 software, respectively. All significant loci were further assessed for heterogeneity by derivation of Heterogeneity Index (I2) and by testing using Cochrane’s heterogeneity test in PLINK80. The quantile-quantile plot of the final meta-analysis showed no global departures from the expected null distribution, with the genomic inflation factor estimated at 1.016 (Supplementary Fig. 2). The genome-wide significant signals were defined by the generally accepted P < 5.0 × 10−8 and signals with P < 1.0 × 10−6 were considered as suggestive.
+#+end_quote
+
+**** EPIC
+
+Hmmm, 'log-transformed' and then 'standardised'?
+
+#+begin_quote
+Prior to running the GWAS, samples were removed if they had: age greater than 80 years at the time of sampling; absence of genetic data; non-European ancestry; presence of relatives in the EPIC Norfolk sample as indicated by π >= 0.1875. Variants with imputation quality (info) < 0.4, Hardy-Weinberg Equilibrium p-value < 1x10-6, minor allele frequency (MAF) < 0.001, or effect size/standard error > 10 were removed. The log-transformed IgA phenotypes were standardised and the GWAS was performed using an additive model in SNPTEST (v2.5.4-beta3) incorporating age, sex, and scores on the first ten principal components of the genetic relatedness matrix.
+#+end_quote
+
+#+begin_quote
+> dat[, lapply(.SD, median, na.rm = T), .SDcols = names(dat) %like% 'IG']
+   IGA_CONC IGG1_CONC IGG2_CONC IGG3_CONC IGG4_CONC IGM_CONC IGG_CONC
+      <num>     <num>     <num>     <num>     <num>    <num>    <num>
+1: 233.9935   582.268   227.672     43.63    34.035   65.836   932.63
+#+end_quote
+
+NB: I created the =IGG_CONC= column as the sum of the IgG subclasses.
+
+What was the sdY in the raw data? I don't know the subset of samples used for the GWAS of each isotype, I have 9,610 data points here. What is the sd of Y on different scales?
+
+#+begin_quote
+> dcast(melt(rbound, id.vars = 'scale'), variable ~ scale)[, .(variable, raw, log, log10)]
+Key: <variable>
+    variable       raw       log     log10
+      <fctr>     <num>     <num>     <num>
+1:  IGA_CONC 134.52692 0.5037606 0.2187805
+2: IGG1_CONC 226.56262 0.3543768 0.1539039
+3: IGG2_CONC 117.06080 0.5133363 0.2229391
+4: IGG3_CONC  37.24913 0.5951565 0.2584732
+5: IGG4_CONC  66.30797 1.0375210 0.4505896
+6:  IGM_CONC  52.42656 0.5423559 0.2355422
+7:  IGG_CONC 274.35088 0.2836292 0.1231786
+#+end_quote
+
+For what it's worth, log10 was used in that other paper. Comparing with the =sdY.est= values:
+
+#+begin_quote
+           dataset median(sdY.est)
+ 5:       epic-iga 0.4996091
+ 6:       epic-igg 0.2871838
+ 7:       epic-igm 0.5358721
+#+end_quote
+
+Looks like there's a very good match between the log scale values and the estimates we recover here. What about normality? Can't paste a plot in here but it looks ok. I think the location's not an issue as we have the intercept in the regression, so really it's just scale that's the issue.
+
+**** Pietzner
+
+#+begin_quote
+Genome-wide association studies for each protein target (rank-based inverse normal-transformed aptamer abundance corrected for age, sex, the first ten genetic principal components and test site) were run for each array separately using the BGENIE software (v1.3) (74) and the results were combined in a fixed-effects meta-analysis in METAL (75). We restricted the GWAS to variants with a minor allele frequency threshold of at least 1%.
+#+end_quote
+
+More detail from their Covid paper:
+
+#+begin_quote
+After excluding ancestry outliers and related individuals, 10,708 Fenland participants had both phenotypes and genetic data for the GWAS (OMICS = 8350, Core-Exome=1026, and GWAS = 1332). Within each genotyping subset, aptamer abundances were transformed to follow a normal distribution using the rank-based inverse normal transformation. Transformed aptamer abundances were then adjusted for age, sex, sample collection site, and 10 principal components in STATA v14, and the residuals used as input for the genetic association analyses. Test site was omitted for protein abundances measured by Olink as those were all selected from the same test site. Genome-wide association was performed under an additive model using BGENIE (v1.3)45. Results for the three genotyping arrays were combined in a fixed-effects meta-analysis in METAL48. Following the meta-analysis, 17,652,797 genetic variants, also present in the largest subset of the Fenland data (Fenland-OMICS), were taken forward for further analysis.
+#+end_quote
+
+**** Gudjonsson
+
+#+begin_quote
+Data processing and statistical analysis were performed using R (v3.5.1 & 4.0.1) and Rstudio (v1.1.456), unless otherwise specified. Box-Cox transformation was applied on the protein data55 and extreme outlier values were excluded, defined as values above the 99.5th percentile of the distribution of 99th percentile cutoffs across all proteins after scaling, resulting in the removal of an average 11 samples per SOMAmer, as previously described18. Within the AGES cohort, 5368 individuals had both genetic data and protein measurements. With that sample set, 7,506,463 variants were tested for association with each of the 4782 SOMAmers separately, in a linear regression model with age, sex, 5 genetic principal components, and genotyping platform as covariates using PLINK 2.0. To obtain independent genetic signals, we performed a stepwise conditional association analysis for each SOMAmer separately with the GCTA-COJO software19,20. We conditioned on the current lead variant, defined as the variant with the lowest P-value, and then kept track of any new lead variants with study-wide-significant associations. Variants in strong LD (r2 > 0.9) with previously chosen lead variants were not considered for joint analysis to avoid multicollinearity. The independent signals defined by GCTA-COJO were subsequently subjected to a validation analysis where the joint models were tested using individual-level data in AGES and those remaining study-wide significant retained. Associations with independent lead variants within 300 kb window of the gene boundaries of the protein-coding gene were defined as cis-signals, and otherwise in trans. To compare independent signals between SOMAmers, we define any signals with lead variants in strong LD (r2 > 0.9) as the same signal. Due to the complex LD structure and high pleiotropy of the MHC region56 (chr.6, 28.47–34.45 Mb) we collapsed all signals within that region to a single signal. To define loci harboring independent signals, we defined a 300 kb window around each independent signal (150 kb up- and downstream of lead variants) and collapsed all such intersecting windows. Therefore, the definition of loci is solely based on physical distances while the definition of independent signals is solely based on LD structure. Variants were annotated using the Ensembl Variant Effect Predictor57 (v104, “per_gene” option), where PAVs affecting the corresponding protein target were defined as those with the following consequences: splice acceptor variant, splice donor variant, splice region variant, stop gained, stop lost, start lost, frameshift variant, missense variant or frameshift variant. The GWAS results were visualized using Circos58. Pathway enrichment was performed using gProfiler59, using the full set of measured proteins as background and considering Benjamini–Hochberg FDR < 0.05 as statistically significant. Enrichment of tissue-elevated gene expression was performed using data from the Human Protein Atlas24 with a Fisher’s exact test, considering Benjamini–Hochberg FDR < 0.05 as statistically significant.
+#+end_quote
+
+**** Eldjarn
+
+#+begin_quote
+Genome-wide association study
+
+We rank-inverse normal transformed the measurements for each assay and adjusted them for age, sex and sample age. We standardized the residuals using rank-inverse normal transformation and used the standardized values as phenotypes for genome-wide association testing using a linear mixed model (BOLT-LMM71). We used LD score regression to account for inflation in test statistics due to cryptic relatedness and stratification72.
+
+We computed P values using a likelihood ratio test and adjusted for multiple testing by using the same significance threshold (1.8 × 10−9) as in our previous study on the Icelandic dataset2.
+
+We defined a pQTL association to be cis if the pQTL was located within 1 Mb of the transcription start site for the gene that encodes the target protein, as reported by UniProt, and trans otherwise.
+
+Of the 2,941 assays on the Olink Explore 3072 platform, data from UKB for 2,931 assays were used for GWAS analysis.
+
+The number of variants we test in Iceland (33.5 million) is about 40% lower than in UKB (57.7 million). The difference is largely due to very rare variants. However, the difference between them would result in a multiple testing correction threshold in UKB of 8.7 × 10−10 instead of 1.8 × 10−9. A total of 153 (1%) of the cis pQTLs are between those two thresholds and 1,608 (5%) of the trans pQTLs.
+
+For replication between platforms, the P value threshold is 0.05, with the requirement that initial and replication associations are in the same direction.
+
+
+
+
+#+end_quote
+
+**** Scepanovic
+
+#+begin_quote
+For single-variant association analyses, we only considered SNPs with a MAF of > 5% (N = 5,699,237). We used PLINK (v1.9) [24] to perform logistic regression for binary phenotypes (serostatus: antibody positive versus negative) and linear regression for continuous traits (log10-transformed quantitative measurements of antibody levels in seropositive donors). The first two principal components of a PCA based on genetic data, age and sex, were used as covariates in all tests. In order to correct for baseline difference in IgG production in individuals, total IgG levels were included as covariates when examining associations with antigen-specific antibody levels, total IgM, IgE, and IgA levels. From a total of 53 additional variables additional co-variates, selected by using elastic net [25] and stability selection [26] as detailed elsewhere [16], were included in some analyses (Additional file 1: Table S3). For all genome-wide association studies, we used a genome-wide significant threshold (Pthreshold < 2.6 × 10−9) corrected for the number of antigens and immunoglobulin classes tested (N = 19). For specific HLA analyses, we used PLINK (v1.07) [27] to perform conditional haplotype-based association tests and multivariate omnibus tests at multi-allelic amino acid positions.
+#+end_quote
 
 ** TODO Z-score plots
 
