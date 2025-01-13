@@ -67,12 +67,11 @@ checkpoint distance_clump_gwas:
 
 rule annotate_lead_snps:
     input:
-        "resources/harmonised_gwas/{trait}/{snp_set}/{threshold}/lead_snps.distance_clumped"
+        "results/{trait}/{window_size}_{threshold}_lead_snps.tsv"
     output:
-        annotations = "resources/harmonised_gwas/{trait}/{snp_set}/{threshold}/lead_snps.distance_clumped.annotations",
-        rsIDs = "resources/harmonised_gwas/{trait}/{snp_set}/{threshold}/lead_snps.distance_clumped.rsIDs"
+        "results/{trait}/{window_size}_{threshold}_annotated_lead_snps.tsv"
     resources:
-        runtime = 20
+        runtime = 30
     localrule: True
     script:
         script_path("gwas/lead_snp_annotation.py")
@@ -80,7 +79,7 @@ rule annotate_lead_snps:
 rule draw_manhattan_with_lead_snp_annotation:
     input:
         gwas = "resources/harmonised_gwas/{trait}.tsv.gz",
-        rsIDs = "resources/harmonised_gwas/{trait}/{snp_set}/{threshold}/lead_snps.distance_clumped.rsIDs"
+        lead_snps = "resources/harmonised_gwas/{trait}/{snp_set}/{threshold}/lead_snps.distance_clumped.rsIDs"
     output:
         "resources/harmonised_gwas/{trait}/{snp_set}/{threshold}/annotated_manhattan.distance_clumped.png"
     params:
@@ -91,6 +90,7 @@ rule draw_manhattan_with_lead_snp_annotation:
     resources:
         runtime = 20
     group: "gwas"
+    conda: env_path("global.yaml")
     script:
         script_path("gwas/plot_gwas_manhattan.R")
 

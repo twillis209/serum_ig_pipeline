@@ -4,6 +4,7 @@ traits_not_for_download = [x for x in config.get('gwas_datasets') if not config.
 pattern = '|'.join(re.escape(x) for x in traits_not_for_download)
 
 wildcard_constraints:
+    trait = '[^/]+',
     snp_set = 'with_mhc|sans_mhc',
     chr = "chr[0-9XY]{1,2}",
     chr_no = "[0-9XY]{1,2}",

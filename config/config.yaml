@@ -76,6 +76,7 @@ gwas_datasets:
     cases: 0
     controls: 22229
     sdY_est: 1.1675795
+    rescale: True
     gwas_ssf:
         date_metadata_last_modified: "2024-11-08"
         genome_assembly: GRCh37
@@ -92,6 +93,7 @@ gwas_datasets:
     cases: 0
     controls: 41448
     sdY_est: 1.5899747
+    rescale: True
     gwas_ssf:
         date_metadata_last_modified: "2024-11-08"
         genome_assembly: GRCh37
@@ -108,6 +110,7 @@ gwas_datasets:
     cases: 0
     controls: 7677
     sdY_est: 0.9110791
+    rescale: True
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -124,6 +127,7 @@ gwas_datasets:
     cases: 0
     controls: 3471
     sdY_est: 0.9345117
+    rescale: True
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -140,6 +144,7 @@ gwas_datasets:
     cases: 0
     controls: 7938
     sdY_est: 0.4996091
+    rescale: True
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -156,6 +161,7 @@ gwas_datasets:
     cases: 0
     controls: 7946
     sdY_est: 0.2871838
+    rescale: True
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -172,6 +178,7 @@ gwas_datasets:
     cases: 0
     controls: 8008
     sdY_est: 0.5358721
+    rescale: True
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -188,6 +195,7 @@ gwas_datasets:
     cases: 0
     controls: 1000
     sdY_est: 0.0788076
+    rescale: True
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -204,6 +212,7 @@ gwas_datasets:
     cases: 0
     controls: 1000
     sdY_est: 0.1933939
+    rescale: True
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -220,6 +229,7 @@ gwas_datasets:
     cases: 0
     controls: 1000
     sdY_est: 0.1712270
+    rescale: True
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -236,6 +246,7 @@ gwas_datasets:
     cases: 0
     controls: 10708
     sdY_est: 0.9821195
+    rescale: False
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -252,6 +263,7 @@ gwas_datasets:
     cases: 0
     controls: 10708
     sdY_est: 1.0155681
+    rescale: False
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -268,6 +280,7 @@ gwas_datasets:
     cases: 0
     controls: 10708
     sdY_est: 1.0145151
+    rescale: False
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -284,6 +297,7 @@ gwas_datasets:
     cases: 0
     controls: 5356
     sdY_est: 0.9441563
+    rescale: True
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -300,6 +314,7 @@ gwas_datasets:
     cases: 0
     controls: 5358
     sdY_est: 0.9342935
+    rescale: True
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -316,6 +331,7 @@ gwas_datasets:
     cases: 0
     controls: 5362
     sdY_est: 0.9793915
+    rescale: False
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -332,6 +348,7 @@ gwas_datasets:
     cases: 0
     controls: 35652
     sdY_est: 1.0449364
+    rescale: False
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -348,6 +365,7 @@ gwas_datasets:
     cases: 0
     controls: 35652
     sdY_est: 1.1091828
+    rescale: True
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -364,6 +382,7 @@ gwas_datasets:
     cases: 0
     controls: 35652
     sdY_est: 1.0969310
+    rescale: True
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37

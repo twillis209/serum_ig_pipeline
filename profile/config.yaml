@@ -1,7 +1,7 @@
 executor: slurm
 jobs: 300
 local-cores: 4
-cores: 16
+cores: 32
 resources:
   # LDlink does not allow concurrent API calls
   - ldlink_calls=1

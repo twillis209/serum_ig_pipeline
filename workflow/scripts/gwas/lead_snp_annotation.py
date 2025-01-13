@@ -3,11 +3,11 @@ import json
 import pandas as pd
 import re
 
-chr_col = snakemake.config.chr_col
-bp_col = snakemake.config.bp_col
-snp_col = snakemake.config.id_col
-ref_col = snakemake.config.ref_col
-alt_col = snakemake.config.alt_col
+chr_col = snakemake.config['chr_col']
+bp_col = snakemake.config['bp_col']
+ref_col = snakemake.config['ref_col']
+alt_col = snakemake.config['alt_col']
+snp_col = 'variant_id'
 
 # NB: Based on the sample script provided by Open Targets Genetics here: https://genetics-docs.opentargets.org/data-access/graphql-api#available-endpoints
 
@@ -128,7 +128,7 @@ base_url = "https://api.genetics.opentargets.org/graphql"
 
 daf = pd.read_csv(snakemake.input[0], delim_whitespace = True)
 
-daf.rename(columns = {chr_col: 'CHR', bp_col: 'BP', snp_col: 'SNP', ref_col: 'REF', alt_col: 'ALT'}, inplace = True)
+daf[snp_col] = daf[[chr_col, bp_col, ref_col, alt_col]].astype(str).agg('_'.join, axis=1)
 
 result_dict = {}
 
@@ -153,15 +153,16 @@ def query_snp(snp_id, chrom, bp, ref, alt, ref_alt_order = True):
     return {'variantInfo' : variant_response_data, 'indexVariantsAndStudiesForTagVariant': index_variants_and_studies_response_data, 'genesForVariant': genes_for_variant_response_data}
 
 for index, row in daf.iterrows():
-    res_dict = query_snp(row.SNP, row.CHR, row.BP, row.REF, row.ALT)
+    res_dict = query_snp(row[snp_col], row[chr_col], row[bp_col], row[ref_col], row[alt_col])
 
     if res_dict['variantInfo'] is None or res_dict['variantInfo']['rsId'] == 'null':
-        res_dict = query_snp(row.SNP, row.CHR, row.BP, row.REF, row.ALT, ref_alt_order = False)
+        res_dict = query_snp(row.SNP, row[chr_col], row[bp_col], row[ref_col], row[alt_col], ref_alt_order = False)
 
-    result_dict[row.SNP] = res_dict
-
-with open(snakemake.output.annotations, 'w') as f:
-    json.dump(result_dict, f)
+    result_dict[row[snp_col]] = res_dict
+    result_dict[row[snp_col]]['variantInfo'][chr_col] = row[chr_col]
+    result_dict[row[snp_col]]['variantInfo'][bp_col] = row[bp_col]
+    result_dict[row[snp_col]]['variantInfo'][ref_col] = row[ref_col]
+    result_dict[row[snp_col]]['variantInfo'][alt_col] = row[alt_col]
 
 d = []
 
@@ -187,8 +188,12 @@ for k,v in result_dict.items():
     # TODO handle case where v['variantInfo'] is None
     d.append(
         {
-            'SNPID': k,
-            'rsID': v['variantInfo']['rsId'],
+            snp_col: k,
+            chr_col: v['variantInfo'][chr_col],
+            bp_col: v['variantInfo'][bp_col],
+            ref_col: v['variantInfo'][ref_col],
+            alt_col: v['variantInfo'][alt_col],
+            'rsid': v['variantInfo']['rsId'],
             'nearestGene':  nearest_gene,
             'nearestGeneDistance' : v['variantInfo']['nearestGeneDistance'],
             'topGene' : top_gene,
@@ -202,13 +207,13 @@ for k,v in result_dict.items():
             'gnomadEAS' : v['variantInfo']['gnomadEAS'],
             'gnomadNFEEST' : v['variantInfo']['gnomadNFEEST'],
             'gnomadNFENWE' : v['variantInfo']['gnomadNFENWE'],
-            'gnomadNFESEU' : v['variantInfo']['gnomadNFESEU'],
-            'associatedTraits' : study_string
+            'gnomadNFESEU' : v['variantInfo']['gnomadNFESEU']
+            #'associatedTraits' : study_string
         }
         )
 
-meta_daf = pd.DataFrame(d)
+pd.DataFrame(d).to_csv(snakemake.output[0], sep = '\t', index = False)
 
-meta_daf = meta_daf.merge(right = daf, how = 'right', left_on = 'SNPID', right_on = 'SNP')
-
-meta_daf.to_csv(snakemake.output.rsIDs, sep = '\t', index = False)
+#meta_daf = meta_daf.merge(right = daf, how = 'right', left_on = 'SNPID', right_on = 'SNP')
+#
+#meta_daf.to_csv(snakemake.output.rsIDs, sep = '\t', index = False)
