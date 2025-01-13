@@ -19,15 +19,15 @@ def env_path(env):
 
 conda: env_path("global.yaml")
 
+include: 'rules/wildcard_constraints.smk'
 include: 'rules/gwas/prune_gwas_with_1kGP_data.smk'
 include: 'rules/gwas/gwas.smk'
 include: 'rules/gwas/phenotype_standardisation.smk'
+include: 'rules/sumher.smk'
+include: 'rules/ldsc.smk'
 include: 'rules/gwas/iga_meta.smk'
 include: 'rules/gwas/igm_meta.smk'
 include: 'rules/gwas/igg_meta.smk'
-include: 'rules/sumher.smk'
-include: 'rules/wildcard_constraints.smk'
-include: 'rules/ldsc.smk'
 
 include: 'rules/python/export.py'
 

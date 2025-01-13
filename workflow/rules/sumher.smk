@@ -9,10 +9,10 @@ rule thin_predictors_for_merged_gwas:
         thin_file = temp("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type,snps_only}/ldak/thin.in"),
         weights_file = temp("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type,snps_only}/ldak/weights.thin")
     log:
-        log_file = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type}/ldak/thin.log"
+        log_file = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type,snps_only}/ldak/thin.log"
     params:
-        in_stem = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type}/merged",
-        out_stem = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type}/ldak/thin"
+        in_stem = subpath(input[0], strip_suffix = '.bed'),
+        out_stem = subpath(output.thin_file, strip_suffix = '.in')
     threads: 8
     resources:
         runtime = 15
@@ -32,7 +32,7 @@ rule calculate_human_default_taggings:
         log_file = "results/processed_gwas/{trait}/{variant_set}/{variant_type}/ldak/human_default/merged.tagging.log"
     params:
         in_stem = subpath(input[0], strip_suffix = '.bed'),
-        out_stem = subpath(output[0], strip_suffix = '.tagging')
+        out_stem = subpath(output.tagging_file, strip_suffix = '.tagging')
     threads: 8
     resources:
         runtime = 30
@@ -109,7 +109,7 @@ rule estimate_h2_with_human_default:
     output:
         multiext("results/ldak/human_default/{trait}/{variant_set}/{variant_type}/sumher.", "cats", "cross", "enrich", "extra", "hers", "share", "taus", "progress")
     log:
-        log_file = subpath(output[0], strip_suffix = '.cats') + ".log"
+        log_file = "results/ldak/human_default/{trait}/{variant_set}/{variant_type}/sumher.log"
     params:
         out_stem = subpath(output[0], strip_suffix = '.cats')
     threads: 8
@@ -127,7 +127,7 @@ rule estimate_rg_with_ldak_thin:
     output:
         cors_full_file = "results/ldak/ldak-thin/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type,snps_only}/sumher.cors.full"
     log:
-        log_file = subpath(output[0], strip_suffix = '.cors.full') + ".log"
+        log_file = "results/ldak/ldak-thin/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type,snps_only}/sumher.log"
     params:
         output_stem = subpath(output[0], strip_suffix = '.cors.full')
     threads: 8
