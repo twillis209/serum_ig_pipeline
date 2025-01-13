@@ -76,39 +76,26 @@ use rule subset_reference as subset_reference_for_iga_meta with:
     output:
         temp(multiext("results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/merged", ".bed", ".bim", ".fam"))
 
+use rule calculate_human_default_taggings as calculate_human_default_taggings_for_iga_meta with:
+    input:
+        multiext("results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/merged", ".bed", ".bim", ".fam")
+    output:
+        tagging_file = temp("results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/merged.tagging")
 
-#use rule compute_genomic_inflation_factor as compute_genomic_inflation_factors_for_iga_meta with:
-#    input:
-#        "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/meta_prescreen.tsv.gz"
-#    output:
-#        "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{variant_set}_gif.tsv"
-#    params:
-#        percentiles = [10, 20, 50, 75],
-#        controls = lambda w: get_metadata_field('liu-decode-lyons-iga', 'N0') if w.decode_inclusion == 'with_decode' else get_metadata_field('liu-lyons-iga', 'N0'),
-#        cases = lambda w: get_metadata_field('liu-decode-lyons-iga', 'N1') if w.decode_inclusion == 'with_decode' else get_metadata_field('liu-lyons-iga', 'N1')
-#
-#use rule draw_qqplot as draw_iga_meta_qqplot with:
-#    input:
-#        gwas = "results/iga_meta/{decode_inclusion}/meta_prescreen.tsv.gz",
-#        gif = "results/iga_meta/{decode_inclusion}/gif.tsv"
-#    output:
-#        "results/iga_meta/{decode_inclusion}/meta_prescreen_qqplot.png"
-#
-#
-#use rule annotate_iga_meta_lead_snps with:
-#    input:
-#        "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/lead_snps.distance_clumped"
-#    output:
-#        annotations = "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/lead_snps.distance_clumped.annotations",
-#        rsIDs = "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/lead_snps.distance_clumped.rsIDs"
-#
-#use rule draw_manhattan_with_lead_snp_annotation as draw_iga_meta_manhattan_with_lead_snp_annotation with:
-#    input:
-#        gwas = "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/meta_{screen}.tsv.gz",
-#        rsIDs = "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/lead_snps.distance_clumped.rsIDs"
-#    output:
-#        "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/annotated_manhattan.distance_clumped.png"
-#
+use rule process_sum_stats as process_sum_stats_for_iga_meta with:
+    input: 
+        gwas_file = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz",
+        range_file = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/matching_ids.txt",
+    output:
+        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/procd.assoc"
+
+use rule estimate_h2_with_human_default as estimate_h2_with_human_default_for_iga_meta with:
+    input:
+        gwas = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/procd.assoc",
+        tagging_file = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/merged.tagging"
+    output:
+        multiext("results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/sumher.", "cats", "cross", "enrich", "extra", "hers", "share", "taus", "progress")
+
 #rule collate_existing_iga_associations:
 #    input:
 #        ebi = "resources/gwas/iga/ebi_associations.tsv",

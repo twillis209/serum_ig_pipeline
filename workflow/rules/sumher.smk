@@ -69,7 +69,7 @@ rule process_sum_stats:
     output:
         "results/processed_gwas/{trait}/{variant_set}/{variant_type}/merged.assoc"
     params:
-        N = lambda w: int(get_metadata_field(w.trait, 'N'))
+        N = lambda w: config.get('gwas_datasets').get(w.trait).get('controls')
     threads: 8
     resources:
         runtime = 15,
@@ -109,17 +109,15 @@ rule estimate_h2_with_human_default:
     output:
         multiext("results/ldak/human_default/{trait}/{variant_set}/{variant_type}/sumher.", "cats", "cross", "enrich", "extra", "hers", "share", "taus", "progress")
     log:
-        log_file = "results/ldak/human_default/{trait}/{variant_set}/{variant_type}/sumher.log"
+        log_file = subpath(output[0], strip_suffix = '.cats') + ".log"
     params:
-        out_stem = "results/ldak/human_default/{trait}/{variant_set}/{variant_type}/sumher",
-        prevalence = lambda w: get_metadata_field(w.trait, 'prevalence'),
-        case_prop = lambda w: get_metadata_field(w.trait, 'case_prop')
+        out_stem = subpath(output[0], strip_suffix = '.cats')
     threads: 8
     resources:
         runtime = 15
     group: "sumher"
     shell:
-        "ldak --sum-hers {params.out_stem} --summary {input.gwas} --tagfile {input.tagging_file} --check-sums NO --prevalence {params.prevalence} --ascertainment {params.case_prop} --max-threads {threads} > {log.log_file}"
+        "ldak --sum-hers {params.out_stem} --summary {input.gwas} --tagfile {input.tagging_file} --check-sums NO --max-threads {threads} > {log.log_file}"
 
 rule estimate_rg_with_ldak_thin:
     input:
@@ -129,9 +127,9 @@ rule estimate_rg_with_ldak_thin:
     output:
         cors_full_file = "results/ldak/ldak-thin/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type,snps_only}/sumher.cors.full"
     log:
-        log_file = "results/ldak/ldak-thin/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type,snps_only}/sumher.log"
+        log_file = subpath(output[0], strip_suffix = '.cors.full') + ".log"
     params:
-        output_stem = "results/ldak/ldak-thin/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type,snps_only}/sumher"
+        output_stem = subpath(output[0], strip_suffix = '.cors.full')
     threads: 8
     resources:
         runtime = 20
