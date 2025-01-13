@@ -75,6 +75,8 @@ use rule process_sum_stats as process_sum_stats_for_igm_meta with:
         range_file = "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/matching_ids.txt",
     output:
         "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/procd.assoc"
+    params:
+        N = lambda w: get_combined_sample_size_for_ig_meta(w, 'igm')
 
 use rule estimate_h2_with_human_default as estimate_h2_with_human_default_for_igm_meta with:
     input:
