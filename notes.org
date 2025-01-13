@@ -806,6 +806,10 @@ For replication between platforms, the P value threshold is 0.05, with the requi
 For single-variant association analyses, we only considered SNPs with a MAF of > 5% (N = 5,699,237). We used PLINK (v1.9) [24] to perform logistic regression for binary phenotypes (serostatus: antibody positive versus negative) and linear regression for continuous traits (log10-transformed quantitative measurements of antibody levels in seropositive donors). The first two principal components of a PCA based on genetic data, age and sex, were used as covariates in all tests. In order to correct for baseline difference in IgG production in individuals, total IgG levels were included as covariates when examining associations with antigen-specific antibody levels, total IgM, IgE, and IgA levels. From a total of 53 additional variables additional co-variates, selected by using elastic net [25] and stability selection [26] as detailed elsewhere [16], were included in some analyses (Additional file 1: Table S3). For all genome-wide association studies, we used a genome-wide significant threshold (Pthreshold < 2.6 × 10−9) corrected for the number of antigens and immunoglobulin classes tested (N = 19). For specific HLA analyses, we used PLINK (v1.07) [27] to perform conditional haplotype-based association tests and multivariate omnibus tests at multi-allelic amino acid positions.
 #+end_quote
 
+*** Which data sets should I rescale? <2025-01-11 Sat>
+
+All three =pietnzer= data sets, =gudjonsson-iga=, =eldjarn-igg= are within 0.05 of 1 (the expected sdY under N(0,1)), so I'll leave these as they are for fear of introducing more noise into them.
+
 ** TODO Z-score plots
 
 ** Content for the paper
