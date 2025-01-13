@@ -90,6 +90,8 @@ use rule process_sum_stats as process_sum_stats_for_iga_meta with:
         range_file = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/matching_ids.txt",
     output:
         "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/procd.assoc"
+    params:
+        N = lambda w: get_combined_sample_size_for_ig_meta(w, 'iga')
 
 use rule estimate_h2_with_human_default as estimate_h2_with_human_default_for_iga_meta with:
     input:
@@ -223,4 +225,4 @@ use rule estimate_h2_with_human_default as estimate_h2_with_human_default_for_ig
 #    output:
 #        "results/iga_meta/all_associations_near_pid_genes.tsv"
 #    localrule: True
-#    script: script_path("iga_meta/merge_all_iga_associations_with_iei_genes.R")
+#    script: script_path("iga_meta/merge_all_iga_associations_with_iei_genes.
