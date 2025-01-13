@@ -2,15 +2,24 @@ library(data.table)
 
 setDTthreads(snakemake@threads)
 
-gwas <- fread(snakemake@input$gwas_file, sep = '\t', header = T, select = c('SNPID', 'CHR38', 'BP38', 'REF', 'ALT', 'BETA', 'SE', 'P'))
+chr_col <- snakemake@config$chr_col
+bp_col <- snakemake@config$bp_col
+ref_col <- snakemake@config$ref_col
+alt_col <- snakemake@config$alt_col
+p_col <- snakemake@config$p_col
+beta_col <- snakemake@config$beta_col
+se_col <- snakemake@config$se_col
+
+gwas <- fread(snakemake@input$gwas_file, sep = '\t', header = T, select = c(chr_col, bp_col, ref_col, alt_col, p_col, beta_col, se_col))
 bim_ids <- fread(snakemake@input$range_file, sep = ' ', header = F)
 names(bim_ids) <- 'SNPID'
 
+gwas[, SNPID := paste(chr, bp, ref, alt, sep = ':'), env = list(chr = chr_col, bp = bp_col, ref = ref_col, alt = alt_col)]
 gwas <- merge(gwas, bim_ids, by = 'SNPID')
 
-# The SumHer documentation states that A1 is the 'test allele' and A2 is the 'other allele', so I take this to mean A1 is the effect allele and A2 the reference allele
+# The SumHer documentation states that A1 is the 'test allele' and A2 is the 'other allele', so I take this to mean A1 is the effect allele and A2 the reference/other allele
 
-setnames(gwas, c('CHR38', 'BP38', 'ALT', 'REF'), c('chr', 'bp', 'A1', 'A2'))
+setnames(gwas, c(chr_col, bp_col, alt_col, ref_col), c('chr', 'bp', 'A1', 'A2'))
 
 gwas <- gwas[!(chr %in% c('X', 'Y', 'MT'))]
 
