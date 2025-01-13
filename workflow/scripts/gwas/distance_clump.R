@@ -15,6 +15,10 @@ index_threshold <- snakemake@params[['index_threshold']]
 
 dat <- fread(snakemake@input[[1]], sep = '\t', select = c(chr_col, bp_col, ref_col, alt_col, p_col, beta_col, se_col))
 
+if(!snakemake@params$mhc) {
+  dat <- dat[!(get(chr_col) == 6 & get(bp_col) %between% c(24e6, 45e6))]
+}
+
 dat[, (chr_col) := as.character(get(chr_col))]
 dat[, (bp_col) := as.integer(get(bp_col))]
 
