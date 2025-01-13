@@ -10,6 +10,7 @@ rule make_plink_range:
     resources:
         runtime = 15
     group: "gwas"
+    conda: env_path("global.yaml")
     script: script_path('gwas/prune_gwas_with_1kGP_data/make_plink_range.R')
 
 use rule make_plink_range as make_plink_range_for_merged_gwas with:
@@ -26,8 +27,8 @@ rule subset_reference:
      output:
          temp(multiext("results/{trait}/{variant_set}/{variant_type}/merged", ".bed", ".bim", ".fam"))
      params:
-        in_stem = "results/1kG/hg38/eur/{variant_type}/005/qc/all/merged",
-        out_stem = "results/{trait}/{variant_set}/{variant_type}/merged"
+        in_stem = subpath(input[0], strip_suffix = '.bed'),
+        out_stem = subpath(output[0], strip_suffix = '.bed')
      threads: 8
      resources:
         runtime = 10
@@ -41,9 +42,9 @@ rule make_pruned_range:
     output:
         temp(multiext("results/{trait}/{variant_set}/{variant_type}/{window_size}_1_{r2}/merged", ".prune.in", ".prune.out"))
     params:
-            in_stem = "results/{trait}/{variant_set}/{variant_type}/merged",
-            out_stem = "results/{trait}/{variant_set}/{variant_type}/{window_size}_1_{r2}/merged",
-            r2 = lambda wildcards: wildcards.r2.replace('_', '.'),
+        in_stem = subpath(input[0], strip_suffix = '.bed'),
+        out_stem = subpath(output[0], strip_suffix = '.prune.in'),
+        r2 = lambda wildcards: wildcards.r2.replace('_', '.'),
     threads: 16
     resources:
         runtime = 90
