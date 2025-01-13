@@ -31,8 +31,8 @@ rule calculate_human_default_taggings:
     log:
         log_file = "results/processed_gwas/{trait}/{variant_set}/{variant_type}/ldak/human_default/merged.tagging.log"
     params:
-        in_stem = "results/processed_gwas/{trait}/{variant_set}/{variant_type}/merged",
-        out_stem = "results/processed_gwas/{trait}/{variant_set}/{variant_type}/ldak/human_default/merged"
+        in_stem = subpath(input[0], strip_suffix = '.bed'),
+        out_stem = subpath(output[0], strip_suffix = '.tagging')
     threads: 8
     resources:
         runtime = 30
