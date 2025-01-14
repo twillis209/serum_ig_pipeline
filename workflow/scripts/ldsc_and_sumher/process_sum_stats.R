@@ -32,7 +32,7 @@ gwas[, Predictor := paste(chr, bp, A2, A1, sep = ':')]
 
 gwas <- unique(gwas, by = 'Predictor')
 
-gwas[, Z := BETA/SE]
+gwas[, Z := beta/se, env = list(beta = beta_col, se = se_col)]
 # qnorm(1e-100) = -21.27345
 gwas[Z > 21, Z := 21]
 gwas[Z < -21, Z := -21]

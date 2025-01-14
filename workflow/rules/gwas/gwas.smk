@@ -22,7 +22,7 @@ rule draw_qqplot:
         gwas = "resources/harmonised_gwas/{trait}.tsv.gz",
         gif = "resources/harmonised_gwas/gif/{trait}.tsv"
     output:
-        "resources/harmonised_gwas/plots/{trait}_qqplot.png"
+        "results/harmonised_gwas/plots/{trait}_qqplot.png"
     params:
         prin_col = 'p_value',
         pretty_trait = '', #lambda wildcards: get_metadata_field(wildcards.trait, 'pretty_name'),
@@ -54,11 +54,11 @@ checkpoint distance_clump_gwas:
     input:
         gwas = "resources/harmonised_gwas/{trait}.tsv.gz",
     output:
-        "resources/harmonised_gwas/{trait}/{snp_set}/{threshold}/lead_snps.distance_clumped"
+        "results/harmonised_gwas/{trait}/{window_size}_{threshold}_lead_snps.tsv"
     params:
         mhc = lambda wildcards: False, #if wildcards.snp_set == 'sans_mhc' else True,
         index_threshold = lambda wildcards: 5e-8 if wildcards.threshold == 'gws' else 1e-5,
-        distance_window = 2e6,
+        distance_window = lambda w: int(w.window_size.split('kb')[0])*1e3,
     threads: 16
     resources:
         runtime = 5
@@ -67,9 +67,9 @@ checkpoint distance_clump_gwas:
 
 rule annotate_lead_snps:
     input:
-        "results/{trait}/{window_size}_{threshold}_lead_snps.tsv"
+        "results/harmonised_gwas/{trait}/{window_size}_{threshold}_lead_snps.tsv"
     output:
-        "results/{trait}/{window_size}_{threshold}_annotated_lead_snps.tsv"
+        "results/harmonised_gwas/{trait}/{window_size}_{threshold}_annotated_lead_snps.tsv"
     resources:
         runtime = 30
     localrule: True
@@ -79,9 +79,9 @@ rule annotate_lead_snps:
 rule draw_manhattan_with_lead_snp_annotation:
     input:
         gwas = "resources/harmonised_gwas/{trait}.tsv.gz",
-        lead_snps = "resources/harmonised_gwas/{trait}/{snp_set}/{threshold}/lead_snps.distance_clumped.rsIDs"
+        lead_snps = "results/harmonised_gwas/{trait}/2000kb_gws_annotated_lead_snps.tsv"
     output:
-        "resources/harmonised_gwas/{trait}/{snp_set}/{threshold}/annotated_manhattan.distance_clumped.png"
+        "results/harmonised_gwas/{trait}/manhattan.png"
     params:
         title = '',
         width = 6,
@@ -96,7 +96,7 @@ rule draw_manhattan_with_lead_snp_annotation:
 
 rule subset_gwas_for_lead_snp_neighbourhood:
     input:
-        ld = "resources/harmonised_gwas/{trait}/{snp_set}/{threshold}/lead_snps/{snp_id}/neighbourhood.ld.gz",
+        ld = "results/harmonised_gwas/{trait}/{snp_set}/{threshold}/lead_snps/{snp_id}/neighbourhood.ld.gz",
         gwas = "resources/harmonised_gwas/{trait}.tsv.gz"
     output:
         temp("resources/harmonised_gwas/{trait}/{snp_set}/{threshold}/lead_snps/{snp_id}/neighbourhood.tsv.gz")
@@ -129,8 +129,8 @@ rule subset_summary_statistics_about_variant:
     input:
         "resources/harmonised_gwas/{trait}.tsv.gz"
     output:
-        sum_stats = temp("resources/harmonised_gwas/{trait}/{variant_id}/{window_size}/sum_stats.tsv.gz"),
-        ids = temp("resources/harmonised_gwas/{trait}/{variant_id}/{window_size}/ids.txt")
+        sum_stats = temp("results/harmonised_gwas/{trait}/{variant_id}/{window_size}/sum_stats.tsv.gz"),
+        ids = temp("results/harmonised_gwas/{trait}/{variant_id}/{window_size}/ids.txt")
     params:
         beta_cols = ['beta'],
         se_cols = ['standard_error'],
@@ -146,12 +146,12 @@ rule subset_summary_statistics_about_variant:
 rule subset_1kGP_data_for_ld_matrix:
     input:
         multiext("results/1kG/hg38/eur/snps_only/005/qc/all/merged", ".pgen", ".pvar.zst", ".psam"),
-        ids = "resources/harmonised_gwas/{trait}/{variant_id}/{window_size}/ids.txt"
+        ids = "results/harmonised_gwas/{trait}/{variant_id}/{window_size}/ids.txt"
     output:
-        temp(multiext("resources/harmonised_gwas/{trait}/{variant_id}/{window_size}/subset", ".pgen", ".pvar.zst", ".psam"))
+        temp(multiext("results/harmonised_gwas/{trait}/{variant_id}/{window_size}/subset", ".pgen", ".pvar.zst", ".psam"))
     params:
-        in_stem = "results/1kG/hg38/eur/snps_only/005/qc/all/merged",
-        out_stem = "resources/harmonised_gwas/{trait}/{variant_id}/{window_size}/subset"
+        in_stem = subpath(input[0], strip_suffix = '.pgen'),
+        out_stem = subpath(output[0], strip_suffix = '.pgen')
     threads: 16
     resources:
         runtime = 15
@@ -160,11 +160,11 @@ rule subset_1kGP_data_for_ld_matrix:
 
 rule calculate_ld_for_subset_about_variant:
     input:
-        multiext("resources/harmonised_gwas/{trait}/{variant_id}/{window_size}/subset", ".pgen", ".pvar.zst", ".psam")
+        multiext("results/harmonised_gwas/{trait}/{variant_id}/{window_size}/subset", ".pgen", ".pvar.zst", ".psam")
     output:
-        temp(multiext("resources/harmonised_gwas/{trait}/{variant_id}/{window_size}/subset.phased", ".vcor2", ".vcor2.vars"))
+        temp(multiext("results/harmonised_gwas/{trait}/{variant_id}/{window_size}/subset.phased", ".vcor2", ".vcor2.vars"))
     params:
-        stem = "resources/harmonised_gwas/{trait}/{variant_id}/{window_size}/subset",
+        stem = subpath(input[0], strip_suffix = '.pgen')
     threads: 16
     resources:
         runtime = 10
@@ -173,11 +173,11 @@ rule calculate_ld_for_subset_about_variant:
 
 rule merge_sumstats_with_r2:
     input:
-        gwas = "resources/harmonised_gwas/{trait}/{variant_id}/{window_size}/sum_stats.tsv.gz",
-        ld = "resources/harmonised_gwas/{trait}/{variant_id}/{window_size}/subset.phased.vcor2",
-        ld_vars = "resources/harmonised_gwas/{trait}/{variant_id}/{window_size}/subset.phased.vcor2.vars"
+        gwas = "results/harmonised_gwas/{trait}/{variant_id}/{window_size}/sum_stats.tsv.gz",
+        ld = "results/harmonised_gwas/{trait}/{variant_id}/{window_size}/subset.phased.vcor2",
+        ld_vars = "results/harmonised_gwas/{trait}/{variant_id}/{window_size}/subset.phased.vcor2.vars"
     output:
-        temp("resources/harmonised_gwas/{trait}/{variant_id}/{window_size}/ld_friends.tsv.gz")
+        temp("results/harmonised_gwas/{trait}/{variant_id}/{window_size}/ld_friends.tsv.gz")
     threads: 16
     resources:
         runtime = 20
@@ -185,17 +185,17 @@ rule merge_sumstats_with_r2:
 
 rule draw_locuszoom_plot_without_r2:
     input:
-        gwas = "resources/harmonised_gwas/{trait}/{variant_id}/{window_size}/sum_stats.tsv.gz"
+        gwas = "results/harmonised_gwas/{trait}/{variant_id}/{window_size}/sum_stats.tsv.gz"
     output:
-        "resources/harmonised_gwas/{trait}/{variant_id}/{window_size}/locuszoom_sans_r2_{gene_track}.png"
+        "results/harmonised_gwas/{trait}/{variant_id}/{window_size}/locuszoom_sans_r2_{gene_track}.png"
     params:
         window = lambda w: int(w.window_size.replace('kb', '')) * 1000,
         with_genes = lambda w: True if w.gene_track == 'with_genes' else False
-    container: "docker://twillis209/r-locuszoomr:latest"
+    conda: env_path('global.yaml')
     script: script_path("gwas/draw_locuszoom_plot.R")
 
 use rule draw_locuszoom_plot_without_r2 as draw_locuszoom_plot_with_r2 with:
     input:
-        gwas = "resources/harmonised_gwas/{trait}/{variant_id}/{window_size}/ld_friends.tsv.gz"
+        gwas = "results/harmonised_gwas/{trait}/{variant_id}/{window_size}/ld_friends.tsv.gz"
     output:
-        "resources/harmonised_gwas/{trait}/{variant_id}/{window_size}/locuszoom_with_r2_{gene_track}.png"
+        "results/harmonised_gwas/{trait}/{variant_id}/{window_size}/locuszoom_with_r2_{gene_track}.png"
