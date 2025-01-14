@@ -36,7 +36,7 @@ rule subset_reference:
      shell:
         "plink2 --memory {resources.mem_mb} --threads {threads} --bfile {params.in_stem} --extract {input.range_file} --make-bed --out {params.out_stem}"
 
-use rule subset_reference as subset_reference_for_merged_gwas with;
+use rule subset_reference as subset_reference_for_merged_gwas with:
      input:
         multiext("results/1kG/hg38/eur/{variant_type}/005/qc/all/merged", ".bed", ".bim", ".fam"),
         range_file = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type}/matching_ids.txt"
