@@ -2,17 +2,16 @@ library(data.table)
 setDTthreads(snakemake@threads)
 
 chr_col <- snakemake@config$chr_col
-pos_col <- snakemake@config$bp_col
+bp_col <- snakemake@config$bp_col
 ref_col <- snakemake@config$ref_col
 alt_col <- snakemake@config$alt_col
 beta_col <- snakemake@config$beta_col
 se_col <- snakemake@config$se_col
 p_col <- snakemake@config$p_col
-rsid_col <- snakemake@config$rsid_col
 
-cols <- c(chr_col, pos_col, ref_col, alt_col, beta_col, se_col, p_col, rsid_col)
+cols <- c(chr_col, bp_col, ref_col, alt_col, beta_col, se_col, p_col)
 coord_cols <- cols[1:4]
-cols_to_relabel <- cols[5:8]
+cols_to_relabel <- cols[5:7]
 
 dats <- list()
 
