@@ -16,9 +16,9 @@ rule make_plink_range:
 use rule make_plink_range as make_plink_range_for_merged_gwas with:
     input:
         bim_file = "results/1kG/hg38/eur/snps_only/005/qc/all/merged.bim",
-        gwas_file = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/merged.tsv.gz"
+        gwas_file = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type}/merged.tsv.gz"
     output:
-        temp("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/matching_ids.txt")
+        temp("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type}/matching_ids.txt")
 
 rule subset_reference:
      input:
@@ -35,6 +35,16 @@ rule subset_reference:
      group: "gwas"
      shell:
         "plink2 --memory {resources.mem_mb} --threads {threads} --bfile {params.in_stem} --extract {input.range_file} --make-bed --out {params.out_stem}"
+
+use rule subset_reference as subset_reference_for_merged_gwas with;
+     input:
+        multiext("results/1kG/hg38/eur/{variant_type}/005/qc/all/merged", ".bed", ".bim", ".fam"),
+        range_file = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type}/matching_ids.txt"
+     output:
+         temp(multiext("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type}/merged", ".bed", ".bim", ".fam"))
+     params:
+        in_stem = subpath(input[0], strip_suffix = '.bed'),
+        out_stem = subpath(output[0], strip_suffix = '.bed')
 
 rule make_pruned_range:
     input:
