@@ -8,9 +8,13 @@ rule draw_zscore_plot_for_ig_gwas:
         beta_b = lambda w: f"{config.get('beta_col')}.{w.study_b}",
         se_a = lambda w: f"{config.get('se_col')}.{w.study_a}",
         se_b = lambda w: f"{config.get('se_col')}.{w.study_b}"
-    threads: 12
+    threads: 8
     resources:
         runtime = 20
     group: "gwas"
     conda: env_path("global.yaml")
     script: script_path("gwas/iga_meta/draw_zscore_plot.R")
+
+rule iga_zscore_plots:
+    input:
+        [f"results/iga_meta/zscore_plots/{study_a}_{study_b}.png" for study_a, study_b in combinations(config.get('iga_studies'), 2)]

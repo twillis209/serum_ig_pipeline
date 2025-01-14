@@ -5,6 +5,7 @@ import datetime
 import re
 import os
 import pandas as pd
+from itertools import combinations
 
 configfile: "config/config.yaml"
 

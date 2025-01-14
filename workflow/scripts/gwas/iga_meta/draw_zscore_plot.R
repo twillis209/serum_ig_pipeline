@@ -3,6 +3,15 @@ setDTthreads(snakemake@threads)
 library(ggplot2)
 library(stringr)
 
+theme_set(theme_bw()+
+          theme(
+            axis.title = element_text(size=12),
+            axis.text = element_text(size = 10, color = "black"),
+            legend.title = element_text(size = 10),
+            legend.text = element_text(size = 10)
+          )
+          )
+
 chr_col <- snakemake@config$chr_col
 bp_col <- snakemake@config$bp_col
 ref_col <- snakemake@config$ref_col
@@ -26,6 +35,8 @@ ggsave(ggplot(dat)+
   geom_vline(xintercept = -qnorm(2.5e-8), linetype = 'dashed')+
   xlab(snakemake@wildcards$study_a)+
   ylab(snakemake@wildcards$study_b)+
+  xlim(c(-20, 20))+
+  ylim(c(-20, 20))+
   coord_fixed(),
   file = snakemake@output[[1]],
   width = 6,
