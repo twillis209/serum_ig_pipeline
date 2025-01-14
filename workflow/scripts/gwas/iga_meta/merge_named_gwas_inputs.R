@@ -16,16 +16,31 @@ cols_to_relabel <- cols[5:8]
 
 dats <- list()
 
-for(i in seq_along(snakemake@input[names(snakemake@input) != ''])) {
-  abbrv <- names(snakemake@input)[names(snakemake@input) != ''][i]
+for(i in seq_along(snakemake@input[names(snakemake@input) != ""])) {
+  abbrv <- names(snakemake@input)[names(snakemake@input) != ""][i]
   dat <- fread(snakemake@input[[i]], select = cols)
 
-  setnames(dat, cols_to_relabel, paste(cols_to_relabel, abbrv, sep = '.'))
+  setnames(dat, cols_to_relabel, paste(cols_to_relabel, abbrv, sep = "."))
 
   dats[[i]] <- dat
 }
 
-merged <- Reduce(function(x,y) merge(x, y, by = coord_cols, all = T), dats)
+if (is.null(snakemake@wildcards$join)) {
+  merged <- Reduce(function(x, y) merge(x, y, by = coord_cols, all = TRUE), dats)
+} else if (snakemake@wildcards$join == "outer") {
+  merged <- Reduce(function(x, y) merge(x, y, by = coord_cols, all = TRUE), dats)
+} else if (snakemake@wildcards$join == "inner") {
+  merged <- Reduce(function(x, y) merge(x, y, by = coord_cols), dats)
+} else {
+  stop("Invalid join type")
+}
+
+if (!is.null(snakemake@wildcards$variant_set)) {
+  if (snakemake@wildcards$variant_set == "sans_mhc") {
+    merged <- merged[!(as.integer(chr) == 6 & bp %between% c(24e6, 45e6)),
+                     env = list(chr = chr_col, bp = bp_col)]
+  }
+}
 
 rm(dats)
 
@@ -40,4 +55,4 @@ rm(dats)
 #  }
 #}, .SDcols = patterns("^rsid\\.")]
 
-fwrite(merged, file = snakemake@output[[1]], sep = '\t')
+fwrite(merged, file = snakemake@output[[1]], sep = "\t")

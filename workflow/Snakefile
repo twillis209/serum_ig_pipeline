@@ -33,6 +33,7 @@ include: 'rules/ldsc.smk'
 include: 'rules/gwas/iga_meta.smk'
 include: 'rules/gwas/igm_meta.smk'
 include: 'rules/gwas/igg_meta.smk'
+include: 'rules/gwas/ig_meta_sumher.smk'
 
 include: 'rules/python/export.py'
 

@@ -812,6 +812,10 @@ All three =pietnzer= data sets, =gudjonsson-iga=, =eldjarn-igg= are within 0.05 
 
 ** TODO Z-score plots
 
+** Existing associations
+
+I've tabulated these in the past, but now we have two studies, Gudjonsson and Eldjarn, whose associations don't seem to be tabulated in the usual places.
+
 ** Content for the paper
 
 *** Introduction

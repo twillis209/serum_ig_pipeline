@@ -69,12 +69,19 @@ epic-iga:
   iei_genes: ['IL6ST', 'FCGR2B|FCGR3A', "TNFRSF13B", 'POU2AF1', 'TRAF3', 'IKZF1', 'TNFSF13']
 imd_traits: ['asthma-ex', 'hyperpara', 'hypothy', 'derm-ecz', 'pbc', 'addi', 'psc', 'ra', 'jia', 'sle', 'crohns', 't1d', 'ms', 'uc-delange', 'liu-decode-lyons-dennis-iga', 'igan']
 gwas_datasets:
+  iga-meta:
+    samples: 90562
+  igg-meta:
+    samples: 64133
+  igm-meta:
+    samples: 60730
   liu-iga:
     sha256: "44a62f93daa4fc0cecabd144c3b8da1777999787fa8c87a4ca055adf47ecfa51"
     is_gz: False
     url: "https://www.columbiamedicine.org/divisions/kiryluk/gwas/IgA/META.IGA.LEVELS.non-DECODE.txt"
     cases: 0
     controls: 22229
+    samples: 22229
     sdY_est: 1.1675795
     rescale: True
     gwas_ssf:
@@ -92,6 +99,7 @@ gwas_datasets:
     url: "https://www.columbiamedicine.org/divisions/kiryluk/gwas/IgA/META.IGA.LEVELS.ALL.COMBINED.txt"
     cases: 0
     controls: 41448
+    samples: 41448
     sdY_est: 1.5899747
     rescale: True
     gwas_ssf:
@@ -109,6 +117,7 @@ gwas_datasets:
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90012001-GCST90013000/GCST90012678/GCST90012678_buildGRCh37.tsv.gz"
     cases: 0
     controls: 7677
+    samples: 7677
     sdY_est: 0.9110791
     rescale: True
     gwas_ssf:
@@ -126,6 +135,7 @@ gwas_datasets:
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90012001-GCST90013000/GCST90012679/GCST90012679_buildGRCh37.tsv.gz"
     cases: 0
     controls: 3471
+    samples: 3471
     sdY_est: 0.9345117
     rescale: True
     gwas_ssf:
@@ -143,6 +153,7 @@ gwas_datasets:
     url: ""
     cases: 0
     controls: 7938
+    samples: 7938
     sdY_est: 0.4996091
     rescale: True
     gwas_ssf:
@@ -160,6 +171,7 @@ gwas_datasets:
     url: ""
     cases: 0
     controls: 7946
+    samples: 7946
     sdY_est: 0.2871838
     rescale: True
     gwas_ssf:
@@ -177,6 +189,7 @@ gwas_datasets:
     url: ""
     cases: 0
     controls: 8008
+    samples: 8008
     sdY_est: 0.5358721
     rescale: True
     gwas_ssf:
@@ -194,6 +207,7 @@ gwas_datasets:
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST006001-GCST007000/GCST006357/harmonised/30053915-GCST006357-EFO_0004565-build37.f.tsv.gz"
     cases: 0
     controls: 1000
+    samples: 1000
     sdY_est: 0.0788076
     rescale: True
     gwas_ssf:
@@ -211,6 +225,7 @@ gwas_datasets:
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST006001-GCST007000/GCST006359/harmonised/30053915-GCST006359-EFO_0004993-build37.f.tsv.gz"
     cases: 0
     controls: 1000
+    samples: 1000
     sdY_est: 0.1933939
     rescale: True
     gwas_ssf:
@@ -228,6 +243,7 @@ gwas_datasets:
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST006001-GCST007000/GCST006360/harmonised/30053915-GCST006360-EFO_0004912-build37.f.tsv.gz"
     cases: 0
     controls: 1000
+    samples: 1000
     sdY_est: 0.1712270
     rescale: True
     gwas_ssf:
@@ -245,6 +261,7 @@ gwas_datasets:
     url: ""
     cases: 0
     controls: 10708
+    samples: 10708
     sdY_est: 0.9821195
     rescale: False
     gwas_ssf:
@@ -262,6 +279,7 @@ gwas_datasets:
     url: ""
     cases: 0
     controls: 10708
+    samples: 10708
     sdY_est: 1.0155681
     rescale: False
     gwas_ssf:
@@ -279,6 +297,7 @@ gwas_datasets:
     url: ""
     cases: 0
     controls: 10708
+    samples: 10708
     sdY_est: 1.0145151
     rescale: False
     gwas_ssf:
@@ -296,6 +315,7 @@ gwas_datasets:
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90088001-GCST90089000/GCST90088489/harmonised/35078996-GCST90088489-EFO_0007937-Build37.f.tsv.gz"
     cases: 0
     controls: 5356
+    samples: 5356
     sdY_est: 0.9441563
     rescale: True
     gwas_ssf:
@@ -313,6 +333,7 @@ gwas_datasets:
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90086001-GCST90087000/GCST90086533/harmonised/35078996-GCST90086533-EFO_0007937-Build37.f.tsv.gz"
     cases: 0
     controls: 5358
+    samples: 5358
     sdY_est: 0.9342935
     rescale: True
     gwas_ssf:
@@ -330,6 +351,7 @@ gwas_datasets:
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90088001-GCST90089000/GCST90088220/harmonised/35078996-GCST90088220-EFO_0007937-Build37.f.tsv.gz"
     cases: 0
     controls: 5362
+    samples: 5362
     sdY_est: 0.9793915
     rescale: False
     gwas_ssf:
@@ -347,6 +369,7 @@ gwas_datasets:
     url: ""
     cases: 0
     controls: 35652
+    samples: 35652
     sdY_est: 1.0449364
     rescale: False
     gwas_ssf:
@@ -364,6 +387,7 @@ gwas_datasets:
     url: ""
     cases: 0
     controls: 35652
+    samples: 35652
     sdY_est: 1.1091828
     rescale: True
     gwas_ssf:
@@ -381,6 +405,7 @@ gwas_datasets:
     url: ""
     cases: 0
     controls: 35652
+    samples: 35652
     sdY_est: 1.0969310
     rescale: True
     gwas_ssf:

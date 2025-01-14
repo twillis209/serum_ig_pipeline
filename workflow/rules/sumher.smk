@@ -80,21 +80,16 @@ rule process_sum_stats:
 rule process_sum_stats_for_merged_gwas:
     input:
         gwas_file = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/merged.tsv.gz",
-        metadata_file = "resources/gwas/metadata/metadata_all_fields.tsv"
     output:
         gwas_file_A = temp("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{trait_A}.assoc"),
         gwas_file_B = temp("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{trait_B}.assoc")
     params:
-        trait_A = lambda wildcards: wildcards.trait_A,
-        trait_B = lambda wildcards: wildcards.trait_B,
-        chr_col = 'CHR38',
-        bp_col = 'BP38',
-        ref_col = 'REF',
-        alt_col = 'ALT',
-        beta_a_col = 'BETA.A',
-        beta_b_col = 'BETA.B',
-        se_a_col = 'SE.A',
-        se_b_col = 'SE.B'
+        beta_a_col = lambda w: f'{config.get('beta_col')}.{w.trait_A}',
+        beta_b_col = lambda w: f'{config.get('beta_col')}.{w.trait_B}',
+        se_a_col = lambda w: f'{config.get('se_col')}.{w.trait_A}',
+        se_b_col = lambda w: f'{config.get('se_col')}.{w.trait_B}',
+        N_A = lambda w: config.get('gwas_datasets').get(w.trait_A).get('samples'),
+        N_B = lambda w: config.get('gwas_datasets').get(w.trait_B).get('samples'),
     threads: 8
     resources:
         runtime = 15,
