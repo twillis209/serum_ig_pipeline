@@ -53,8 +53,8 @@ rule calculate_ldak_thin_taggings_for_merged_gwas:
     log:
         log_file = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type}/ldak/merged.tagging.log"
     params:
-        in_stem = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type}/merged",
-        out_stem = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type}/ldak/merged"
+        in_stem = subpath(input[0], strip_suffix = '.bed'),
+        out_stem = subpath(output[0], strip_suffix = '.tagging')
     threads: 8
     resources:
         runtime = 15
@@ -127,20 +127,14 @@ rule estimate_rg_with_ldak_thin:
         output_stem = subpath(output[0], strip_suffix = '.cors.full')
     threads: 8
     resources:
-        runtime = 20
+        runtime = 45
     group: "sumher"
     shell:
         """
         ldak --sum-cors {params.output_stem} --tagfile {input.tagging_file} --summary {input.gwas_file_A} --summary2 {input.gwas_file_B} --allow-ambiguous YES --check-sums NO --cutoff 0.01 --max-threads {threads} > {log.log_file}
         """
 
-imd_trait_pairs = list(chain(*[[f"{imd_traits[i]}_and_{imd_traits[j]}" for j in range(i+1,len(imd_traits))] for i in range(len(imd_traits))]))
-
-updated_iga_imd_pairs = [x for x in imd_trait_pairs if re.search("liu-decode-lyons-dennis-iga", x)]
-
-rule run_sumher_on_updated_iga:
-    input:
-        cors = [f"results/ldak/ldak-thin/{x}/inner/sans_mhc/snps_only/sumher.cors.full" for x in updated_iga_imd_pairs]
+imd_trait_pairs = [f"{imd_a}_and_{imd_b}" for imd_a, imd_b in combinations(config.get('imd_traits'), 2)]
 
 rule run_sumher_on_imds:
     input:
@@ -163,12 +157,6 @@ use rule run_sumher_on_imds as run_sumher_on_trait_and_imds with:
     output:
         "results/ldak/ldak-thin/combined/{variant_set}/snps_only/{trait}_and_imds.tsv"
     localrule: True
-
-rule run_pid_against_updated_iga:
-    input:
-        "results/ldak/ldak-thin/bronson-finngen-igad_and_liu-decode-lyons-dennis-iga/inner/sans_mhc/snps_only/sumher.cors.full",
-        "results/ldak/ldak-thin/10kG-finngen-li-bronson-ukb-pad_and_liu-decode-lyons-dennis-iga/inner/sans_mhc/snps_only/sumher.cors.full",
-        "results/ldak/ldak-thin/10kG-finngen-li-ukb-cvid_and_liu-decode-lyons-dennis-iga/inner/sans_mhc/snps_only/sumher.cors.full"
 
 rule draw_gps_and_sumher_rg_plot_for_trait_and_imds:
     input:

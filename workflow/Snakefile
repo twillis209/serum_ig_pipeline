@@ -5,7 +5,7 @@ import datetime
 import re
 import os
 import pandas as pd
-from itertools import combinations
+from itertools import combinations, chain
 
 configfile: "config/config.yaml"
 
@@ -35,6 +35,7 @@ include: 'rules/gwas/iga_meta.smk'
 include: 'rules/gwas/igm_meta.smk'
 include: 'rules/gwas/igg_meta.smk'
 include: 'rules/gwas/ig_meta_sumher.smk'
+include: 'rules/gwas/ig.smk'
 include: 'rules/zscore_plots.smk'
 
 include: 'rules/python/export.py'

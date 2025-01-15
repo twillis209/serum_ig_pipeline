@@ -33,7 +33,7 @@ gwas_dat[, Predictor := paste(chr, bp, A2, A1, sep = ':')]
 
 gwas_dat <- unique(gwas_dat, by = 'Predictor')
 
-gwas_dat[, Z := get(beta_a_col)/get(se_a_col)]
+gwas_dat[, Z := beta_a/se_a, env = list(beta_a = beta_a_col, se_a = se_a_col)]
 # qnorm(1e-100) = -21.27345
 gwas_dat[Z > 21, Z := 21]
 gwas_dat[Z < -21, Z := -21]
@@ -42,7 +42,7 @@ gwas_dat <- na.omit(gwas_dat, cols = c('Predictor', 'A1', 'A2', 'Z'))
 
 fwrite(gwas_dat[, .(Predictor, A1, A2, n, Z)], sep = '\t', file =  gwas_file_A)
 
-gwas_dat[, Z := get(beta_b_col)/get(se_b_col)]
+gwas_dat[, Z := beta_b/se_b, env = list(beta_b = beta_b_col, se_b = se_b_col)]
 gwas_dat[Z > 21, Z := 21]
 gwas_dat[Z < -21, Z := -21]
 gwas_dat[, n := snakemake@params$N_B]

@@ -16,7 +16,7 @@ rule make_plink_range:
 use rule make_plink_range as make_plink_range_for_merged_gwas with:
     input:
         bim_file = "results/1kG/hg38/eur/snps_only/005/qc/all/merged.bim",
-        gwas_file = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type}/merged.tsv.gz"
+        gwas_file = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/merged.tsv.gz"
     output:
         temp("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type}/matching_ids.txt")
 

@@ -28,7 +28,7 @@ dat <- na.omit(dat, c(beta_a_col, beta_b_col, se_a_col, se_b_col))
 dat[, `:=` (Z.A = beta_a/se_a, Z.B = beta_b/se_b), env = list(beta_a = beta_a_col, beta_b = beta_b_col, se_a = se_a_col, se_b = se_b_col)]
 
 ggsave(ggplot(dat)+
-  geom_point(aes(x = Z.A, y = Z.B), alpha = 0.05)+
+  geom_point(aes(x = Z.A, y = Z.B), alpha = 0.25)+
   geom_hline(yintercept = qnorm(2.5e-8), linetype = 'dashed')+
   geom_hline(yintercept = -qnorm(2.5e-8), linetype = 'dashed')+
   geom_vline(xintercept = qnorm(2.5e-8), linetype = 'dashed')+

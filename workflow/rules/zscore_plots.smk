@@ -15,6 +15,6 @@ rule draw_zscore_plot_for_ig_gwas:
     conda: env_path("global.yaml")
     script: script_path("gwas/iga_meta/draw_zscore_plot.R")
 
-rule iga_zscore_plots:
+rule zscore_plots:
     input:
-        [f"results/iga_meta/zscore_plots/{study_a}_{study_b}.png" for study_a, study_b in combinations(config.get('iga_studies'), 2)]
+        [[f"results/{x}_meta/zscore_plots/{study_a}_{study_b}.png" for study_a, study_b in combinations(config.get(f'{x}_studies'), 2)] for x in ['iga', 'igm', 'igg']]
