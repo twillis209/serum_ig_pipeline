@@ -126,94 +126,97 @@ query annotateLeadSnp($inputVariantId: String!){
 
 base_url = "https://api.genetics.opentargets.org/graphql"
 
-daf = pd.read_csv(snakemake.input[0], delim_whitespace = True)
+daf = pd.read_csv(snakemake.input[0], sep = '\\s+')
 
-daf[snp_col] = daf[[chr_col, bp_col, ref_col, alt_col]].astype(str).agg('_'.join, axis=1)
+if daf.shape[0] == 0:
+    pd.DataFrame(columns = ['variant_id', 'chromosome', 'base_pair_location', 'other_allele', 'effect_allele', 'rsid', 'nearestGene', 'nearestGeneDistance', 'topGene', 'topGeneId', 'mostSevereConsequence', 'gnomadFIN', 'gnomadNFE', 'gnomadAFR', 'gnomadAMR', 'gnomadASJ', 'gnomadEAS', 'gnomadNFEEST', 'gnomadNFENWE', 'gnomadNFESEU']).to_csv(snakemake.output[0], sep = '\t')
+else:
+    daf[snp_col] = daf[[chr_col, bp_col, ref_col, alt_col]].astype(str).agg('_'.join, axis=1)
 
-result_dict = {}
+    result_dict = {}
 
-def query_snp(snp_id, chrom, bp, ref, alt, ref_alt_order = True):
-    if ref_alt_order:
-        variables = {"inputVariantId": '_'.join([str(x) for x in [chrom, bp, ref, alt]])}
-    else:
-        variables = {"inputVariantId": '_'.join([str(x) for x in [chrom, bp, alt, ref]])}
+    def query_snp(snp_id, chrom, bp, ref, alt, ref_alt_order = True):
+        if ref_alt_order:
+            variables = {"inputVariantId": '_'.join([str(x) for x in [chrom, bp, ref, alt]])}
+        else:
+            variables = {"inputVariantId": '_'.join([str(x) for x in [chrom, bp, alt, ref]])}
 
-    r = requests.post(base_url, json={"query": variant_query, "variables": variables})
+        r = requests.post(base_url, json={"query": variant_query, "variables": variables})
 
-    variant_response_data = json.loads(r.text)['data']['variantInfo']
+        variant_response_data = json.loads(r.text)['data']['variantInfo']
 
-    r = requests.post(base_url, json={"query": index_variants_and_studies_query, "variables": variables})
+        r = requests.post(base_url, json={"query": index_variants_and_studies_query, "variables": variables})
 
-    index_variants_and_studies_response_data = json.loads(r.text)['data']['indexVariantsAndStudiesForTagVariant']
+        index_variants_and_studies_response_data = json.loads(r.text)['data']['indexVariantsAndStudiesForTagVariant']
 
-    r = requests.post(base_url, json={"query": genes_for_variant_query, "variables": variables})
+        r = requests.post(base_url, json={"query": genes_for_variant_query, "variables": variables})
 
-    genes_for_variant_response_data = json.loads(r.text)['data']['genesForVariant']
+        genes_for_variant_response_data = json.loads(r.text)['data']['genesForVariant']
 
-    return {'variantInfo' : variant_response_data, 'indexVariantsAndStudiesForTagVariant': index_variants_and_studies_response_data, 'genesForVariant': genes_for_variant_response_data}
+        return {'variantInfo' : variant_response_data, 'indexVariantsAndStudiesForTagVariant': index_variants_and_studies_response_data, 'genesForVariant': genes_for_variant_response_data}
 
-for index, row in daf.iterrows():
-    res_dict = query_snp(row[snp_col], row[chr_col], row[bp_col], row[ref_col], row[alt_col])
+    for index, row in daf.iterrows():
+        res_dict = query_snp(row[snp_col], row[chr_col], row[bp_col], row[ref_col], row[alt_col])
 
-    if res_dict['variantInfo'] is None or res_dict['variantInfo']['rsId'] == 'null':
-        res_dict = query_snp(row.SNP, row[chr_col], row[bp_col], row[ref_col], row[alt_col], ref_alt_order = False)
+        if res_dict['variantInfo'] is None or res_dict['variantInfo']['rsId'] == 'null':
+            res_dict = query_snp(row.SNP, row[chr_col], row[bp_col], row[ref_col], row[alt_col], ref_alt_order = False)
 
-    result_dict[row[snp_col]] = res_dict
-    result_dict[row[snp_col]]['variantInfo'][chr_col] = row[chr_col]
-    result_dict[row[snp_col]]['variantInfo'][bp_col] = row[bp_col]
-    result_dict[row[snp_col]]['variantInfo'][ref_col] = row[ref_col]
-    result_dict[row[snp_col]]['variantInfo'][alt_col] = row[alt_col]
+        result_dict[row[snp_col]] = res_dict
+        result_dict[row[snp_col]]['variantInfo'][chr_col] = row[chr_col]
+        result_dict[row[snp_col]]['variantInfo'][bp_col] = row[bp_col]
+        result_dict[row[snp_col]]['variantInfo'][ref_col] = row[ref_col]
+        result_dict[row[snp_col]]['variantInfo'][alt_col] = row[alt_col]
 
-d = []
+    d = []
 
-for k,v in result_dict.items():
-    study_string = ';'.join([f"{x['study']['traitReported']}" for x in v['indexVariantsAndStudiesForTagVariant']['associations'] if x['pval'] <= 5e-8])
-    study_string = study_string.replace('"', '')
-    study_string = f"\"{study_string}\""
+    for k,v in result_dict.items():
+        study_string = ';'.join([f"{x['study']['traitReported']}" for x in v['indexVariantsAndStudiesForTagVariant']['associations'] if x['pval'] <= 5e-8])
+        study_string = study_string.replace('"', '')
+        study_string = f"\"{study_string}\""
 
-    nearest_gene = '' if v['variantInfo']['nearestGene'] is None else v['variantInfo']['nearestGene']['symbol']
+        nearest_gene = '' if v['variantInfo']['nearestGene'] is None else v['variantInfo']['nearestGene']['symbol']
 
-    top_gene = ""
-    top_gene_id = ""
-    top_score = 0
+        top_gene = ""
+        top_gene_id = ""
+        top_score = 0
 
-    if v['genesForVariant']:
-        for x in v['genesForVariant']:
-            if x['overallScore'] > top_score:
-                top_score = x['overallScore']
-                top_gene = x['gene']['symbol']
-                top_gene_id = x['gene']['id']
+        if v['genesForVariant']:
+            for x in v['genesForVariant']:
+                if x['overallScore'] > top_score:
+                    top_score = x['overallScore']
+                    top_gene = x['gene']['symbol']
+                    top_gene_id = x['gene']['id']
 
 
-    # TODO handle case where v['variantInfo'] is None
-    d.append(
-        {
-            snp_col: k,
-            chr_col: v['variantInfo'][chr_col],
-            bp_col: v['variantInfo'][bp_col],
-            ref_col: v['variantInfo'][ref_col],
-            alt_col: v['variantInfo'][alt_col],
-            'rsid': v['variantInfo']['rsId'],
-            'nearestGene':  nearest_gene,
-            'nearestGeneDistance' : v['variantInfo']['nearestGeneDistance'],
-            'topGene' : top_gene,
-            'topGeneId' : top_gene_id,
-            'mostSevereConsequence' : v['variantInfo']['mostSevereConsequence'],
-            'gnomadFIN' : v['variantInfo']['gnomadFIN'],
-            'gnomadNFE' : v['variantInfo']['gnomadNFE'],
-            'gnomadAFR' : v['variantInfo']['gnomadAFR'],
-            'gnomadAMR' : v['variantInfo']['gnomadAMR'],
-            'gnomadASJ' : v['variantInfo']['gnomadASJ'],
-            'gnomadEAS' : v['variantInfo']['gnomadEAS'],
-            'gnomadNFEEST' : v['variantInfo']['gnomadNFEEST'],
-            'gnomadNFENWE' : v['variantInfo']['gnomadNFENWE'],
-            'gnomadNFESEU' : v['variantInfo']['gnomadNFESEU']
-            #'associatedTraits' : study_string
-        }
-        )
+        # TODO handle case where v['variantInfo'] is None
+        d.append(
+            {
+                snp_col: k,
+                chr_col: v['variantInfo'][chr_col],
+                bp_col: v['variantInfo'][bp_col],
+                ref_col: v['variantInfo'][ref_col],
+                alt_col: v['variantInfo'][alt_col],
+                'rsid': v['variantInfo']['rsId'],
+                'nearestGene':  nearest_gene,
+                'nearestGeneDistance' : v['variantInfo']['nearestGeneDistance'],
+                'topGene' : top_gene,
+                'topGeneId' : top_gene_id,
+                'mostSevereConsequence' : v['variantInfo']['mostSevereConsequence'],
+                'gnomadFIN' : v['variantInfo']['gnomadFIN'],
+                'gnomadNFE' : v['variantInfo']['gnomadNFE'],
+                'gnomadAFR' : v['variantInfo']['gnomadAFR'],
+                'gnomadAMR' : v['variantInfo']['gnomadAMR'],
+                'gnomadASJ' : v['variantInfo']['gnomadASJ'],
+                'gnomadEAS' : v['variantInfo']['gnomadEAS'],
+                'gnomadNFEEST' : v['variantInfo']['gnomadNFEEST'],
+                'gnomadNFENWE' : v['variantInfo']['gnomadNFENWE'],
+                'gnomadNFESEU' : v['variantInfo']['gnomadNFESEU']
+                #'associatedTraits' : study_string
+            }
+            )
 
-pd.DataFrame(d).to_csv(snakemake.output[0], sep = '\t', index = False)
+    pd.DataFrame(d).to_csv(snakemake.output[0], sep = '\t', index = False)
 
-#meta_daf = meta_daf.merge(right = daf, how = 'right', left_on = 'SNPID', right_on = 'SNP')
-#
-#meta_daf.to_csv(snakemake.output.rsIDs, sep = '\t', index = False)
+    #meta_daf = meta_daf.merge(right = daf, how = 'right', left_on = 'SNPID', right_on = 'SNP')
+    #
+    #meta_daf.to_csv(snakemake.output.rsIDs, sep = '\t', index = False)

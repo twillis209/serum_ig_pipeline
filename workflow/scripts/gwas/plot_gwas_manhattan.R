@@ -8,6 +8,7 @@ library(serumIgPipelineCode)
 if(is.null(snakemake@params[['width']])) {
   width <- 8
 } else {
+
   width <- snakemake@params[['width']]
 }
 
@@ -40,23 +41,18 @@ procd_sumstats <- process_sumstats_for_manhattan(gwas_dat)
 manh_plot <- draw_manhattan(procd_sumstats)
 
 if(!is.null(snakemake@input$lead_snps)) {
-  lead_snps <- fread(snakemake@input$lead_snps)
+  lead_snps <- fread(snakemake@input$lead_snps, header = T)
 
-  merged <- merge(lead_snps, procd_sumstats$data,
-                      by.x = c(chr_col, bp_col),
-                      by.y = c('chr', 'bp')
-                      )
+  if(lead_snps[, .N] > 0) {
+    merged <- merge(lead_snps, procd_sumstats$data,
+                        by.x = c(chr_col, bp_col),
+                        by.y = c('chr', 'bp')
+                        )
 
-  manh_plot <- manh_plot+
-    geom_point(size = 0.9, pch = 21, colour = 'black', data = merged)+
-    geom_text_repel(aes(label = topGene), hjust = -0.2, size = 4, data = merged, colour = 'black')
+    manh_plot <- manh_plot+
+      geom_point(size = 0.9, pch = 21, colour = 'black', data = merged)+
+      geom_text_repel(aes(label = topGene), hjust = -0.2, size = 4, data = merged, colour = 'black')
+    }
 }
-
-#if(!is.null(snakemake@wildcards[['cfdr_threshold']])) {
-#  if(as.numeric(snakemake@wildcards[['cfdr_threshold']]) < 1) {
-#    manhplot <- manhplot+
-#      geom_hline(yintercept = as.numeric(snakemake@wildcards[['cfdr_threshold']]), color = 'red', linetype = 'dashed')
-#  }
-#}
 
 ggsave(manh_plot, file = snakemake@output[[1]], width = width, height = height)

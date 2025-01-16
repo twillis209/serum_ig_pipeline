@@ -86,7 +86,7 @@ rule draw_manhattan_with_lead_snp_annotation:
         title = '',
         width = 6,
         height = 4
-    threads: 8
+    threads: 16
     resources:
         runtime = 20
     group: "gwas"
