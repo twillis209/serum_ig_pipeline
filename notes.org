@@ -428,9 +428,11 @@ Chrom   Pos     Name    rsids   effectAllele    otherAllele     Beta    Pval    
 
 =effectAllele= is handled correctly.
 
+Actually happened again on <2025-01-24 Fri>.
+
 ****** PR for this issue
 
-Would need to edit header schema. =otherAllele= is absent, but perhaps the matching checks for capitalised/uncapitalised versions.
+Would need to edit header schema. =otherAllele= is absent, but perhaps the matching checks for capitalised/uncapitalised versions. Main problem is that it's not picked up when generating the json.
 
 ***** =rsid= column where multiple rsIDs are present <2024-12-06 Fri>
 
@@ -941,7 +943,7 @@ done < decode_files.txt
 
 Contents of the README:
 #+begin_quote
-These files contain GWAS summary statistics from the Icelandic SomaScan proteomics data (with and without SMP normalization), 
+These files contain GWAS summary statistics from the Icelandic SomaScan proteomics data (with and without SMP normalization),
 as well as GWAS summary statistics from the UK Biobank Olink proteomics data (for British/Irish, African, and South Asian ancestries):
 
 The different groups can be identified by the start of the file name:
