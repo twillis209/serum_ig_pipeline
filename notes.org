@@ -1,4 +1,37 @@
 * The serum Ig paper <2024-11-02 Sat>
+
+** TODO list
+
+*** Analyses
+
+- [-] drop Gudjonsson and see what happens
+  - [X] IgA
+  - [ ] IgG
+  - [ ] IgM
+- [-] IGH locus issue (after Manhattans)
+  - [X] determine affected studies
+  - [ ] tabulate summary stats for lead SNPs across studies
+    - [ ] concatenate lead snps files
+    - [ ] merge with isotype merged file in turn to add in summary stats
+  - [ ] implement exclusion pipeline
+- [-] Z-score plots
+  - [X] draw them
+  - [ ] inspect them
+- [ ] possibility of Gudjonsson/Eldjarn sample overlap
+- [ ] h2 estimation with BLD-LDAK
+  - [ ] download and liftover annotations
+- [ ] forest plots
+- [ ] analysis of heterogeneity
+- [ ] random effects? Kiryluk did it.
+
+*** Write-up
+
+- [ ] table of different phenotype scales, i.e. transformations etc.
+
+*** Longer-term stuff
+
+- [ ] with/out SMP normalisation in the Eldjarn data sets?
+
 ** TODO Setting up the pipeline
 
 Probably best to do this by copying code from the =igad_paper_pipeline=, the =conda= version.
@@ -632,8 +665,6 @@ NB:
 
 Re: 2, if my fix to the strand counts step was merged in through a PR, I could probably revert to using the public version.
 
-** TODO estimating sdY in all data sets
-
 ** Study inclusion
 
 *** Scepanovic and sdY estimates <2025-01-10 Fri>
@@ -816,12 +847,134 @@ All three =pietnzer= data sets, =gudjonsson-iga=, =eldjarn-igg= are within 0.05 
 
 I've tabulated these in the past, but now we have two studies, Gudjonsson and Eldjarn, whose associations don't seem to be tabulated in the usual places.
 
+** Big signals in the IGH locus
+
+*** Which studies have these
+
+- =eldjarn-iga= has signal labelled IGHA1
+- =eldjarn-igg= has signal labelled IGHG1
+- =eldjarn-igm= has signal labelled IGHG1
+- =epic-iga= has signal labelled IGHA1
+- =epic-igg= has signal labelled IGHG1
+- =pietzner-iga= has signal labelled IGHA1
+- =pietzner-igg= has signal labelled IGHG1
+
 ** Content for the paper
 
 *** Introduction
 
 Idea that the study of common-variant architecture of physiological trait might inform understanding of traits in which dysregulation of the same antibody isotypes is implicated. Could cite our IgAD paper here but that seems a bit obnoxious; Kiryluk/Liu paper talked about IgAN.
 
+Idea that immune-mediated diseases and immune-related traits (which?) show evident of widespread pleiotropy, motivates interrogation of the shared genetic architecture which underlies variance in these physiological traits as well as the pathological ones.
+
 *** Methods
 
-Re: sdY estimation, I used a prune of the 1kGP panel of SNPs with MAF > 0.005 in Europeans rather than a panel of SNPs specific to each data set.
+Re: sdY estimation, I used a prune of the 1kGP panel of SNPs with MAF > 0.005 in Europeans (TODO check that this was data set specific). Took median of estimates, which were precise, anyway, showed good agreement with
+
+*** Discussion
+
+Heterogeneity among component study methods
+
+** Miscellaneous data set-specific issues
+*** To SMP or not SMP?
+
+This is discussed in [[https://static-content.springer.com/esm/art%3A10.1038%2Fs41586-023-06563-x/MediaObjects/41586_2023_6563_MOESM1_ESM.pdf][Supplementary Note 4]]:
+
+#+begin_quote
+As a normalization step, SomaScan scales each sample to conform to a reference population. This is done by calculating a scaling factor for each assay relative to a reference sample, averaging this scaling factor over all assays in the same dilution group, and applying the resulting scaling factor to all assays in the dilution group. While this can serve to reduce variation between samples, this may not always be desirable, as this has the effect of potentially removing large-scale variation in protein levels, affecting multiple proteins. Some studies therefore forego this normalization4. Here, we briefly note how the SMP normalization affects the present analysis.
+#+end_quote
+
+They note not everyone performs SMP in their studies. This passage is quite persuasive:
+
+#+begin_quote
+Using non-normalized data, the levels of 79% of SomaScan assays associated with age and 58% 64 associated with sex (Supplementary Table ST14). The SomaScan normalization factors were associated 65 with age and sex and affected the association with the normalized data accordingly (Supplementary 66 Table ST14). The correlations between age and sex effects were less consistent between Olink and 67 SomaScan (Spearman correlation=0.53 for age and 0.57 for sex).
+#+end_quote
+
+#+begin_quote
+Notably, the normalization decreases the correlation between Olink and SomaScan assays, probably because it is adjusting out some of the biological variability as previously described. However, the power to detect protein associations with sequence variants and phenotypes that are not pleiotropic tends to increase following normalization.
+#+end_quote
+
+As of <2025-01-23 Thu> I'm already in deep with the raw data.
+
+[[https://pmc.ncbi.nlm.nih.gov/articles/PMC7744536/#Sec14][Pietzner et al.]] did perform the normalisation:
+
+#+begin_quote
+Proteomic profiling of fasted EDTA plasma samples from 12,084 Fenland Study participants collected at baseline was performed by SomaLogic Inc. (Boulder, CO, USA) using an aptamer-based technology (SomaScan proteomic assay). Relative protein abundances of 4775 human protein targets were evaluated by 4979 aptamers (SomaLogic V4), and a detailed description can be found elsehwere43. Briefly, the SomaScan assay utilizes a library of short single-stranded DNA molecules that are chemically modified to specifically bind to protein targets, and the relative amount of aptamers binding to protein targets is determined using DNA microarrays. To account for variation in hybridization within runs, hybridization control probes are used to generate a hybridization scale factor for each sample. *To control for total signal differences between samples due to variation in overall protein concentration or technical factors such as reagent concentration, pipetting, or assay timing; a ratio between each aptamer’s measured value and a reference value is computed, and the median of these ratios is computed for each of the three dilution sets (40%, 1%, and 0.005%) and applied to each dilution set.* Samples were removed if they were deemed by SomaLogic to have failed or did not meet our acceptance criteria of 0.25–4 for all scaling factors. In addition to passing SomaLogic QC, only human protein targets were taken forward for subsequent analysis (4979 out of the 5284 aptamers). Aptamers’ target annotation and mapping to UniProt accession numbers as well as Entrez gene identifiers were provided by SomaLogic.
+#+end_quote
+
+I think on that basis I should use the SMP'd Eldjarn data sets.
+
+*** Why didn't I include the UKB Olink data sets from Eldjarn et al.?
+
+I grepped through the =bi= directory (British and Irish ancestry GWAS in the UKB) and couldn't find any results for antibodies.
+
+** Possibility of Eldjarn/Gudjonsson overlap <2025-01-23 Thu>
+
+[[https://www.nature.com/articles/s41586-023-06563-x][Eldjarn et al.]] looked at >50k people from UKB using Olink and compared results with SomaScan samples from 36k Icelanders. 1,514 Icelanders also had Olink measurements.
+
+I downloaded the SomaScan data, i.e. the Icelandic data, not the UKB data.
+
+[[https://www.nature.com/articles/s41467-021-27850-z#Sec2][Gudjonsson et al.]] looked at 5,368 elderly Icelanders from the AGES Cohort, more on [[https://pmc.ncbi.nlm.nih.gov/articles/PMC2723948/#:~:text=The%20AGES%2DReykjavik%20sample%20is,by%20the%20Icelandic%20Heart%20Association.][them here]].
+
+#+begin_quote
+The AGES-Reykjavik sample is drawn from an established population-based cohort, the Reykjavik Study. This cohort of men and women born between 1907 and 1935 has been followed in Iceland since 1967 by the Icelandic Heart Association.
+#+end_quote
+
+** Downloading the deCODE data (Eldjarn et al.)
+
+NB: remember to have up-to-date keys in =~/.aws/credentials= as supplied in the deCODE request response email.
+
+Listing
+#+begin_src
+aws s3 ls s3://largescaleplasma-2023/final_somascan_raw/Proteomics_PC0_11089_7_IGHA1_IGHA2_IgA_07082019.txt.gz --endpoint-url https://s3-ext.decode.is:10443
+#+end_src
+
+
+#+begin_quote
+aws s3 cp s3://largescaleplasma-2023/final_somascan_raw/Proteomics_PC0_11089_7_IGHA1_IGHA2_IgA_07082019.txt.gz --endpoint-url https://s3-ext.decode.is:10443
+
+while IFS= read -r s3_url; do
+  # Use aws s3 cp to download each file
+  aws s3 cp "$s3_url" resources/decode_data/ --endpoint-url https://s3-ext.decode.is:10443
+done < decode_files.txt
+#+end_quote
+
+Contents of the README:
+#+begin_quote
+These files contain GWAS summary statistics from the Icelandic SomaScan proteomics data (with and without SMP normalization), 
+as well as GWAS summary statistics from the UK Biobank Olink proteomics data (for British/Irish, African, and South Asian ancestries):
+
+The different groups can be identified by the start of the file name:
+GBR_UKB_Africa: UK Biobank Olink, African ancestry
+GBR_UKB_OLINK: UK Biobank Olink, British/Irish ancestry
+GBR_UKB_SAsia: UK Biobank Olink, South Asian ancestry
+Proteomics_PC0: Icelandic SomaScan, without SMP normalization
+Proteomics_SMP: Icelandic SomaScan, with SMP normalization
+
+The columns of the GWAS summary statistics files are as follows:
+Chrom: Chromosome
+Pos: Position (hg38)
+Name: Unique variant name
+rsids: rs-name, if it exists
+effectAllele: Effect allele
+otherAllele: Non-effect allele
+Beta: Effect (in standard deviations)
+Pval: P-value
+minus_log10_pval: -log10 of P-value
+SE: Standard error
+N: Sample size
+ImpMAF: Minor allele frequency
+Note: For multi-allelic variants, the value '!' in otherAllele means that the effectAllele is tested against the other (two or more) 
+alleles except effectAllele (using the '!' sign as shorthand for 'not effectAllele'). 
+#+end_quote
+
+Files:
+#+begin_quote
+Proteomics_SMP_PC0_11089_7_IGHA1_IGHA2_IgA_10032022.txt.gz
+Proteomics_SMP_PC0_3069_52_IGHM_IGJ_IGK_IGL_IgM_10032022.txt.gz
+Proteomics_SMP_PC0_2744_57_IGHG1_IGHG2_IGHG3_IGHG4_IGK_IGL_IgG_10032022.txt.gz
+Proteomics_SMP_PC0_13230_174_IGHG2_IgG2__Kappa_10032022.txt.gz
+Proteomics_SMP_PC0_13231_90_IGHG4_IgG4__Kappa_10032022.txt.gz
+
+aws s3 cp s3://largescaleplasma-2023/final_somascan_smp/Proteomics_SMP_PC0_2744_57_IGHG1_IGHG2_IGHG3_IGHG4_IGK_IGL_IgG_10032022.txt.g --endpoint-url https://s3-ext.decode.is:10443 .
+#+end_quote
