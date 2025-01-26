@@ -72,7 +72,7 @@ rule annotate_lead_snps:
         "results/harmonised_gwas/{trait}/{window_size}_{threshold}_annotated_lead_snps.tsv"
     resources:
         runtime = 30
-    localrule: True
+    group: "gwas"
     script:
         script_path("gwas/lead_snp_annotation.py")
 

@@ -28,6 +28,7 @@ checkpoint distance_clump_igg_meta:
     threads: 16
     resources:
         runtime = 5
+    group: "gwas"
     conda: env_path("global.yaml")
     script: script_path("gwas/distance_clump.R")
 
