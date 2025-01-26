@@ -1,5 +1,4 @@
 * The serum Ig paper <2024-11-02 Sat>
-
 ** TODO list
 
 *** Analyses
@@ -668,7 +667,6 @@ NB:
 Re: 2, if my fix to the strand counts step was merged in through a PR, I could probably revert to using the public version.
 
 ** Study inclusion
-
 *** Scepanovic and sdY estimates <2025-01-10 Fri>
 
 There are only 1,000 subjects in this study, so inclusion is hardly critical to the power of the meta-analysis.
@@ -722,15 +720,15 @@ sdY estimates:
 19:    eldjarn-igm 1.0969310
 #+end_quote
 
-| Study      | Scale           | Notes                                                                 |
-|------------+-----------------+-----------------------------------------------------------------------|
-| Dennis     | standard normal | rank-based INT, sdY.est values suggestive of standardised Y           |
-| Liu        | standard normal | standard-normalised residuals from regression of log Y on age and sex |
-| EPIC       | log             |                                                                       |
-| Pietzner   | standard normal | rank-based INT                                                        |
-| Gudjonsson | Box-Cox         | Box-Cox transformation                                                |
-| Eldjarn    | standard normal | rank-based INT                                                        |
-| Scepanovic | log10           |                                                                       |
+| Study      | Transformation                                                        | Other details                                                                      |
+|------------+-----------------------------------------------------------------------+------------------------------------------------------------------------------------|
+| Dennis     | rank-based INT, sdY.est values suggestive of standardised Y           |                                                                                    |
+| Liu        | standard-normalised residuals from regression of log Y on age and sex |                                                                                    |
+| EPIC       | log Y then standardised                                               | age, sex, and 10 PC scores in linear model                                         |
+| Pietzner   | rank-based INT                                                        | 'corrected for age, sex, the first ten genetic principal components and test site' |
+| Gudjonsson | Box-Cox transformation                                                | age, sex, 5 PCs, and genotyping platform                                           |
+| Eldjarn    | rank-based INT then extracted standard residuals                      | 'adjusted for age, sex, and sample age'                                            |
+| Scepanovic | log10                                                                 | age, sex, 2 PCs                                                                   |
 
 NB: 'INT' is inverse normal transformation, so on the scale of a standard normal. See Fig1b in the Dennis paper for where I saw this.
 
@@ -850,7 +848,6 @@ All three =pietnzer= data sets, =gudjonsson-iga=, =eldjarn-igg= are within 0.05 
 I've tabulated these in the past, but now we have two studies, Gudjonsson and Eldjarn, whose associations don't seem to be tabulated in the usual places.
 
 ** Big signals in the IGH locus
-
 *** Which studies have these
 
 - =eldjarn-iga= has signal labelled IGHA1
@@ -862,7 +859,6 @@ I've tabulated these in the past, but now we have two studies, Gudjonsson and El
 - =pietzner-igg= has signal labelled IGHG1
 
 ** Content for the paper
-
 *** Introduction
 
 Idea that the study of common-variant architecture of physiological trait might inform understanding of traits in which dysregulation of the same antibody isotypes is implicated. Could cite our IgAD paper here but that seems a bit obnoxious; Kiryluk/Liu paper talked about IgAN.
@@ -920,6 +916,12 @@ I downloaded the SomaScan data, i.e. the Icelandic data, not the UKB data.
 
 #+begin_quote
 The AGES-Reykjavik sample is drawn from an established population-based cohort, the Reykjavik Study. This cohort of men and women born between 1907 and 1935 has been followed in Iceland since 1967 by the Icelandic Heart Association.
+#+end_quote
+
+Eldjarn et al. refer to an earlier paper by [[https://www.nature.com/articles/s41588-021-00978-w#Sec14][Ferkingstad et al.]], which describes the study participants:
+
+#+begin_quote
+From 24 August 2000 until 11 January 2019, we collected plasma samples from 40,004 Icelanders through two main projects: the Icelandic Cancer Project47 (52% of participants; samples collected from 2001 to 2005) and various genetic programs at deCODE genetics, Reykjavík, Iceland (48%). In the Icelandic Cancer Project, we invited all Icelanders with prevalent and newly diagnosed cancer and their relatives to participate in a comprehensive study of cancer, along with a control population, randomly selected from the National Registry. This sample set is enriched for cancer; 36% of the samples correspond to a cancer diagnosis up to the year 2019. For a given cancer, the fraction of active cancer (diagnosis from 2 years before to 1 month after sampling) out of the whole set was never higher than 1% for the 13 cancer types with at least 100 cases. The largest fraction of cases diagnosed before sampling out of the 36,000 individuals in the study was below 5% for all cancers (Supplementary Table 19). The samples collected at deCODE genetics were mainly collected through the population-based deCODE Health study, and the rest were mainly collected through various programs at deCODE. The median collection date for samples collected in the Icelandic Cancer Project was 1 July 2002, whereas the median collection date for deCODE samples was 15 May 2015. The average participant age was 55 years (s.d. = 17 years), and 57% were women. All participants who donated samples gave informed consent, and the National Bioethics Committee of Iceland approved the study, which was conducted in agreement with conditions issued by the Data Protection Authority of Iceland (VSN_14-015). Personal identities for the participant’s data and biological samples were encrypted by a third-party system (Identity Protection System), approved and monitored by the Data Protection Authority.
 #+end_quote
 
 ** Downloading the deCODE data (Eldjarn et al.)
