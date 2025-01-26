@@ -841,6 +841,17 @@ For single-variant association analyses, we only considered SNPs with a MAF of >
 
 All three =pietnzer= data sets, =gudjonsson-iga=, =eldjarn-igg= are within 0.05 of 1 (the expected sdY under N(0,1)), so I'll leave these as they are for fear of introducing more noise into them.
 
+
+*** Dataset idiosyncrasies
+
+**** Eldjarn
+
+Need to:
+- strip leading =chr= from chromosome column
+- explicitly map =otherAllele= to =other_allele= in the json config
+- explicitly map =rsids= to =rsid= in the json config
+- specify genome assembly as GRCh38?
+  
 ** TODO Z-score plots
 
 ** Existing associations
