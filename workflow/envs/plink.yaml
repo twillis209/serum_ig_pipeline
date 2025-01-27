@@ -1,0 +1,5 @@
+name: serum-ig-pipeline-plink
+channels:
+- bioconda
+dependencies:
+- plink2 >= 2.00a5.10

@@ -155,6 +155,7 @@ rule subset_1kGP_data_for_ld_matrix:
     threads: 16
     resources:
         runtime = 15
+    conda: env_path('plink.yaml')
     shell:
         "plink2 --memory {resources.mem_mb} --threads {threads} --pfile {params.in_stem} vzs --extract {input.ids} --make-pgen 'vzs' --out {params.out_stem}"
 
@@ -168,6 +169,7 @@ rule calculate_ld_for_subset_about_variant:
     threads: 16
     resources:
         runtime = 10
+    conda: env_path('plink.yaml')
     shell:
         "plink2 --memory {resources.mem_mb} --threads {threads} --pfile {params.stem} vzs --r2-phased square --out {params.stem}"
 

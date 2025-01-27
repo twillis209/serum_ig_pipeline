@@ -33,6 +33,7 @@ rule subset_reference:
      resources:
         runtime = 10
      group: "gwas"
+     conda: env_path('plink.yaml')
      shell:
         "plink2 --memory {resources.mem_mb} --threads {threads} --bfile {params.in_stem} --extract {input.range_file} --make-bed --out {params.out_stem}"
 
@@ -59,8 +60,9 @@ rule make_pruned_range:
     resources:
         runtime = 90
     group: "gwas"
+    conda: env_path('plink.yaml')
     shell:
-        "plink --memory {resources.mem_mb} --threads {threads} --bfile {params.in_stem} --indep-pairwise {wildcards.window_size} 1 {params.r2} --out {params.out_stem}"
+        "plink2 --memory {resources.mem_mb} --threads {threads} --bfile {params.in_stem} --indep-pairwise {wildcards.window_size} 1 {params.r2} --out {params.out_stem}"
 
 rule prune_gwas:
      input:
