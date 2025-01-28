@@ -19,7 +19,7 @@ def env_path(env):
     return os.path.join(workflow.basedir, "envs", env)
 
 def get_combined_sample_size_for_ig_meta(wildcards, isotype):
-    inclusion_wildcards = [value for key, value in wildcards.items() if re.match('with_[\\w-]+', value)]
+    inclusion_wildcards = [value for key, value in wildcards.items() if re.match('with_(?!mhc\\b)[\\w-]+', value)]
     datasets = [re.match('with_([\\w-]+)', x).groups()[0] for x in inclusion_wildcards]
     return sum([config.get('gwas_datasets').get('-'.join([x, isotype])).get('controls') for x in datasets])
 

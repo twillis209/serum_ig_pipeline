@@ -186,3 +186,43 @@ rule collate_h2_estimates_on_liab_scale_from_combined_results:
     localrule: True
     script: script_path("ldsc_and_sumher/compute_h2_liab_estimates.R")
 
+rule download_bld_ldak_annotations:
+    output:
+        zipped = temp(ensure("resources/ldak/bld-ldak/hg19_annotations.zip", sha256 = "77cef6a817b04495c7ac811b0ad62223aa9706899707a946bbdce04bbe86ee46"))
+    params:
+        url = "https://genetics.ghpc.au.dk/doug/bld.zip"
+    localrule: True
+    shell: """wget -O {output} {params.url}"""
+
+rule unpack_bld_ldak_annotations:
+    input:
+        "resources/ldak/bld-ldak/hg19_annotations.zip"
+    output:
+        [f"resources/ldak/bld-ldak/hg19_annotations/bld{i}" for i in range(0, 65)],
+        "resources/ldak/bld-ldak/hg19_annotations/bldnames",
+        "resources/ldak/bld-ldak/hg19_annotations/README.txt"
+    params:
+        parent = subpath(output[0], parent = True)
+    localrule: True
+    shell: "unzip {input} -d {params.parent}"
+
+rule format_bld_ldak_annotations:
+    input:
+        "resources/ldak/bld-ldak/hg19_annotations/bld{ann_no}"
+    output:
+        temp("results/ldak/bld-ldak/hg19_annotations/bld{ann_no}.bed")
+    localrule: True
+    shell: """
+        awk -F':' '{{print "chr" $1 "\t" $2 "\t" $2}}' {input} >{output}
+    """
+
+rule liftover_bld_ldak_annotations:
+    input:
+        bld = "results/ldak/bld-ldak/hg19_annotations/bld{ann_no}.bed",
+        chain_file = "resources/liftover/hg19ToHg38.over.chain.gz"
+    output:
+        lifted = "results/ldak/bld-ldak/hg38_annotations/bld{ann_no}_lifted.bed",
+        unlifted = "results/ldak/bld-ldak/hg38_annotations/bld{ann_no}_unlifted.bed"
+    resources:
+        runtime = 10
+    shell: "liftOver {input.bld} {input.chain_file} {output.lifted} {output.unlifted}"
