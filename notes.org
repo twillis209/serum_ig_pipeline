@@ -851,7 +851,7 @@ Need to:
 - explicitly map =otherAllele= to =other_allele= in the json config
 - explicitly map =rsids= to =rsid= in the json config
 - specify genome assembly as GRCh38?
-  
+
 ** TODO Z-score plots
 
 ** Existing associations
@@ -993,3 +993,13 @@ Proteomics_SMP_PC0_13231_90_IGHG4_IgG4__Kappa_10032022.txt.gz
 
 aws s3 cp s3://largescaleplasma-2023/final_somascan_smp/Proteomics_SMP_PC0_2744_57_IGHG1_IGHG2_IGHG3_IGHG4_IGK_IGL_IgG_10032022.txt.g --endpoint-url https://s3-ext.decode.is:10443 .
 #+end_quote
+
+** Heritability estimation
+
+*** BLD-LDAK model <2025-01-28 Tue>
+
+As the preponderance of the data comes from imputed SNP data sets, I choose [[https://dougspeed.com/pre-computed-tagging-files/][the HapMap3 panel over the smaller, directly genotyped set]].
+
+
+
+
