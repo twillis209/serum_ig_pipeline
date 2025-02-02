@@ -88,3 +88,14 @@ use rule estimate_h2_with_human_default as estimate_h2_with_human_default_for_ig
         multiext("results/igg_meta/{epic_inclusion}/{dennis_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/sumher.", "cats", "cross", "enrich", "extra", "hers", "share", "taus", "progress")
     log:
         log_file = "results/igg_meta/{epic_inclusion}/{dennis_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/sumher.log"
+
+use rule draw_igh_locus_for_iga_datasets as draw_igh_locus_for_igg_datasets with:
+    input:
+        "results/igg_meta/merged.tsv.gz"
+    output:
+        "results/igg_meta/locuszoomr/igh.pdf"
+    params:
+        p_value_cols = [f"p_value.{x}" for x in config['igg_studies']],
+        chrom = config['loci']['igh']['chrom'],
+        start_pos = config['loci']['igh']['start'],
+        stop_pos = config['loci']['igh']['stop']

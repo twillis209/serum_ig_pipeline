@@ -102,6 +102,20 @@ use rule estimate_h2_with_human_default as estimate_h2_with_human_default_for_ig
     log:
         log_file = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/sumher.log"
 
+rule draw_igh_locus_for_iga_datasets:
+    input:
+        "results/iga_meta/merged.tsv.gz"
+    output:
+        "results/iga_meta/locuszoomr/igh.pdf"
+    params:
+        p_value_cols = [f"p_value.{x}" for x in config['iga_studies']],
+        chrom = config['loci']['igh']['chrom'],
+        start_pos = config['loci']['igh']['start'] - 250000,
+        stop_pos = config['loci']['igh']['stop'] + 250000
+    threads: 12
+    conda: env_path("global.yaml")
+    script: script_path("gwas/locuszoomr/plot_locus.R")
+
 #rule collate_existing_iga_associations:
 #    input:
 #        ebi = "resources/gwas/iga/ebi_associations.tsv",

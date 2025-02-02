@@ -37,6 +37,7 @@ include: 'rules/gwas/igm_meta.smk'
 include: 'rules/gwas/igg_meta.smk'
 include: 'rules/gwas/ig_meta_sumher.smk'
 include: 'rules/gwas/ig.smk'
+include: 'rules/gwas/locuszoomr.smk'
 include: 'rules/zscore_plots.smk'
 
 include: 'rules/python/export.py'

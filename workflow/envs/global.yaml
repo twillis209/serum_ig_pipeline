@@ -23,4 +23,6 @@ dependencies:
 - r-ldlinkr
 - r-serum-ig-pipeline-code == 0.2.1
 - r-httr
+- r-gridextra
 - r-locuszoomr
+- bioconductor-ensdb.hsapiens.v86

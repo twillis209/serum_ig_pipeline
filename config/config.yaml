@@ -420,3 +420,8 @@ gwas_datasets:
         file_type: "GWAS-SSF v0.1"
         is_harmonised: false
         is_sorted: false
+loci:
+  igh:
+    chrom: 14
+    start: 105586437
+    stop: 106879844
