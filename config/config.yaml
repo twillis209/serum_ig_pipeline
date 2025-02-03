@@ -70,16 +70,16 @@ epic-iga:
   # Novel and non-novel alike
   iei_genes: ['IL6ST', 'FCGR2B|FCGR3A', "TNFRSF13B", 'POU2AF1', 'TRAF3', 'IKZF1', 'TNFSF13']
 imd_traits: ['asthma-ex', 'hyperpara', 'hypothy', 'derm-ecz', 'pbc', 'addi', 'psc', 'ra', 'jia', 'sle', 'crohns', 't1d', 'ms', 'uc-delange', 'liu-decode-lyons-dennis-iga', 'igan']
-iga_studies: ['epic', 'liu', 'dennis', 'scepanovic', 'pietzner', 'gudjonsson', 'eldjarn']
-igg_studies: ['epic', 'dennis', 'scepanovic', 'pietzner', 'gudjonsson', 'eldjarn']
-igm_studies: ['epic', 'scepanovic', 'pietzner', 'gudjonsson', 'eldjarn']
+iga_studies: ['epic', 'liu', 'dennis', 'scepanovic', 'pietzner', 'eldjarn']
+igg_studies: ['epic', 'dennis', 'scepanovic', 'pietzner', 'eldjarn']
+igm_studies: ['epic', 'scepanovic', 'pietzner', 'eldjarn']
 gwas_datasets:
   iga-meta:
-    samples: 90562
+    samples: 85204
   igg-meta:
-    samples: 64133
+    samples: 58777
   igm-meta:
-    samples: 60730
+    samples: 55368
   liu-iga:
     sha256: "44a62f93daa4fc0cecabd144c3b8da1777999787fa8c87a4ca055adf47ecfa51"
     is_gz: False
