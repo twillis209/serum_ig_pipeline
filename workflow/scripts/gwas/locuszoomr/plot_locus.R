@@ -1,34 +1,18 @@
-library(ggplot2)
+library(data.table)
 library(locuszoomr)
 library(EnsDb.Hsapiens.v86)
-library(data.table)
-library(gridExtra)
-library(patchwork)
-library(stringr)
+library(ggplot2)
 
 chr_col <- snakemake@config$chr_col
 bp_col <- snakemake@config$bp_col
+p_col <- snakemake@config$p_col
+rsid_col <- snakemake@config$rsid_col
 
-dat <- fread(snakemake@input[[1]], sep = '\t', header = T, select = c(chr_col, bp_col, snakemake@params$p_value_cols))
+dat <- fread(snakemake@input[[1]], sep = '\t', header = T, select = c(rsid_col, chr_col, bp_col, p_col))
 
-dat <- dat[chr == snakemake@params$chrom & pos %between% c(snakemake@params$start_pos, snakemake@params$stop_pos), env = list(chr = chr_col, pos = bp_col)]
+variant_chr <- dat[get(rsid_col) == snakemake@wildcards$variant_id, get(chr_col)]
+variant_pos <- dat[get(rsid_col) == snakemake@wildcards$variant_id, get(bp_col)]
 
-dat[, snpid := paste(chr, bp), env = list(chr = chr_col, bp = bp_col)]
+loc <- locus(data = dat, chrom = chr_col, pos = bp_col, p = p_col, labs = rsid_col, seqname = variant_chr, xrange = c(variant_pos - snakemake@params$window/2, variant_pos + snakemake@params$window/2), ens_db = 'EnsDb.Hsapiens.v86')
 
-pls <- list()
-
-pdf(snakemake@output[[1]], width = 7, height = 10)
-
-for(i in seq_along(snakemake@params$p_value_cols)) {
-  p_value_col <- snakemake@params$p_value_cols[[i]]
-
-  loc <- locus(data = dat[!is.na(get(p_value_col))], chrom = chr_col, pos = bp_col, p = p_value_col, ens_db = "EnsDb.Hsapiens.v86", seqname = as.integer(snakemake@params$chrom), xrange = c(snakemake@params$start_pos, snakemake@params$stop_pos), labs = 'snpid')
-
-  print(str_split_i(p_value_col, '\\.', 2))
-
-  pl <- (gg_scatter(loc, showLD = F, min.segment.length = 0, nudge_y = 5)/ gg_genetracks(loc))+plot_annotation(title = str_split_i(p_value_col, '\\.', 2))
-
-  print(pl)
-}
-
-dev.off()
+ggsave(gg_scatter(loc, showLD = F), file = snakemake@output[[1]], width = 6, height = 4)

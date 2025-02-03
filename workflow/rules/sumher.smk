@@ -136,47 +136,6 @@ rule estimate_rg_with_ldak_thin:
 
 imd_trait_pairs = [f"{imd_a}_and_{imd_b}" for imd_a, imd_b in combinations(config.get('imd_traits'), 2)]
 
-rule run_sumher_on_imds:
-    input:
-        cors = [f"results/ldak/ldak-thin/{x}/inner/sans_mhc/snps_only/sumher.cors.full" for x in imd_trait_pairs]
-    output:
-        "results/ldak/ldak-thin/combined/{variant_set}/{variant_type}/imds.tsv"
-    resources:
-        runtime = 30
-    localrule: True
-    run:
-        cors_daf = compile_sumher_files(input.cors)
-        #log_daf = tally_predictors_from_log_files(input.log)
-        #daf = cors_daf.merge(log_daf, left_on = 'trait.B', right_on = 'trait.B')
-
-        cors_daf.to_csv(output[0], sep = '\t', index = False)
-
-use rule run_sumher_on_imds as run_sumher_on_trait_and_imds with:
-    input:
-        cors = [f"results/ldak/ldak-thin/{{trait}}_and_{x}/inner/{{variant_set}}/snps_only/sumher.cors.full" for x in imd_traits]
-    output:
-        "results/ldak/ldak-thin/combined/{variant_set}/snps_only/{trait}_and_imds.tsv"
-    localrule: True
-
-rule draw_gps_and_sumher_rg_plot_for_trait_and_imds:
-    input:
-        rg = "results/ldak/ldak-thin/combined/sans_mhc/snps_only/{trait}_and_imds.tsv",
-        gps = "results/gps/combined/{trait}/inner/sans_mhc/snps_only/1000kb_1_0_8/3000_draws/pvalues.tsv",
-        metadata = "resources/gwas/metadata/metadata_all_fields.tsv"
-    output:
-        "results/ldak/ldak-thin/combined/sans_mhc/snps_only/{trait}_and_imds.png"
-    localrule: True
-    script: script_path("ldsc_and_sumher/draw_sumher_rg_plot.R")
-
-rule draw_imd_heatmap:
-    input:
-        rg = "results/ldak/ldak-thin/combined/sans_mhc/snps_only/imds.tsv",
-        metadata = "resources/gwas/metadata/metadata_all_fields.tsv"
-    output:
-        "results/ldak/ldak-thin/combined/sans_mhc/snps_only/imds.png"
-    localrule: True
-    script: script_path("ldsc_and_sumher/draw_heatmap.R")
-
 rule collate_h2_estimates_on_liab_scale_from_combined_results:
     input:
         metadata = "resources/gwas/metadata/metadata_all_fields.tsv",

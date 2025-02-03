@@ -129,19 +129,15 @@ rule subset_summary_statistics_about_variant:
     input:
         "resources/harmonised_gwas/{trait}.tsv.gz"
     output:
-        sum_stats = temp("results/harmonised_gwas/{trait}/{variant_id}/{window_size}/sum_stats.tsv.gz"),
+        sum_stats = temp("results/harmonised_gwas/{trait}/{variant_id}/{window_size}/sumstats.tsv.gz"),
         ids = temp("results/harmonised_gwas/{trait}/{variant_id}/{window_size}/ids.txt")
     params:
-        beta_cols = ['beta'],
-        se_cols = ['standard_error'],
-        p_cols = ['p_value'],
-        variant_id = lambda w: w.variant_id.replace('_', ':') if '_' in w.variant_id else w.variant_id,
         window = lambda w: int(w.window_size.replace('kb', '')) * 1000
     threads: 8
     resources:
         runtime = 15
     group: "gwas"
-    script: script_path("ldlink/subset_sumstats_about_variant.R")
+    script: script_path("gwas/subset_sumstats_about_variant.R")
 
 rule subset_1kGP_data_for_ld_matrix:
     input:
@@ -169,13 +165,12 @@ rule calculate_ld_for_subset_about_variant:
     threads: 16
     resources:
         runtime = 10
-    conda: env_path('plink.yaml')
     shell:
         "plink2 --memory {resources.mem_mb} --threads {threads} --pfile {params.stem} vzs --r2-phased square --out {params.stem}"
 
 rule merge_sumstats_with_r2:
     input:
-        gwas = "results/harmonised_gwas/{trait}/{variant_id}/{window_size}/sum_stats.tsv.gz",
+        gwas = "results/harmonised_gwas/{trait}/{variant_id}/{window_size}/sumstats.tsv.gz",
         ld = "results/harmonised_gwas/{trait}/{variant_id}/{window_size}/subset.phased.vcor2",
         ld_vars = "results/harmonised_gwas/{trait}/{variant_id}/{window_size}/subset.phased.vcor2.vars"
     output:
@@ -183,21 +178,33 @@ rule merge_sumstats_with_r2:
     threads: 16
     resources:
         runtime = 20
-    script: script_path("ldlink/merge_r2_with_sumstats.R")
+    script: script_path("gwas/merge_r2_with_sumstats.R")
 
 rule draw_locuszoom_plot_without_r2:
     input:
-        gwas = "results/harmonised_gwas/{trait}/{variant_id}/{window_size}/sum_stats.tsv.gz"
+        gwas = "results/harmonised_gwas/{trait}/{variant_id}/{window_size}/sumstats.tsv.gz"
     output:
         "results/harmonised_gwas/{trait}/{variant_id}/{window_size}/locuszoom_sans_r2_{gene_track}.png"
     params:
         window = lambda w: int(w.window_size.replace('kb', '')) * 1000,
         with_genes = lambda w: True if w.gene_track == 'with_genes' else False
     conda: env_path('global.yaml')
-    script: script_path("gwas/draw_locuszoom_plot.R")
+    script: script_path("gwas/locuszoomr/plot_locus.R")
 
 use rule draw_locuszoom_plot_without_r2 as draw_locuszoom_plot_with_r2 with:
     input:
         gwas = "results/harmonised_gwas/{trait}/{variant_id}/{window_size}/ld_friends.tsv.gz"
     output:
         "results/harmonised_gwas/{trait}/{variant_id}/{window_size}/locuszoom_with_r2_{gene_track}.png"
+
+rule draw_locus_with_r2_from_LDlink:
+    input:
+        "resources/harmonised_gwas/{trait}.tsv.gz"
+    output:
+        "results/harmonised_gwas/{trait}/{locus}/locus_plot.png"
+    params:
+        chrom = lambda w: config.get('loci').get(w.locus).get('chrom'),
+        start_pos = lambda w: config.get('loci').get(w.locus).get('start'),
+        stop_pos = lambda w: config.get('loci').get(w.locus).get('stop')
+    conda: env_path('global.yaml')
+    script: script_path("gwas/locuszoomr/plot_locus.R")

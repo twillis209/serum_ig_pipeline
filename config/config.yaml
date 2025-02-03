@@ -1,5 +1,7 @@
 ebispot_harmoniser:
   version: 1.1.10
+LDlink:
+  token: "9ee21d1a12e9"
 1kGP_pipeline:
   sha256:
     hg19:
