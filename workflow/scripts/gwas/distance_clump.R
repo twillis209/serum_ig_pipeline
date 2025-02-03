@@ -9,11 +9,12 @@ alt_col <- snakemake@config$alt_col
 p_col <- snakemake@config$p_col
 beta_col <- snakemake@config$beta_col
 se_col <- snakemake@config$se_col
+rsid_col <- snakemake@config$rsid_col
 
 distance_window <- snakemake@params[['distance_window']]
 index_threshold <- snakemake@params[['index_threshold']]
 
-dat <- fread(snakemake@input[[1]], sep = '\t', select = c(chr_col, bp_col, ref_col, alt_col, p_col, beta_col, se_col))
+dat <- fread(snakemake@input[[1]], sep = '\t', select = c(chr_col, bp_col, ref_col, alt_col, rsid_col, p_col, beta_col, se_col))
 
 if(!snakemake@params$mhc) {
   dat <- dat[!(get(chr_col) == 6 & get(bp_col) %between% c(24e6, 45e6))]

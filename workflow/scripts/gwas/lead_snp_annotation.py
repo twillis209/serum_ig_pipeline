@@ -7,6 +7,10 @@ chr_col = snakemake.config['chr_col']
 bp_col = snakemake.config['bp_col']
 ref_col = snakemake.config['ref_col']
 alt_col = snakemake.config['alt_col']
+beta_col = snakemake.config['beta_col']
+se_col = snakemake.config['se_col']
+p_col = snakemake.config['p_col']
+rsid_col = snakemake.config['rsid_col']
 snp_col = 'variant_id'
 
 # NB: Based on the sample script provided by Open Targets Genetics here: https://genetics-docs.opentargets.org/data-access/graphql-api#available-endpoints
@@ -47,7 +51,6 @@ index_variants_and_studies_query = """
 variant_query = """
     query annotateLeadSnp($inputVariantId: String!) {
         variantInfo(variantId: $inputVariantId) {
-            rsId
             nearestGene {
                 id
                 symbol
@@ -158,14 +161,18 @@ else:
     for index, row in daf.iterrows():
         res_dict = query_snp(row[snp_col], row[chr_col], row[bp_col], row[ref_col], row[alt_col])
 
-        if res_dict['variantInfo'] is None or res_dict['variantInfo']['rsId'] == 'null':
+        if res_dict['variantInfo'] is None:
             res_dict = query_snp(row.SNP, row[chr_col], row[bp_col], row[ref_col], row[alt_col], ref_alt_order = False)
 
         result_dict[row[snp_col]] = res_dict
+        result_dict[row[snp_col]]['variantInfo'][rsid_col] = row[rsid_col]
         result_dict[row[snp_col]]['variantInfo'][chr_col] = row[chr_col]
         result_dict[row[snp_col]]['variantInfo'][bp_col] = row[bp_col]
         result_dict[row[snp_col]]['variantInfo'][ref_col] = row[ref_col]
         result_dict[row[snp_col]]['variantInfo'][alt_col] = row[alt_col]
+        result_dict[row[snp_col]]['variantInfo'][beta_col] = row[beta_col]
+        result_dict[row[snp_col]]['variantInfo'][se_col] = row[se_col]
+        result_dict[row[snp_col]]['variantInfo'][p_col] = row[p_col]
 
     d = []
 
@@ -188,15 +195,17 @@ else:
                     top_gene_id = x['gene']['id']
 
 
-        # TODO handle case where v['variantInfo'] is None
         d.append(
             {
                 snp_col: k,
+                rsid_col: v['variantInfo'][rsid_col],
                 chr_col: v['variantInfo'][chr_col],
                 bp_col: v['variantInfo'][bp_col],
                 ref_col: v['variantInfo'][ref_col],
                 alt_col: v['variantInfo'][alt_col],
-                'rsid': v['variantInfo']['rsId'],
+                beta_col: v['variantInfo'][beta_col],
+                se_col: v['variantInfo'][se_col],
+                p_col: v['variantInfo'][p_col],
                 'nearestGene':  nearest_gene,
                 'nearestGeneDistance' : v['variantInfo']['nearestGeneDistance'],
                 'topGene' : top_gene,
@@ -216,7 +225,3 @@ else:
             )
 
     pd.DataFrame(d).to_csv(snakemake.output[0], sep = '\t', index = False)
-
-    #meta_daf = meta_daf.merge(right = daf, how = 'right', left_on = 'SNPID', right_on = 'SNP')
-    #
-    #meta_daf.to_csv(snakemake.output.rsIDs, sep = '\t', index = False)
