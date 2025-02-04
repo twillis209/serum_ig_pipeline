@@ -72,7 +72,8 @@ use rule draw_manhattan_with_lead_snp_annotation as draw_iga_meta_manhattan with
     params:
         title = '',
         width = 6,
-        height = 4
+        height = 4,
+        ylim = [0, 1e-80],
 
 use rule make_plink_range as make_plink_range_for_iga_meta with:
     input:
@@ -128,15 +129,6 @@ rule draw_igh_locus_for_iga_datasets:
     conda: env_path("global.yaml")
     script: script_path("gwas/locuszoomr/plot_locus.R")
 
-#rule collate_existing_iga_associations:
-#    input:
-#        ebi = "resources/gwas/iga/ebi_associations.tsv",
-#        pietzner = "resources/gwas/iga/pietzner_associations.tsv",
-#        liu = "resources/gwas/iga/liu_table_2.tsv"
-#    output:
-#        "results/iga_meta/existing_associations.tsv"
-#    localrule: True
-#    script: script_path("iga_meta/collate_existing_associations.R")
 #
 #use rule subset_summary_statistics_about_variant as subset_summary_statistics_about_variant_for_iga_meta with:
 #    input:
@@ -192,22 +184,6 @@ rule draw_igh_locus_for_iga_datasets:
 #    output:
 #        "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/{variant_id}/{window_size}/locuszoom_with_r2_{gene_track}.png"
 #
-#rule plot_iga_locus_tetrad:
-#    input:
-#        "results/iga_meta/with_decode/with_dennis/all_sum_stats.tsv.gz"
-#    output:
-#        "results/iga_meta/with_decode/with_dennis/prescreen/gws/locus_plots/{locus}/index_snp.png"
-#    params:
-#        index_snp_seqname = lambda w: int(config.get('iga').get('loci').get(w.locus).get('index_snp').split(':')[0]),
-#        index_snp_pos = lambda w: int(config.get('iga').get('loci').get(w.locus).get('index_snp').split(':')[1]),
-#        flank = lambda w: int(config.get('iga').get('loci').get(w.locus).get('flank').replace('kb', '')) * 1000
-#    threads: 16
-#    resources:
-#        runtime = 5
-#    group: "gwas"
-#    container: "docker://twillis209/r-locuszoomr:latest"
-#    script: script_path("iga_meta/plot_iga_locus_tetrad.R")
-#
 #rule plot_all_meta_gws_loci:
 #    input:
 #        [f"results/iga_meta/with_decode/with_dennis/prescreen/gws/locus_plots/{locus}/index_snp.png" for locus in config.get('iga').get('all')]
@@ -216,39 +192,3 @@ rule draw_igh_locus_for_iga_datasets:
 #    localrule: True
 #    shell: "touch {output}"
 #
-#rule fetch_hg38_coordinates_for_liu_lead_snps:
-#    input:
-#        "resources/gwas/iga/liu_table_2.tsv"
-#    output:
-#    localrule: True
-#
-#rule merge_liu_decode_lead_snps_with_meta_sumstats:
-#    input:
-#        liu = "resources/gwas/iga/liu_table_2.tsv",
-#        merged = "results/iga_meta/with_decode/with_dennis/all_sum_stats.tsv.gz"
-#    output:
-#        "results/iga_meta/with_decode/with_dennis/liu_lead_snps_with_sum_stats.tsv.gz"
-#    threads: 8
-#    localrule: True
-#    script: script_path("iga_meta/merge_liu_lead_snps_with_sum_stats.R")
-#
-#rule merge_lead_snps_with_existing_associations:
-#    input:
-#        existing = "results/iga_meta/existing_associations.tsv",
-#        new = "results/iga_meta/with_decode/with_dennis/prescreen/gws/lead_snps.distance_clumped.rsIDs"
-#    output:
-#        "results/iga_meta/with_decode/with_dennis/prescreen/gws/lead_snps_and_existing_associations.tsv"
-#    params:
-#        window = 1e6,
-#        novel = config.get('iga').get('novel')
-#    localrule: True
-#    script: script_path("iga_meta/merge_lead_snps_with_existing_associations.R")
-#
-#rule merge_all_iga_associations_with_iei_genes:
-#    input:
-#        iga = "results/iga_meta/with_decode/with_dennis/prescreen/gws/lead_snps_and_existing_associations.tsv",
-#        iei = "resources/pid/pid_gene_coordinates.tsv"
-#    output:
-#        "results/iga_meta/all_associations_near_pid_genes.tsv"
-#    localrule: True
-#    script: script_path("iga_meta/merge_all_iga_associations_with_iei_genes.

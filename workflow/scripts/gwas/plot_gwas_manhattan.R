@@ -26,7 +26,8 @@ theme_set(theme_bw()+
             axis.text.x=element_text(size=6, angle=90, color="black"),
             axis.text.y=element_text(size=10, color="black"),
             legend.title=element_text(size=10),
-            legend.text=element_text(size=10)
+            legend.text=element_text(size=10),
+            panel.grid.major.y = element_blank()
           )
           )
 
@@ -38,7 +39,16 @@ gwas_dat <- fread(snakemake@input[['gwas']], sep = '\t', select = c(chr_col, bp_
 
 procd_sumstats <- process_sumstats_for_manhattan(gwas_dat)
 
-manh_plot <- draw_manhattan(procd_sumstats)
+
+if(!is.null(snakemake@params$y_axis_break)) {
+  manh_plot <- draw_manhattan(procd_sumstats, y_axis_break = as.numeric(snakemake@params$y_axis_break))
+} else {
+  manh_plot <- draw_manhattan(procd_sumstats)
+}
+
+if(!is.null(snakemake@params$ylim)) {
+  manh_plot <- manh_plot + ylim(as.numeric(snakemake@params$ylim))
+}
 
 if(!is.null(snakemake@input$lead_snps)) {
   lead_snps <- fread(snakemake@input$lead_snps, header = T)

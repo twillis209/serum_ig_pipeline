@@ -21,7 +21,7 @@ dependencies:
 - r-pheatmap
 - r-ggnewscale
 - r-ldlinkr
-- r-serum-ig-pipeline-code == 0.2.1
+- r-serum-ig-pipeline-code == 0.2.2
 - r-httr
 - r-gridextra
 - r-locuszoomr
