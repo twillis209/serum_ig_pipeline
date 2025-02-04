@@ -1,23 +1,27 @@
 library(data.table)
 
 ebi <- fread(snakemake@input$ebi, sep = '\t', select = c('CHR_ID', 'CHR_POS', 'SNPS', 'MAPPED_GENE', 'P-VALUE'))
-ebi <- ebi[, .(CHR_ID = snakemake@config$chr_col, CHR_POS = snakemake@config$bp_col, SNPS = snakemake@config$rsid_col, MAPPED_GENE = Genes, `P-VALUE` = snakemake@config$p_col)]
+ebi <- ebi[, .(chromosome = CHR_ID, base_pair_location = CHR_POS, rsid = SNPS, Genes = MAPPED_GENE, p_value = `P-VALUE`)]
+ebi[, dataset := 'ebi']
+ebi <- ebi[p_value <= 5e-8]
 
-# TODO filter ebi for significance, they're not always GWS
-# TODO handle liu as special case
-# TODO handle willis as special case
+liu <- fread(snakemake@input$liu)
+setnames(liu, 'Locus', 'Genes')
+liu[, dataset := 'liu']
 
-epic <- fread(snakemake@input$epic)
-epic[, dataset := 'epic']
-pietzner <- fread(snakemake@input$pietzner)
-pietzner[, dataset := 'pietzner']
-gudjonsson <- fread(snakemake@input$gudjonsson)
-gudjonsson[, dataset := 'gudjonsson']
-eldjarn <- fread(snakemake@input$eldjarn)
-eldjarn[, dataset := 'eldjarn']
-scepanovic <- fread(snakemake@input$scepanovic)
-scepanovic[, dataset := 'scepanovic']
-dennis <- fread(snakemake@input$dennis)
-dennis[, dataset := 'dennis']
+willis <- fread(snakemake@input$willis, select = c('CHR38', 'BP38', 'REF', 'ALT', 'rsID', 'topGene', 'P.meta'))
+willis <- willis[, .(chromosome = CHR38, base_pair_location = BP38, effect_allele = ALT, other_allele = REF, rsid = rsID, Genes = topGene, p_value = P.meta)]
+willis[, dataset := 'willis']
 
-merged <- rbindlist(list(ebi, liu, willis, epic, pietzner, gudjonsson, eldjarn, scepanovic, dennis), fill = T)
+dats <- list()
+
+for(x in c('epic', 'pietzner', 'gudjonsson', 'eldjarn', 'scepanovic', 'dennis')) {
+  dat <- fread(snakemake@input[[x]], select = c('chromosome', 'base_pair_location', 'rsid', 'effect_allele', 'other_allele', 'p_value', 'topGene'))
+  setnames(dat, 'topGene', 'Genes')
+  dat[, dataset := x]
+  dats[[x]] <- dat
+}
+
+merged <- rbindlist(c(list(ebi, liu, willis), dats), fill = T)
+
+fwrite(merged[order(chromosome, base_pair_location)], file = snakemake@output[[1]], sep = '\t')
