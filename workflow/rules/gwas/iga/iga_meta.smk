@@ -92,8 +92,25 @@ rule add_rsids_to_annotated_lead_snps_for_iga_meta:
     conda: env_path("global.yaml")
     script: script_path("gwas/iga_meta/add_rsids_to_lead_snps.R")
 
-#rule add_study_sumstats_to_annotated_lead_snps_for_iga_meta:
-#    pass
+rule add_study_sumstats_to_annotated_lead_snps_for_iga_meta:
+    input:
+        lead = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps.tsv",
+        merged = "results/iga_meta/merged.tsv.gz"
+    output:
+        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_study_sumstats.tsv"
+    threads: 8
+    localrule: True
+    conda: env_path("global.yaml")
+    script: script_path("gwas/iga_meta/add_study_sumstats_to_annotated_lead_snps.R")
+
+rule add_gnomad_queried_mafs_to_annotated_lead_snps_for_iga_meta:
+    input:
+        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps.tsv"
+    output:
+        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_gnomad_maf.tsv"
+    localrule: True
+    conda: env_path("global.yaml")
+    script: script_path("gwas/query_lead_snp_maf_with_gnomad.py")
 
 use rule draw_manhattan_with_lead_snp_annotation as draw_iga_meta_manhattan with:
     input:
