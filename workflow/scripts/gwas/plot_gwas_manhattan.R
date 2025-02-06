@@ -18,6 +18,12 @@ if(is.null(snakemake@params[['height']])) {
   height <- snakemake@params[['height']]
 }
 
+if(is.null(snakemake@params$ylim)) {
+  ylim <- c(1, 1e-10)
+} else {
+  ylim <- snakemake@params$ylim
+}
+
 theme_set(theme_bw()+
           theme(
             axis.title = element_text(size=12),
@@ -41,13 +47,9 @@ procd_sumstats <- process_sumstats_for_manhattan(gwas_dat)
 
 
 if(!is.null(snakemake@params$y_axis_break)) {
-  manh_plot <- draw_manhattan(procd_sumstats, y_axis_break = as.numeric(snakemake@params$y_axis_break))
+  manh_plot <- draw_manhattan(procd_sumstats, y_axis_break = as.numeric(snakemake@params$y_axis_break), y_limits = ylim)
 } else {
-  manh_plot <- draw_manhattan(procd_sumstats)
-}
-
-if(!is.null(snakemake@params$ylim)) {
-  manh_plot <- manh_plot + ylim(as.numeric(snakemake@params$ylim))
+  manh_plot <- draw_manhattan(procd_sumstats, y_limits = ylim)
 }
 
 if(!is.null(snakemake@input$lead_snps)) {
@@ -61,7 +63,7 @@ if(!is.null(snakemake@input$lead_snps)) {
 
     manh_plot <- manh_plot+
       geom_point(size = 0.9, pch = 21, colour = 'black', data = merged)+
-      geom_text_repel(aes(label = topGene), hjust = -0.2, size = 4, data = merged, colour = 'black')
+      geom_text_repel(aes(label = topGene), hjust = -0.2, size = 2, min.segment.length = 0, data = merged, colour = 'black')
     }
 }
 

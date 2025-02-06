@@ -24,6 +24,7 @@ cols <- c(snakemake@config$chr_col,
           snakemake@config$bp_col,
           snakemake@config$ref_col,
           snakemake@config$alt_col,
+          snakemake@config$rsid_col,
           snakemake@config$beta_col,
           snakemake@config$se_col,
           snakemake@config$p_col

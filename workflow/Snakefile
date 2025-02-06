@@ -42,6 +42,7 @@ include: 'rules/gwas/ig_meta_sumher.smk'
 include: 'rules/gwas/ig.smk'
 include: 'rules/gwas/locuszoomr.smk'
 include: 'rules/zscore_plots.smk'
+include: 'rules/paper/tables.smk'
 
 include: 'rules/python/export.py'
 

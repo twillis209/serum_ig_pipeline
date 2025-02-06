@@ -5,23 +5,25 @@ chr_col <- snakemake@config$chr_col
 bp_col <- snakemake@config$bp_col
 ref_col <- snakemake@config$ref_col
 alt_col <- snakemake@config$alt_col
+rsid_col <- snakemake@config$rsid_col
 beta_col <- snakemake@config$beta_col
 se_col <- snakemake@config$se_col
 p_col <- snakemake@config$p_col
 
-cols <- c(chr_col, bp_col, ref_col, alt_col, beta_col, se_col, p_col)
+cols <- c(chr_col, bp_col, ref_col, alt_col, rsid_col, beta_col, se_col, p_col)
 coord_cols <- cols[1:4]
-cols_to_relabel <- cols[5:7]
+cols_to_relabel <- cols[5:8]
 
 dats <- list()
 
-for(i in seq_along(snakemake@input[names(snakemake@input) != ""])) {
-  abbrv <- names(snakemake@input)[names(snakemake@input) != ""][i]
-  dat <- fread(snakemake@input[[i]], select = cols)
+studies <- names(snakemake@input)[names(snakemake@input) != ""]
 
-  setnames(dat, cols_to_relabel, paste(cols_to_relabel, abbrv, sep = "."))
+for(x in studies) {
+  dat <- fread(snakemake@input[[x]], select = cols)
 
-  dats[[i]] <- dat
+  setnames(dat, cols_to_relabel, paste(cols_to_relabel, x, sep = "."))
+
+  dats[[x]] <- dat
 }
 
 if (is.null(snakemake@wildcards$join)) {
@@ -41,17 +43,8 @@ if (!is.null(snakemake@wildcards$variant_set)) {
   }
 }
 
-rm(dats)
+merged[, rsid := fcoalesce(.SD), .SDcols = patterns('^rsid')]
 
-#merged[, rsid := {
-#  rsIDs <- unique(na.omit(unlist(.SD)))
-#  if(length(rsIDs) == 1) {
-#    rsIDs
-#  } else if(length(rsIDs > 1)) {
-#    paste(rsIDs, collapse = ',')
-#  } else {
-#    NA
-#  }
-#}, .SDcols = patterns("^rsid\\.")]
+out_cols <- !(names(merged) %like% '^rsid\\.')
 
-fwrite(merged, file = snakemake@output[[1]], sep = "\t")
+fwrite(merged[, ..out_cols], file = snakemake@output[[1]], sep = "\t")

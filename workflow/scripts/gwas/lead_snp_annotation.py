@@ -166,13 +166,14 @@ else:
 
         result_dict[row[snp_col]] = res_dict
 
-        if rsid_col in row.keys():
-            result_dict[row[snp_col]]['variantInfo'][rsid_col] = row[rsid_col]
+#        if rsid_col in row.keys():
+#            result_dict[row[snp_col]]['variantInfo'][rsid_col] = row[rsid_col]
 
         result_dict[row[snp_col]]['variantInfo'][chr_col] = row[chr_col]
         result_dict[row[snp_col]]['variantInfo'][bp_col] = row[bp_col]
         result_dict[row[snp_col]]['variantInfo'][ref_col] = row[ref_col]
         result_dict[row[snp_col]]['variantInfo'][alt_col] = row[alt_col]
+        result_dict[row[snp_col]]['variantInfo'][rsid_col] = row[rsid_col]
         result_dict[row[snp_col]]['variantInfo'][beta_col] = row[beta_col]
         result_dict[row[snp_col]]['variantInfo'][se_col] = row[se_col]
         result_dict[row[snp_col]]['variantInfo'][p_col] = row[p_col]
@@ -201,7 +202,7 @@ else:
         d.append(
             {
                 snp_col: k,
-                rsid_col: v['variantInfo'][rsid_col] if rsid_col in v['variantInfo'].keys() else None,
+                rsid_col: v['variantInfo'][rsid_col],
                 chr_col: v['variantInfo'][chr_col],
                 bp_col: v['variantInfo'][bp_col],
                 ref_col: v['variantInfo'][ref_col],

@@ -28,6 +28,24 @@ rule run_iga_meta_analysis:
     conda: env_path("global.yaml")
     script: script_path("gwas/iga_meta/run_meta_analysis.R")
 
+rule compile_iga_meta_analysis_rsids:
+    input:
+        epic = "results/restandardised_gwas/epic-iga.tsv.gz",
+        liu = "results/restandardised_gwas/liu-iga.tsv.gz",
+        dennis = "results/restandardised_gwas/dennis-iga.tsv.gz",
+        pietzner = "resources/harmonised_gwas/pietzner-iga.tsv.gz",
+        eldjarn = "results/restandardised_gwas/eldjarn-iga.tsv.gz",
+        gudjonsson = "resources/harmonised_gwas/gudjonsson-iga.tsv.gz",
+        scepanovic = "results/restandardised_gwas/scepanovic-iga.tsv.gz"
+    output:
+        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta_rsids.tsv.gz"
+    threads: 16
+    resources:
+        runtime = 30
+    group: "gwas"
+    conda: env_path("global.yaml")
+    script: script_path("gwas/iga_meta/compile_meta_analysis_rsids.R")
+
 rule drop_selected_loci_from_iga_meta_analysis:
     input:
         "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz"
@@ -63,17 +81,40 @@ use rule annotate_lead_snps as annotate_iga_meta_lead_snps with:
     output:
         "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps.tsv"
 
+rule add_rsids_to_annotated_lead_snps_for_iga_meta:
+    input:
+        lead = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps.tsv",
+        rsids = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta_rsids.tsv.gz"
+    output:
+        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_rsids.tsv"
+    threads: 6
+    localrule: True
+    conda: env_path("global.yaml")
+    script: script_path("gwas/iga_meta/add_rsids_to_lead_snps.R")
+
+#rule add_study_sumstats_to_annotated_lead_snps_for_iga_meta:
+#    pass
+
 use rule draw_manhattan_with_lead_snp_annotation as draw_iga_meta_manhattan with:
     input:
         gwas = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz",
-        lead_snps = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/2000kb_gws_annotated_lead_snps.tsv"
     output:
         "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/manhattan.png"
     params:
         title = '',
-        width = 6,
-        height = 4,
-        ylim = [0, 1e-80],
+        width = 12,
+        height = 4
+
+use rule draw_iga_meta_manhattan as draw_annotated_iga_meta_manhattan with:
+    input:
+        gwas = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz",
+        lead_snps = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/2000kb_gws_annotated_lead_snps.tsv"
+    output:
+        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/annotated_manhattan.png"
+    params:
+        title = '',
+        width = 12,
+        height = 4
 
 use rule make_plink_range as make_plink_range_for_iga_meta with:
     input:
