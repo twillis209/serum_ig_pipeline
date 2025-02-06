@@ -89,6 +89,7 @@ gwas_datasets:
     samples: 22229
     sdY_est: 1.1675795
     rescale: True
+    pretty_study: 'Liu et al.'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-08"
         genome_assembly: GRCh37
@@ -107,6 +108,7 @@ gwas_datasets:
     samples: 41448
     sdY_est: 1.5899747
     rescale: True
+    pretty_study: 'Liu et al.'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-08"
         genome_assembly: GRCh37
@@ -125,6 +127,7 @@ gwas_datasets:
     samples: 7677
     sdY_est: 0.9110791
     rescale: True
+    pretty_study: 'Dennis et al.'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -143,6 +146,7 @@ gwas_datasets:
     samples: 3471
     sdY_est: 0.9345117
     rescale: True
+    pretty_study: 'Dennis et al.'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -161,6 +165,7 @@ gwas_datasets:
     samples: 7938
     sdY_est: 0.4996091
     rescale: True
+    pretty_study: 'EPIC'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -179,6 +184,7 @@ gwas_datasets:
     samples: 7946
     sdY_est: 0.2871838
     rescale: True
+    pretty_study: 'EPIC'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -197,6 +203,7 @@ gwas_datasets:
     samples: 8008
     sdY_est: 0.5358721
     rescale: True
+    pretty_study: 'EPIC'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -215,6 +222,7 @@ gwas_datasets:
     samples: 1000
     sdY_est: 0.0788076
     rescale: True
+    pretty_study: 'Scepanovic et al.'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -233,6 +241,7 @@ gwas_datasets:
     samples: 1000
     sdY_est: 0.1933939
     rescale: True
+    pretty_study: 'Scepanovic et al.'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -251,6 +260,7 @@ gwas_datasets:
     samples: 1000
     sdY_est: 0.1712270
     rescale: True
+    pretty_study: 'Scepanovic et al.'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -269,6 +279,7 @@ gwas_datasets:
     samples: 10708
     sdY_est: 0.9821195
     rescale: False
+    pretty_study: 'Pietzner et al.'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -287,6 +298,7 @@ gwas_datasets:
     samples: 10708
     sdY_est: 1.0155681
     rescale: False
+    pretty_study: 'Pietzner et al.'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -305,6 +317,7 @@ gwas_datasets:
     samples: 10708
     sdY_est: 1.0145151
     rescale: False
+    pretty_study: 'Pietzner et al.'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -323,6 +336,7 @@ gwas_datasets:
     samples: 5356
     sdY_est: 0.9441563
     rescale: True
+    pretty_study: 'Gudjonsson et al.'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -341,6 +355,7 @@ gwas_datasets:
     samples: 5358
     sdY_est: 0.9342935
     rescale: True
+    pretty_study: 'Gudjonsson et al.'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -359,6 +374,7 @@ gwas_datasets:
     samples: 5362
     sdY_est: 0.9793915
     rescale: False
+    pretty_study: 'Gudjonsson et al.'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -377,6 +393,7 @@ gwas_datasets:
     samples: 35652
     sdY_est: 1.0449364
     rescale: False
+    pretty_study: 'Eldjarn et al.'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -395,6 +412,7 @@ gwas_datasets:
     samples: 35652
     sdY_est: 1.1091828
     rescale: True
+    pretty_study: 'Eldjarn et al.'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -413,6 +431,7 @@ gwas_datasets:
     samples: 35652
     sdY_est: 1.0969310
     rescale: True
+    pretty_study: 'Eldjarn et al.'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
