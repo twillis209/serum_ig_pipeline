@@ -1,6 +1,16 @@
 rule ig_manhattans:
     input:
-        [[f"results/harmonised_gwas/{x}-{y}/manhattan.png" for x in config.get(f'{y}_studies')] for y in ['iga', 'igm', 'igg']]
+        [[f"results/harmonised_gwas/{x}-{y}/manhattan.png" for x in config.get(f'{y}_studies')] for y in ['iga', 'igm', 'igg']],
+        ["results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/manhattan.png",
+         "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/manhattan.png",
+         "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/manhattan.png"
+         ]
+
+rule ig_novel_hits:
+    input:
+        "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/candidate_novel_associations.tsv",
+        "results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/candidate_novel_associations.tsv",
+        "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/candidate_novel_associations.tsv"
 
 rule h2_estimates:
     input:
@@ -49,3 +59,14 @@ rule compile_igh_gws_hits_across_datasets:
     localrule: True
     run:
         pd.concat([pd.read_csv(x, sep = '\t') for x in input]).to_csv(output[0], sep = '\t', index = False)
+
+rule plot_beta_vs_maf_for_all_isotypes:
+    input:
+        iga = "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps_with_gnomad_maf.tsv",
+        igg = "results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps_with_gnomad_maf.tsv",
+        igm = "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps_with_gnomad_maf.tsv"
+    output:
+        "results/ig/beta_vs_maf.png"
+    localrule: True
+    conda: env_path("global.yaml")
+    script: script_path("gwas/ig/plot_beta_vs_maf_at_ig_lead_snps.R")

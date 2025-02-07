@@ -1,5 +1,6 @@
 library(data.table)
 setDTthreads(snakemake@threads)
+library(stringr)
 
 chr_col <- snakemake@config$chr_col
 bp_col <- snakemake@config$bp_col
@@ -11,17 +12,31 @@ se_col <- snakemake@config$se_col
 p_col <- snakemake@config$p_col
 
 cols <- c(chr_col, bp_col, ref_col, alt_col, rsid_col, beta_col, se_col, p_col)
-coord_cols <- cols[1:4]
-cols_to_relabel <- cols[5:8]
+coord_cols <- c(chr_col, bp_col, ref_col, alt_col)
+cols_to_relabel <- c(rsid_col, beta_col, se_col, p_col)
 
 dats <- list()
 
 studies <- names(snakemake@input)[names(snakemake@input) != ""]
 
 for(x in studies) {
-  dat <- fread(snakemake@input[[x]], select = cols)
+  if(x %in% c('epic', 'pietzner', 'scepanovic', 'dennis', 'eldjarn')) {
+    if(x == 'dennis') {
+      freq_col <- 'AF1'
+    } else if(x == 'eldjarn') {
+      freq_col <- 'ImpMAF'
+    } else {
+      freq_col <- 'effect_allele_frequency'
+    }
 
-  setnames(dat, cols_to_relabel, paste(cols_to_relabel, x, sep = "."))
+    dat <- fread(snakemake@input[[x]], select = c(cols, freq_col))
+
+    setnames(dat, c(cols_to_relabel, freq_col), paste(c(cols_to_relabel, freq_col), x, sep = "."))
+  } else {
+    dat <- fread(snakemake@input[[x]], select = cols)
+
+    setnames(dat, cols_to_relabel, paste(cols_to_relabel, x, sep = "."))
+  }
 
   dats[[x]] <- dat
 }

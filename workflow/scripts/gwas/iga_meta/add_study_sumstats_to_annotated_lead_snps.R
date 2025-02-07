@@ -28,6 +28,26 @@ cols <- as.vector(outer(c(beta_col, se_col, p_col), studies, FUN = paste, sep = 
 
 cols <- c(coord_cols, cols)
 
+if('epic' %in% studies) {
+  cols <- c(cols, 'effect_allele_frequency.epic')
+}
+
+if('pietzner' %in% studies) {
+  cols <- c(cols, 'effect_allele_frequency.pietzner')
+}
+
+if('scepanovic' %in% studies) {
+  cols <- c(cols, 'effect_allele_frequency.scepanovic')
+}
+
+if('dennis' %in% studies) {
+  cols <- c(cols, 'AF1.dennis')
+}
+
+if('eldjarn' %in% studies) {
+  cols <- c(cols, 'ImpMAF.eldjarn')
+}
+
 merged <- fread(snakemake@input$merged, select = cols)
 
 lead_with_sumstats <- merge(lead, merged, by = coord_cols, all.x = T)
