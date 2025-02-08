@@ -21,7 +21,7 @@ gwas <- merge(gwas, bim_ids, by = 'SNPID')
 
 setnames(gwas, c(chr_col, bp_col, alt_col, ref_col), c('chr', 'bp', 'A1', 'A2'))
 
-gwas <- gwas[!(chr %in% c('X', 'Y', 'MT'))]
+#gwas <- gwas[!(chr %in% c('X', 'Y', 'MT'))]
 
 gwas[, `:=` (len.A1 = nchar(A1), len.A2 = nchar(A2))]
 

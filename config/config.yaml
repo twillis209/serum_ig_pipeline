@@ -80,6 +80,12 @@ gwas_datasets:
     samples: 58777
   igm-meta:
     samples: 55368
+  iga:
+    samples: 85204
+  igg:
+    samples: 58777
+  igm:
+    samples: 55368
   liu-iga:
     sha256: "44a62f93daa4fc0cecabd144c3b8da1777999787fa8c87a4ca055adf47ecfa51"
     is_gz: False

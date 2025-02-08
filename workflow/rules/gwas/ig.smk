@@ -21,12 +21,31 @@ rule h2_estimates:
          "results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/with_mhc/snps_only/sumher.hers",
          "results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/sans_mhc/snps_only/sumher.hers"
          ]
+    output:
+        "results/ig/h2_estimates.tsv"
+    params:
+        pretty_isotypes = {"igm_meta": "IgM", "iga_meta": "IgA", "igg_meta": "IgG"}
+    localrule: True
+    run:
+        dafs = []
+
+        for x in input:
+            isotype = params.pretty_isotypes[x.split('/')[1]]
+            daf = pd.read_csv(x, sep = ' ')
+            daf = daf.loc[daf['Component'] == 'Her_All', ['Heritability', 'Her_SD']]
+            daf['Isotype'] = isotype
+            daf = daf.rename({'Heritability': 'Heritability estimate', 'Her_SD': 'Standard error'}, axis = 1)
+            daf['Heritability model'] = 'Human Default'
+            daf['MHC'] = True if 'with_mhc' in x else False
+            dafs.append(daf)
+
+        pd.concat(dafs)[['Isotype', 'Heritability model', 'MHC', 'Heritability estimate', 'Standard error']].to_csv(output[0], sep = '\t', index = False)
 
 rule rg_estimates:
     input:
-        "results/ldak/ldak-thin/iga-meta_and_igm-meta/inner/sans_mhc/snps_only/sumher.cors.full",
-        "results/ldak/ldak-thin/iga-meta_and_igg-meta/inner/sans_mhc/snps_only/sumher.cors.full",
-        "results/ldak/ldak-thin/igg-meta_and_igm-meta/inner/sans_mhc/snps_only/sumher.cors.full",
+        "results/ldak/ldak-thin/iga_and_igm/inner/sans_mhc/snps_only/sumher.cors.full",
+        "results/ldak/ldak-thin/iga_and_igg/inner/sans_mhc/snps_only/sumher.cors.full",
+        "results/ldak/ldak-thin/igg_and_igm/inner/sans_mhc/snps_only/sumher.cors.full",
 
 rule compile_igh_gws_hits:
     input:
