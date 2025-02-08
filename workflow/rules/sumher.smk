@@ -135,12 +135,3 @@ rule estimate_rg_with_ldak_thin:
         """
 
 imd_trait_pairs = [f"{imd_a}_and_{imd_b}" for imd_a, imd_b in combinations(config.get('imd_traits'), 2)]
-
-rule collate_h2_estimates_on_liab_scale_from_combined_results:
-    input:
-        metadata = "resources/gwas/metadata/metadata_all_fields.tsv",
-        rg = "results/ldak/ldak-thin/combined/sans_mhc/snps_only/{trait}_and_imds.tsv"
-    output:
-        "results/ldak/ldak-thin/combined/sans_mhc/snps_only/{trait}_and_imds_with_h2_liab.tsv"
-    localrule: True
-    script: script_path("ldsc_and_sumher/compute_h2_liab_estimates.R")

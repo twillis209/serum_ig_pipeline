@@ -1,3 +1,5 @@
+from scipy.stats import chi2
+
 rule ig_manhattans:
     input:
         [[f"results/harmonised_gwas/{x}-{y}/manhattan.png" for x in config.get(f'{y}_studies')] for y in ['iga', 'igm', 'igg']],
@@ -12,7 +14,7 @@ rule ig_novel_hits:
         "results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/candidate_novel_associations.tsv",
         "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/candidate_novel_associations.tsv"
 
-rule h2_estimates:
+rule ig_h2_estimates:
     input:
         ["results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/with_mhc/snps_only/sumher.hers",
          "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/sans_mhc/snps_only/sumher.hers",
@@ -23,14 +25,12 @@ rule h2_estimates:
          ]
     output:
         "results/ig/h2_estimates.tsv"
-    params:
-        pretty_isotypes = {"igm_meta": "IgM", "iga_meta": "IgA", "igg_meta": "IgG"}
     localrule: True
     run:
         dafs = []
 
         for x in input:
-            isotype = params.pretty_isotypes[x.split('/')[1]]
+            isotype = config.pretty_isotypes[x.split('/')[1].split('_')[0]]
             daf = pd.read_csv(x, sep = ' ')
             daf = daf.loc[daf['Component'] == 'Her_All', ['Heritability', 'Her_SD']]
             daf['Isotype'] = isotype
@@ -39,13 +39,34 @@ rule h2_estimates:
             daf['MHC'] = True if 'with_mhc' in x else False
             dafs.append(daf)
 
-        pd.concat(dafs)[['Isotype', 'Heritability model', 'MHC', 'Heritability estimate', 'Standard error']].to_csv(output[0], sep = '\t', index = False)
+            pd.concat(dafs)[['Isotype', 'Heritability model', 'MHC', 'Heritability estimate', 'Standard error']].to_csv(output[0], sep = '\t', index = False)
 
-rule rg_estimates:
+rule ig_rg_estimates:
     input:
-        "results/ldak/ldak-thin/iga_and_igm/inner/sans_mhc/snps_only/sumher.cors.full",
-        "results/ldak/ldak-thin/iga_and_igg/inner/sans_mhc/snps_only/sumher.cors.full",
-        "results/ldak/ldak-thin/igg_and_igm/inner/sans_mhc/snps_only/sumher.cors.full",
+        [f"results/ldak/ldak-thin/{x}/inner/{y}/snps_only/sumher.cors.full" for x in ["iga_and_igm", "iga_and_igg", "igg_and_igm"] for y in ['sans_mhc', 'with_mhc']]
+    output:
+        "results/ig/rg_estimates.tsv"
+    localrule: True
+    run:
+        dafs = []
+
+        for x in input:
+            print(x)
+            isotype_a = config['pretty_isotypes'][x.split('/')[3].split('_and_')[0]]
+            isotype_b = config['pretty_isotypes'][x.split('/')[3].split('_and_')[1]]
+            daf = pd.read_csv(x, sep = ' ')
+            print(daf)
+            daf = daf.loc[daf['Category'] == 'ALL', ['Correlation', 'SD']]
+            daf['First isotype'] = isotype_a
+            daf['Second isotype'] = isotype_b
+            daf['p-value'] = chi2.sf((daf['Correlation']/daf['SD'])**2, df = 1)
+            daf = daf.rename({'Correlation': 'Genetic correlation estimate', 'SD': 'Standard error'}, axis = 1)
+            daf['Heritability model'] = 'LDAK-Thin'
+            daf['MHC'] = True if 'with_mhc' in x else False
+            dafs.append(daf)
+
+        pd.concat(dafs)[['First isotype', 'Second isotype', 'Heritability model', 'MHC', 'Genetic correlation estimate', 'Standard error', 'p-value']].to_csv(output[0], sep = '\t', index = False)
+
 
 rule compile_igh_gws_hits:
     input:

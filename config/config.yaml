@@ -62,6 +62,7 @@ beta_col: 'beta'
 se_col: 'standard_error'
 rsid_col: 'rsid'
 id_col: 'variant_id'
+pretty_isotypes: {"igm": "IgM", "iga": "IgA", "igg": "IgG"}
 # NB: some redundancy here to cover alternative names for known loci
 epic-iga:
   known_iga_gwas_loci: ["ANKRD55", "IL6ST", "ASCC2|MTMR3", "ATP5PBP6|FILNC1", "CITED2", "CTF1", "DYSF|RPS20P10", "ELL2", "FADS1|FADS2", "GALNT12|NME2P3", "GPATCH2", "HDAC7", "HORMAD2|LIF", "IL1R1", "LINC02655|RPS7P9", "LITAF", "OVOL1|RELA", "POU2AF1", "RUNX2", "RUNX3", "RUNX3|MIR4425", "SH2B3", "ATXN2", "TMEM258", "TNFSF13", "TNFSF15", "TNFSF4|TNFSF18", "TNFSF8", "TRAF3", "ZP3|SSC4D"]

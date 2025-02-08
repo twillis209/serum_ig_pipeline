@@ -1,9 +1,6 @@
 library(data.table)
 setDTthreads(snakemake@threads)
 
-save.image('process.RData')
-stop()
-
 gwas_file <- snakemake@input[['gwas_file']]
 chr_col <- snakemake@config$chr_col
 bp_col <- snakemake@config$bp_col
