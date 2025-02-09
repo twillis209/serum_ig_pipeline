@@ -841,7 +841,6 @@ For single-variant association analyses, we only considered SNPs with a MAF of >
 
 All three =pietnzer= data sets, =gudjonsson-iga=, =eldjarn-igg= are within 0.05 of 1 (the expected sdY under N(0,1)), so I'll leave these as they are for fear of introducing more noise into them.
 
-
 *** Dataset idiosyncrasies
 
 **** Eldjarn
@@ -1001,5 +1000,225 @@ aws s3 cp s3://largescaleplasma-2023/final_somascan_smp/Proteomics_SMP_PC0_2744_
 As the preponderance of the data comes from imputed SNP data sets, I choose [[https://dougspeed.com/pre-computed-tagging-files/][the HapMap3 panel over the smaller, directly genotyped set]].
 
 
+** New Ig associations
+*** Candidate novel IgA hits
 
+**** POU3F1
 
+**** GOLPH3L
+
+**** SCYL3
+
+**** FAM98A,RASGRP3
+
+**** B3GNT2,COMMD1
+
+**** EIF2AK3,RPIA
+
+**** SP110,SP140
+
+**** TSEN2,MKRN2
+
+**** ACTRT3
+
+**** TBL1XR1
+
+**** TP63
+
+**** TLR10
+
+**** NFKB1
+
+**** IL7R
+
+**** PTGER4
+
+**** HIVEP2
+
+**** SNX13
+
+**** POU5F1B
+
+**** SYK
+
+**** TRAF1
+
+**** IFITM1,IFITM2
+
+**** PTPRJ/MTCH2
+
+**** TRIM49B,FOLH1
+
+**** GRAMD1B
+
+**** BCL2L14
+
+**** FBRSL1
+
+**** BMF
+
+**** FRMD5,ADAL
+
+**** MAF,WWOX
+
+**** GSDMB
+
+**** PHOSPHO1,GNGT2
+
+**** CD79,FTSJ3
+
+**** SLC25A19,GRB2
+
+**** CBX4,TBC1D16
+
+**** ZBTB7A
+
+**** SLC35E1,C19orf44
+
+**** CLASRP
+
+**** MYBPC2,SPIB
+
+**** RIMBP3C,UBE2L3
+
+**** DERL3
+*** TODO Candidate novel IgG hits
+
+There are more hits which were not annotated by OTG.
+
+**** AFF3
+**** RPP14,PXK
+**** HHEX
+**** ZPBP2,GSDMB
+
+*** Candidate novel IgM hits
+
+**** LAPTM5
+
+**** TARS2,ADAMTSL4
+
+**** MTIF2,CLHC1
+
+**** STK25,FARP2
+
+**** SLC35G2
+
+**** MBNL1
+
+**** RHOH
+
+**** STAP1,UBA6
+
+**** unlabelled chr6:121,440,620
+
+**** HIVEP2,HIVEP2
+
+**** CARD11
+
+IEI gene?
+
+**** TRA2A,CCDC126
+
+**** PRKAR2B,HBP1
+
+**** BCAP29,HBP1
+
+**** RPS20,LYN
+
+**** PAX5,ZCCHC7
+
+**** SYK
+
+**** KLF6
+
+**** DUSP5
+
+**** TCIRG1
+
+**** COLCA2,POU2AF1
+
+**** NXPE1,REX02
+
+**** RAB21
+
+**** SLITRK6
+
+**** BATF,NEK9
+
+**** LGMN,RIN3
+
+**** unlabelled chr15:50,492,793
+
+**** CPLX3,ULK3
+
+**** CIITA
+
+**** PLCG2
+
+**** IRF8
+
+**** TNFRSF13B
+
+**** BCL2
+
+**** KLF2
+
+**** COLGALT1,NIBAN3
+
+**** KASH5,DKKL1
+
+**** GRIK1
+
+**** unlabelled chr22:50,704,843
+** EPIC phenotypic correlations
+
+#+begin_src
+> cor(dat[, .SD, .SDcols = patterns('IG')], use = 'pairwise.complete.obs')
+           IGA_CONC   IGG1_CONC   IGG2_CONC  IGG3_CONC    IGG4_CONC
+IGA_CONC   1.000000000  0.16948769  0.22426911 0.17878454  0.174424557
+IGG1_CONC  0.169487687  1.00000000 -0.06646444 0.02177384  0.086556574
+IGG2_CONC  0.224269112 -0.06646444  1.00000000 0.16396403  0.229087348
+IGG3_CONC  0.178784544  0.02177384  0.16396403 1.00000000  0.044582203
+IGG4_CONC  0.174424557  0.08655657  0.22908735 0.04458220  1.000000000
+IGM_CONC  -0.004271912  0.05946210  0.09329625 0.08815389 -0.006951686
+IGG_CONC   0.300423384  0.82011455  0.44850020 0.23345022  0.414992445
+              IGM_CONC   IGG_CONC
+IGA_CONC  -0.004271912 0.30042338
+IGG1_CONC  0.059462096 0.82011455
+IGG2_CONC  0.093296247 0.44850020
+IGG3_CONC  0.088153887 0.23345022
+IGG4_CONC -0.006951686 0.41499245
+IGM_CONC   1.000000000 0.09890761
+IGG_CONC   0.098907611 1.00000000
+#+end_src
+
+i.e.
+
+| First isotype | Second isotype |      r |
+|---------------+----------------+--------|
+| IgA           | IgG            |  0.300 |
+| IgA           | IgM            | -0.004 |
+| IgM           | IgG            |  0.099 |
+| IgM           | IgG1           |  0.059 |
+| IgM           | IgG2           |  0.093 |
+| IgM           | IgG3           |  0.088 |
+| IgM           | IgG4           | -0.007 |
+| IgA           | IgG1           |  0.169 |
+| IgA           | IgG2           |  0.224 |
+| IgA           | IgG3           |  0.179 |
+| IgA           | IgG4           |  0.174 |
+
+** Paper by the numbers
+*** Sample sizes
+- IgA: 85,204
+- IgG: 58,777
+- IgM: 55,368
+*** No. of associations
+- IgA: 106
+- IgG: 19
+- IgM: 89
+**** Novel associations
+- IgA: 40
+- IgG: 9
+- IgM: 37
+**** TODO Number of known associations prior to this study
