@@ -48,7 +48,7 @@ include: 'rules/paper/tables.smk'
 include: 'rules/python/export.py'
 
 module kGP_pipeline:
-    snakefile: github("twillis209/1kGP_pipeline", path = "workflow/Snakefile", branch = 'conda')
+    snakefile: github("twillis209/1kGP_pipeline", path = "workflow/Snakefile", commit = '7882247')
     config: config['1kGP_pipeline']
 
 use rule * from kGP_pipeline as kGP_*

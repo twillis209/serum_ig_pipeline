@@ -90,7 +90,11 @@ rule calculate_bld_ldak_taggings:
         multiext("results/1kG/hg38/eur/snps_only/005/qc/all/sans_pars", ".bim", ".bed", ".fam"),
         [f"results/ldak/bld-ldak/hg38_annotations/bld{x}" for x in range(1,66)]
     output:
+        "results/1kG/hg38/eur/snps_only/005/qc/all/sans_pars.tagging"
     params:
         bfile_stem = subpath(input[0], strip_suffix = '.bim'),
         bld_stem = "results/ldak/bld-ldak/hg38_annotations/bld"
-    shell: "ldak --calc-tagging BLD-LDAK --bfile {params.bfile_stem} --power -.25 --annotation-number 65 --annotation-prefix {params.bld_stem}"
+    log:
+        log_file = "results/1kG/hg38/eur/snps_only/005/qc/all/sans_pars.tagging.log"
+    threads: 12
+    shell: "ldak --calc-tagging BLD-LDAK --bfile {params.bfile_stem} --power -.25 --annotation-number 65 --annotation-prefix {params.bld_stem} --max-threads {threads} >{log.log_file}"

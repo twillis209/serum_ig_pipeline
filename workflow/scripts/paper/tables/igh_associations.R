@@ -1,39 +1,30 @@
 library(data.table)
 library(stringr)
 
-studies <- names(snakemake@input)[names(snakemake@input) != '']
+consequences <- data.table(mostSevereConsequence = c('missense_variant', 'upstream_gene_variant', 'intron_variant', 'downstream_gene_variant', 'intergenic_variant'), variant_effect = c('missense', 'upstream', 'intronic', 'downstream', 'intergenic'))
 
-pretty_isotypes = list(iga = 'IgA', igm = 'IgM', igg = 'IgG')
+dat <- fread(snakemake@input[[1]], sep = '\t', header = T, select = c('dataset', 'rsid', 'chromosome', 'base_pair_location', 'other_allele', 'effect_allele', 'beta', 'standard_error', 'p_value', 'nearestGene', 'mostSevereConsequence'))
 
-consequences = list(missense_variant = 'missense', upstream_gene_variant = 'upstream', intronic_variant = 'intronic')
+dat[dataset %like% '-', c('study', 'isotype') := tstrsplit(dataset, split = '-')]
+dat[dataset %like% '-', study := snakemake@config$gwas_datasets[[dataset]][['pretty_study']], by = 1:nrow(dat)]
+dat[!(dataset %like% '-'), `:=` (study = 'Meta-analysis', isotype = dataset)]
+dat[, isotype := snakemake@config$pretty_isotypes[isotype], by = 1:nrow(dat)]
 
-dats <- list()
+dat[mostSevereConsequence == '', mostSevereConsequence := 'intergenic_variant']
 
-for(x in studies) {
-  dat <- fread(snakemake@input[[x]], sep = '\t', header = T, select = c('rsid', 'chromosome', 'base_pair_location', 'other_allele', 'effect_allele', 'beta', 'standard_error', 'p_value', 'nearestGene', 'mostSevereConsequence'))
-  study_split <- str_split_1(x, '_')
+dat <- merge(dat, consequences, all.x = T, by = 'mostSevereConsequence')
 
-  pretty_study <- snakemake@config[['gwas_datasets']][[paste(study_split, collapse = '-')]][['pretty_study']]
+dat[, rsID := paste0(rsid, ':', other_allele, '>', effect_allele)]
 
-  dat[, `Variant effect` := '']
+dat[, `:=` (Study = study,
+            Isotype = isotype,
+            rsID = rsID,
+            Chromosome = chromosome,
+            Position = base_pair_location,
+            Beta = beta,
+            `Standard error` = standard_error,
+            `p-value` = p_value,
+            `Nearest gene` = nearestGene,
+            `Variant effect` = variant_effect)]
 
-  dat[mostSevereConsequence != '', `Variant effect` := consequences[[mostSevereConsequence]]]
-  dat[mostSevereConsequence == '', `Variant effect` := 'intergenic']
-
-  dat[, rsID := paste0(rsid, ':', other_allele, '>', effect_allele)]
-
-  dat[, `:=` (Study = pretty_study,
-              Isotype = pretty_isotypes[study_split[2]],
-              rsID = rsID,
-              Chromosome = chromosome,
-              Position = base_pair_location,
-              Beta = beta,
-              `Standard error` = standard_error,
-              `p-value` = p_value,
-              `Nearest gene` = nearestGene,
-              `Variant effect` = mostSevereConsequence)]
-
-  dats[[x]] <- dat
-}
-
-fwrite(rbindlist(dats)[, .(Study, Isotype, rsID, Chromosome, Position, Beta, `Standard error`, `p-value`, `Nearest gene`, `Variant effect`)], sep = '\t', file = snakemake@output[[1]])
+fwrite(dat[order(Isotype, Study), .(Study, Isotype, rsID, Chromosome, Position, Beta, `Standard error`, `p-value`, `Nearest gene`, `Variant effect`)], sep = '\t', file = snakemake@output[[1]])

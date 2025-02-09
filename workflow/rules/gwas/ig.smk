@@ -51,11 +51,9 @@ rule ig_rg_estimates:
         dafs = []
 
         for x in input:
-            print(x)
             isotype_a = config['pretty_isotypes'][x.split('/')[3].split('_and_')[0]]
             isotype_b = config['pretty_isotypes'][x.split('/')[3].split('_and_')[1]]
             daf = pd.read_csv(x, sep = ' ')
-            print(daf)
             daf = daf.loc[daf['Category'] == 'ALL', ['Correlation', 'SD']]
             daf['First isotype'] = isotype_a
             daf['Second isotype'] = isotype_b
@@ -70,9 +68,9 @@ rule ig_rg_estimates:
 
 rule compile_igh_gws_hits:
     input:
-        "results/harmonised_gwas/{trait}/2000kb_gws_annotated_lead_snps.tsv"
+         "results/harmonised_gwas/{trait}/1000kb_gws_annotated_lead_snps.tsv"
     output:
-        "results/harmonised_gwas/{trait}/2000kb_gws_igh_lead_snps.tsv"
+        "results/harmonised_gwas/{trait}/1000kb_gws_igh_lead_snps.tsv"
     params:
         chrom = config['loci']['igh']['chrom'],
         start = config['loci']['igh']['start'],
@@ -91,11 +89,42 @@ rule compile_igh_gws_hits:
 
         daf.to_csv(output[0], sep = '\t', index = False)
 
+rule compile_igh_meta_gws_hits:
+    input:
+        iga = "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps.tsv",
+        igm = "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps.tsv",
+        igg = "results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps.tsv"
+    output:
+        "results/ig/1000kb_meta_gws_igh_lead_snps.tsv"
+    params:
+        chrom = config['loci']['igh']['chrom'],
+        start = config['loci']['igh']['start'],
+        stop = config['loci']['igh']['stop']
+    localrule: True
+    run:
+        dafs = []
+
+        for x in input:
+            daf = pd.read_csv(x, sep = '\t')
+
+            daf = daf.loc[
+                (daf['chromosome'] == params.chrom) &
+                (daf['base_pair_location'] >= params.start) &
+                (daf['base_pair_location'] <= params.stop)
+            ]
+
+            daf['dataset'] = x.split('/')[1].split('_')[0]
+
+            dafs.append(daf)
+
+            pd.concat(dafs).to_csv(output[0], sep = '\t', index = False)
+
 rule compile_igh_gws_hits_across_datasets:
     input:
-        [[f"results/harmonised_gwas/{x}-{y}/2000kb_gws_igh_lead_snps.tsv" for x in config.get(f'{y}_studies')] for y in ['iga', 'igm', 'igg']]
+        [[f"results/harmonised_gwas/{x}-{y}/1000kb_gws_igh_lead_snps.tsv" for x in config.get(f'{y}_studies')] for y in ['iga', 'igm', 'igg']],
+        "results/ig/1000kb_meta_gws_igh_lead_snps.tsv"
     output:
-        "results/harmonised_gwas/gws_igh_lead_snps.tsv"
+        "results/ig/1000kb_study_and_meta_gws_igh_lead_snps.tsv"
     localrule: True
     run:
         pd.concat([pd.read_csv(x, sep = '\t') for x in input]).to_csv(output[0], sep = '\t', index = False)

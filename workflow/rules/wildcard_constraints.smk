@@ -9,7 +9,7 @@ wildcard_constraints:
     chr = "chr[0-9XY]{1,2}",
     chr_no = "[0-9XY]{1,2}",
     assembly = "hg19|hg38",
-    variant_set = "all|sans_mhc|with_mhc",
+    variant_set = "all|sans_mhc|with_mhc|sans_pars",
     variant_type = "all|snps_only|sans_at_gc_snps_only",
     window_size = "\\d+kb",
     flank_size = "\\d+kb",

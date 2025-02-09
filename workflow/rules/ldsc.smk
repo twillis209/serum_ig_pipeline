@@ -1,15 +1,14 @@
 rule compute_ld_scores:
     input:
-        multiext("results/1kG/{assembly}/{ancestry}/snps_only/merged_with_cm", ".bed", ".bim", ".fam")
+        multiext("results/1kG/{assembly}/{ancestry}/{variant_type}/{maf}/qc/{variant_set}/merged_with_cm", ".bed", ".bim", ".fam")
     output:
-        "results/ldsc/ld_scores/{assembly}/{ancestry}/merged.l2.M"
+        "results/ldsc/ld_scores/{assembly}/{ancestry}/{variant_type}/{maf}/qc/{variant_set}/merged.l2.M"
     params:
-        in_stem = "results/1kG/{assembly}/{ancestry}/snps_only/merged_with_cm",
-        out_stem = "results/ldsc/ld_scores/{assembly}/{ancestry}/merged"
+        in_stem = subpath(input[0], strip_suffix = '.bed'),
+        out_stem = subpath(output[0], strip_suffix = '.l2.M')
     threads: 8
     resources:
         runtime = 150,
-    container: None
     conda: env_path("ldsc.yaml")
     shell:
         """
@@ -18,22 +17,15 @@ rule compute_ld_scores:
 
 rule preprocess_sumstats_for_ldsc_munging:
     input:
+        # TODO redirect to harmonised_gwas
         sumstats = "results/processed_gwas/{trait}.tsv.gz",
         maf = "results/1kG/hg38/eur/snps_only/merged.afreq"
     output:
         temp("results/ldsc/{trait}/preprocessed_sumstats.tsv.gz")
-    params:
-        chr_col = 'CHR38',
-        bp_col = 'BP38',
-        ref_col = 'REF',
-        alt_col = 'ALT',
-        p_col = 'P',
-        beta_col = 'BETA',
-        snp_col = 'SNPID'
     threads: 8
     resources:
     script:
-        script_path("ldsc_and_sumher/preprocess_sumstats.R")
+        script_path("ldsc_and_sumher/preprocess_sumstats_for_ldsc.R")
 
 # TODO I think I'm misspecifying a1 and a2?
 #Interpreting column names as follows:
