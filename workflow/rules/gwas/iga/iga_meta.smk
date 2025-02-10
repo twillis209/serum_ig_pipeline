@@ -191,6 +191,12 @@ rule draw_igh_locus_for_iga_datasets:
     conda: env_path("global.yaml")
     script: script_path("gwas/locuszoomr/plot_locus.R")
 
+use rule preprocess_sumstats_for_ldsc_munging as preprocess_iga_meta_sumstats_for_ldsc_munging with:
+    input:
+        sumstats = "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/filtered_meta.tsv.gz",
+        maf = "results/1kG/hg38/eur/snps_only/005/merged.afreq"
+    output:
+        temp("results/ldsc/iga/preprocessed_sumstats.tsv.gz")
 #
 #use rule subset_summary_statistics_about_variant as subset_summary_statistics_about_variant_for_iga_meta with:
 #    input:

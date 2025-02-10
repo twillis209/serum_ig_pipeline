@@ -118,3 +118,10 @@ use rule draw_igh_locus_for_iga_datasets as draw_igh_locus_for_igg_datasets with
         chrom = config['loci']['igh']['chrom'],
         start_pos = config['loci']['igh']['start'],
         stop_pos = config['loci']['igh']['stop']
+
+use rule preprocess_sumstats_for_ldsc_munging as preprocess_igg_meta_sumstats_for_ldsc_munging with:
+    input:
+        sumstats = "results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/filtered_meta.tsv.gz",
+        maf = "results/1kG/hg38/eur/snps_only/005/merged.afreq"
+    output:
+        temp("results/ldsc/igg/preprocessed_sumstats.tsv.gz")
