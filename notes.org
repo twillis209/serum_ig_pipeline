@@ -724,7 +724,7 @@ sdY estimates:
 |------------+-----------------------------------------------------------------------+------------------------------------------------------------------------------------|
 | Dennis     | rank-based INT, sdY.est values suggestive of standardised Y           |                                                                                    |
 | Liu        | standard-normalised residuals from regression of log Y on age and sex |                                                                                    |
-| EPIC       | log Y then standardised                                               | age, sex, and 10 PC scores in linear model                                         |
+| EPIC       | log Y then standardised                                               | age, sex, and 10 PC scores in linear model for GWAS                                |
 | Pietzner   | rank-based INT                                                        | 'corrected for age, sex, the first ten genetic principal components and test site' |
 | Gudjonsson | Box-Cox transformation                                                | age, sex, 5 PCs, and genotyping platform                                           |
 | Eldjarn    | rank-based INT then extracted standard residuals                      | 'adjusted for age, sex, and sample age'                                            |
@@ -1207,6 +1207,167 @@ i.e.
 | IgA           | IgG2           |  0.224 |
 | IgA           | IgG3           |  0.179 |
 | IgA           | IgG4           |  0.174 |
+
+Note that these are on the scale of the raw data. The GWAS was performed on log-transformed Ig concentrations:
+#+begin_src
+> dat[, cor(log(IGA_CONC), log(IGM_CONC), use = 'complete.obs')]
+[1] 0.05032
+> dat[, cor(log(IGG_CONC), log(IGM_CONC), use = 'complete.obs')]
+[1] 0.1756809
+> dat[, cor(log(IGG_CONC), log(IGA_CONC), use = 'complete.obs')]
+[1] 0.3768878
+#+end_src
+
+If we log-transform them and standardise, naturally it makes no difference to the Pearson correlation.
+#+begin_src
+> dat[!is.na(IGM_CONC) & !is.na(IGA_CONC), cor(preproc(IGM_CONC), preproc(IGA_CONC), use = 'complete.obs')]
+[1] 0.05032
+> dat[!is.na(IGG_CONC) & !is.na(IGM_CONC), cor(preproc(IGG_CONC), preproc(IGM_CONC), use = 'complete.obs')]
+[1] 0.1756809
+> dat[!is.na(IGG_CONC) & !is.na(IGA_CONC), cor(preproc(IGG_CONC), preproc(IGA_CONC), use = 'complete.obs')]
+[1] 0.3768878
+#+end_src
+
+*** Constraining the LDSC intercept for the EPIC data
+
+**** IgG and IgA
+Without:
+#+begin_src
+Heritability of phenotype 1
+---------------------------
+Total Observed scale h2: 0.1909 (0.0564)
+Lambda GC: 1.0285
+Mean Chi^2: 1.0427
+Intercept: 1.0072 (0.0046)
+Ratio: 0.1686 (0.1067)
+
+Heritability of phenotype 2/2
+-----------------------------
+Total Observed scale h2: 0.1438 (0.0658)
+Lambda GC: 1.0135
+Mean Chi^2: 1.0301
+Intercept: 1.005 (0.0047)
+Ratio: 0.1665 (0.1546)
+
+Genetic Covariance
+------------------
+Total Observed scale gencov: 0.0605 (0.0304)
+Mean z1*z2: 0.377
+Intercept: 0.3669 (0.0027)
+
+Genetic Correlation
+-------------------
+Genetic Correlation: 0.3653 (0.1356)
+Z-score: 2.6947
+P: 0.007
+
+
+Summary of Genetic Correlation Results
+p1                                          p2      rg      se       z      p  h2_obs  h2_obs_se  h2_int  h2_int_se  gcov_int  gcov_int_se
+results/ldsc/epic-iga/epic-iga.sumstats.gz  results/ldsc/epic-igg/epic-igg.sumstats.gz  0.3653  0.1356  2.6947  0.007  0.1438     0.0658   1.005     0.0047    0.3669       0.0027
+
+Analysis finished at Sun Feb  9 23:53:57 2025
+Total time elapsed: 1.0m:22.64s
+#+end_src
+
+That's a pretty good estimate of the intercept!
+
+With constrained intercept:
+
+#+begin_src
+Heritability of phenotype 1
+---------------------------
+Total Observed scale h2: 0.1909 (0.0564)
+Lambda GC: 1.0285
+Mean Chi^2: 1.0427
+Intercept: 1.0072 (0.0046)
+Ratio: 0.1686 (0.1067)
+
+Heritability of phenotype 2/2
+-----------------------------
+Total Observed scale h2: 0.1438 (0.0658)
+Lambda GC: 1.0135
+Mean Chi^2: 1.0301
+Intercept: 1.005 (0.0047)
+Ratio: 0.1665 (0.1546)
+
+Genetic Covariance
+------------------
+Total Observed scale gencov: -0.0012 (0.026)
+Mean z1*z2: 0.377
+Intercept: constrained to 0.377
+
+Genetic Correlation
+-------------------
+Genetic Correlation: -0.007 (0.162)
+Z-score: -0.0432
+P: 0.9655
+#+end_src
+
+**** IgG and IgM
+
+Without:
+#+begin_quote
+Heritability of phenotype 1
+---------------------------
+Total Observed scale h2: 0.3711 (0.0971)
+Lambda GC: 1.0466
+Mean Chi^2: 1.0702
+Intercept: 0.9983 (0.0057)
+Ratio < 0 (usually indicates GC correction).
+
+Heritability of phenotype 2/2
+-----------------------------
+Total Observed scale h2: 0.1438 (0.0658)
+Lambda GC: 1.0135
+Mean Chi^2: 1.0301
+Intercept: 1.005 (0.0047)
+Ratio: 0.1666 (0.1546)
+
+Genetic Covariance
+------------------
+Total Observed scale gencov: 0.032 (0.0306)
+Mean z1*z2: 0.1825
+Intercept: 0.1774 (0.0025)
+
+Genetic Correlation
+-------------------
+Genetic Correlation: 0.1384 (0.1228)
+Z-score: 1.1266
+P: 0.2599
+#+end_quote
+
+With:
+
+#+begin_quote
+Heritability of phenotype 1
+---------------------------
+Total Observed scale h2: 0.3711 (0.0971)
+Lambda GC: 1.0466
+Mean Chi^2: 1.0702
+Intercept: 0.9983 (0.0057)
+Ratio < 0 (usually indicates GC correction).
+
+Heritability of phenotype 2/2
+-----------------------------
+Total Observed scale h2: 0.1438 (0.0658)
+Lambda GC: 1.0135
+Mean Chi^2: 1.0301
+Intercept: 1.005 (0.0047)
+Ratio: 0.1666 (0.1546)
+
+Genetic Covariance
+------------------
+Total Observed scale gencov: 0.043 (0.0263)
+Mean z1*z2: 0.1825
+Intercept: constrained to 0.1757
+
+Genetic Correlation
+-------------------
+Genetic Correlation: 0.1861 (0.1098)
+Z-score: 1.6948
+P: 0.0901
+#+end_quote
 
 ** Paper by the numbers
 *** Sample sizes

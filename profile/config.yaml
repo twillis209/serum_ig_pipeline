@@ -3,8 +3,9 @@ jobs: 300
 local-cores: 4
 cores: 32
 resources:
-  # LDlink does not allow concurrent API calls
-  - ldlink_calls=1
+  # LDlink and gnomAD do not allow concurrent API calls
+  - ldlink_call=1
+  - gnomad_api_call=1
 default-resources:
   runtime: 5
   mem_mb: threads * 3420
