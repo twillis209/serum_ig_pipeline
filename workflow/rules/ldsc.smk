@@ -102,4 +102,4 @@ rule estimate_rg:
     resources:
         runtime = 5
     conda: env_path("ldsc.yaml")
-    shell: "ldsc.py --rg {input.sumstats_A},{input.sumstats_B} --out {output} --ref-ld-chr {params.ld_score_stem} --w-ld-chr {params.ld_score_stem} --out {params.out_stem} --intercept-gencov 0,0.1757"
+    shell: "ldsc.py --rg {input.sumstats_A},{input.sumstats_B} --out {output} --ref-ld-chr {params.ld_score_stem} --w-ld-chr {params.ld_score_stem} --out {params.out_stem}"

@@ -19,52 +19,52 @@ client = Client(transport=transport, fetch_schema_from_transport=True)
 # Semaphore to limit concurrent requests
 semaphore = asyncio.Semaphore(10)  # 10 requests per minute
 
-async def query_variant_for_nfe_af(session, rsid):
-    print(rsid)
-    query = gql(
-        """
+query_string = """
         query getVariant($rsId: String!) {
             variant(rsid: $rsId, dataset: gnomad_r4) {
                 variant_id
-                    reference_genome 
-                    genome {
-                    af
+                rsid
+                chrom
+                pos
+                ref
+                alt
+                reference_genome 
+                genome {
+                af
+                ac
+                an 
+                populations {
+                    id
                     ac
-                    an 
-                    populations {
-                        id
-                        ac
-                        an
-                        homozygote_count
-                        hemizygote_count
-                    }
-                    }
-                    }
+                    an
+                    homozygote_count
+                    hemizygote_count
+                }
+                }
+                }
                 }
         """
-)
 
-    async with semaphore:  # Ensure only 10 requests per minute
+async def query_variant_for_nfe_af(session, rsid):
+    query = gql(query_string)
+    async with semaphore:
         await asyncio.sleep(6)  # Space requests to stay within the limit (60 sec / 10 reqs = 6 sec per request)
         try:
             result = await session.execute(query, variable_values={"rsId": rsid})
             nfe_dict = [x for x in result['variant']['genome']['populations'] if x['id'] in ['nfe']][0]
-    # [{'id': 'nfe', 'ac': 0, 'an': 68016, 'homozygote_count': 0, 'hemizygote_count': 0}]
             af = nfe_dict['ac']/nfe_dict['an']
-            return af
+            return pd.DataFrame([{'variant_id': result['variant']['variant_id'], 'rsid': result['variant']['rsid'], 'chrom': result['variant']['chrom'], 'pos': result['variant']['pos'], 'ref': result['variant']['ref'], 'alt': result['variant']['alt'], 'af': af}])
         except TransportQueryError:
             return nan
 
 async def main():
     async with client as session:
-        rsids = daf[daf['gnomadNFE'].isna()].rsid.tolist()
+        rsids = daf.rsid.tolist()
         tasks = [query_variant_for_nfe_af(session, rsid) for rsid in rsids]
         results = await asyncio.gather(*tasks)
 
         return results
 
-af = asyncio.run(main())
+dafs = asyncio.run(main())
 
-daf.loc[daf['gnomadNFE'].isna(), 'gnomadNFE'] = af
-
-daf.to_csv(snakemake.output[0], sep = '\t', index = False)
+res_daf = pd.concat(dafs).to_csv(snakemake.output[0], sep = '\t', index = False)
