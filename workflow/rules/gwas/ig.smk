@@ -30,7 +30,7 @@ rule ig_h2_estimates:
         dafs = []
 
         for x in input:
-            isotype = config.pretty_isotypes[x.split('/')[1].split('_')[0]]
+            isotype = config['pretty_isotypes'][x.split('/')[1].split('_')[0]]
             daf = pd.read_csv(x, sep = ' ')
             daf = daf.loc[daf['Component'] == 'Her_All', ['Heritability', 'Her_SD']]
             daf['Isotype'] = isotype
