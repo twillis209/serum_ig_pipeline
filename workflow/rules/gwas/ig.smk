@@ -65,7 +65,6 @@ rule ig_rg_estimates:
 
         pd.concat(dafs)[['First isotype', 'Second isotype', 'Heritability model', 'MHC', 'Genetic correlation estimate', 'Standard error', 'p-value']].to_csv(output[0], sep = '\t', index = False)
 
-
 rule compile_igh_gws_hits:
     input:
          "results/harmonised_gwas/{trait}/1000kb_gws_annotated_lead_snps.tsv"
@@ -128,6 +127,52 @@ rule compile_igh_gws_hits_across_datasets:
     localrule: True
     run:
         pd.concat([pd.read_csv(x, sep = '\t') for x in input]).to_csv(output[0], sep = '\t', index = False)
+
+use rule compile_igh_gws_hits as compile_igk_gws_hits with:
+    output:
+        "results/harmonised_gwas/{trait}/1000kb_gws_igk_lead_snps.tsv"
+    params:
+        chrom = config['loci']['igk']['chrom'],
+        start = config['loci']['igk']['start'],
+        stop = config['loci']['igk']['stop']
+
+use rule compile_igh_meta_gws_hits as compile_igk_meta_gws_hits with:
+    output:
+        "results/ig/1000kb_meta_gws_igk_lead_snps.tsv"
+    params:
+        chrom = config['loci']['igk']['chrom'],
+        start = config['loci']['igk']['start'],
+        stop = config['loci']['igk']['stop']
+
+use rule compile_igh_gws_hits_across_datasets as compile_igk_gws_hits_across_datasets with:
+    input:
+        [[f"results/harmonised_gwas/{x}-{y}/1000kb_gws_igk_lead_snps.tsv" for x in config.get(f'{y}_studies')] for y in ['iga', 'igm', 'igg']],
+        "results/ig/1000kb_meta_gws_igk_lead_snps.tsv"
+    output:
+        "results/ig/1000kb_study_and_meta_gws_igk_lead_snps.tsv"
+
+use rule compile_igh_gws_hits as compile_igl_gws_hits with:
+    output:
+        "results/harmonised_gwas/{trait}/1000kb_gws_igl_lead_snps.tsv"
+    params:
+        chrom = config['loci']['igl']['chrom'],
+        start = config['loci']['igl']['start'],
+        stop = config['loci']['igl']['stop']
+
+use rule compile_igh_meta_gws_hits as compile_igl_meta_gws_hits with:
+    output:
+        "results/ig/1000kb_meta_gws_igl_lead_snps.tsv"
+    params:
+        chrom = config['loci']['igl']['chrom'],
+        start = config['loci']['igl']['start'],
+        stop = config['loci']['igl']['stop']
+
+use rule compile_igh_gws_hits_across_datasets as compile_igl_gws_hits_across_datasets with:
+    input:
+        [[f"results/harmonised_gwas/{x}-{y}/1000kb_gws_igl_lead_snps.tsv" for x in config.get(f'{y}_studies')] for y in ['iga', 'igm', 'igg']],
+        "results/ig/1000kb_meta_gws_igl_lead_snps.tsv"
+    output:
+        "results/ig/1000kb_study_and_meta_gws_igl_lead_snps.tsv"
 
 rule plot_beta_vs_maf_for_all_isotypes:
     input:
