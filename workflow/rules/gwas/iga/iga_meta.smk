@@ -28,24 +28,6 @@ rule run_iga_meta_analysis:
     conda: env_path("global.yaml")
     script: script_path("gwas/iga_meta/run_meta_analysis.R")
 
-rule compile_iga_meta_analysis_rsids:
-    input:
-        epic = "results/restandardised_gwas/epic-iga.tsv.gz",
-        liu = "results/restandardised_gwas/liu-iga.tsv.gz",
-        dennis = "results/restandardised_gwas/dennis-iga.tsv.gz",
-        pietzner = "resources/harmonised_gwas/pietzner-iga.tsv.gz",
-        eldjarn = "results/restandardised_gwas/eldjarn-iga.tsv.gz",
-        gudjonsson = "resources/harmonised_gwas/gudjonsson-iga.tsv.gz",
-        scepanovic = "results/restandardised_gwas/scepanovic-iga.tsv.gz"
-    output:
-        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta_rsids.tsv.gz"
-    threads: 16
-    resources:
-        runtime = 30
-    group: "gwas"
-    conda: env_path("global.yaml")
-    script: script_path("gwas/iga_meta/compile_meta_analysis_rsids.R")
-
 rule drop_selected_loci_from_iga_meta_analysis:
     input:
         "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz"

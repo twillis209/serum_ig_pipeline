@@ -453,3 +453,11 @@ loci:
     chrom: 14
     start: 105586437
     stop: 106879844
+  igk:
+    chrom: 2
+    start: 88857361
+    stop: 90235368
+  igl:
+    chrom: 22
+    start: 22026076
+    stop: 22922913

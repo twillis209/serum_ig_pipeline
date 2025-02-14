@@ -35,7 +35,7 @@ rule calculate_human_default_taggings:
         out_stem = subpath(output.tagging_file, strip_suffix = '.tagging')
     threads: 8
     resources:
-        runtime = 30
+        runtime = 45
     group: "sumher"
     shell:
         # NB: weightings now only used with BLD-LDAK or BLD-LDAK+Alpha models
@@ -108,7 +108,7 @@ rule estimate_h2_with_human_default:
         out_stem = subpath(output[0], strip_suffix = '.cats')
     threads: 12
     resources:
-        runtime = 15
+        runtime = 30
     group: "sumher"
     shell:
         "ldak --sum-hers {params.out_stem} --summary {input.gwas} --tagfile {input.tagging_file} --check-sums NO --max-threads {threads} > {log.log_file}"
