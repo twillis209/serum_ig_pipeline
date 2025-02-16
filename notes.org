@@ -3,33 +3,133 @@
 
 *** Analyses
 
-- [-] drop Gudjonsson and see what happens
-  - [X] IgA
-  - [ ] IgG
-  - [ ] IgM
-- [-] IGH locus issue (after Manhattans)
-  - [X] determine affected studies
-  - [ ] tabulate summary stats for lead SNPs across studies
-    - [ ] concatenate lead snps files
-    - [ ] merge with isotype merged file in turn to add in summary stats
-  - [ ] implement exclusion pipeline
+- [-] redo h2 and rg after excluding IGK and IGL
+  - [X] run jobs 5057310
+  - [-] h2 for IgA has plummeted, what's up?
+    - [X] rerun with inclusion of IGH/K/L
+    - [X] calculate h2 enrichments
+    - [X] check logs
+    - [ ] rerunning missing result 5183642
+  - [ ] rewrite rg to omit IGH/K/L
+    - [ ] write
+    - [ ] run
+    - [ ] check logs
+  - [-] update Google Sheets
+    - [X] h2
+    - [ ] rg
+- [ ] redo beta vs maf plot once we have all EAF
 - [-] Z-score plots
   - [X] draw them
   - [ ] inspect them
-- [ ] possibility of Gudjonsson/Eldjarn sample overlap
-- [ ] h2 estimation with BLD-LDAK
-  - [ ] download and liftover annotations
 - [ ] forest plots
+- [ ] coloc
 - [ ] analysis of heterogeneity
 - [ ] random effects? Kiryluk did it.
 
-*** Write-up
+*** TODOs to integrate
 
-- [ ] table of different phenotype scales, i.e. transformations etc.
+****** Serum Ig paper
 
-*** Longer-term stuff
+******* =serum_ig_pipeline=
 
-- [ ] with/out SMP normalisation in the Eldjarn data sets?
+- [ ] report =liu-iga= and =liu-decode-iga= (inclusion of 4,699 SNPs with p < 1e-6) sdY.est disparity
+
+******** Ideas
+
+- [ ] Chen lymphocyte count trait?
+- [ ] vaccine response GWAS
+  - [ ] Bian would be good to look at as it's large, accession GCST90295945
+- [ ] MTAG-type modelling of architecture of different isotype production?
+- [ ] comparison with 23andme infection summary statistics
+- [ ] do loci influencing volume of ab production also affect antibody repertoires?
+- [ ] h2 enrichment in relevant cell type annotations?
+- [ ] local rg estimation with SUPERGNOVA?
+  - [ ] LD score calculation would be a PITA
+
+******** Writing
+
+********* Introduction
+
+********** h2 estimate studies:
+
+- 'The genetic control of antibody production. A study of isoimmune antibodies in cattle twins'
+
+********** Additional general Ig studies
+
+Seems like I have too many citations as it is!
+
+*********** IgE
+
+- Weidinger et al. (2008)
+- Granada et al. (2013)
+- Levin et al. (2013)
+- Liao et al. (2013)
+- Akenroye et al. (2022)
+- Daya et al. (2022)
+
+********** General references:
+
+-  Gonzalez-Quintela for sex-specific variation
+
+********** Things to mention
+
+- [ ] meta-analysis of (Western?) European and Icelandic populations
+
+********* Material and methods
+
+- [X] describe standardisation procedure
+- [X] reference IgAD paper for EPIC GWAS in Material and Methods
+- [X] was Pietzner SMP'd?
+- [ ] need to add GRAMD1B as known association for IgM via anti-PC IgM study in CLL (mentioned in the IgE publications, too, not sure if GWS), also Ig light chain amyloidosis
+- [ ] mention SMP issue
+- [ ] exclusion of IGH
+- [ ] cite new locuszoomr paper
+
+********* Discussion
+
+- [ ] viktorin Swedish twin study has h2 estimates for serum IgA, ~0.5
+
+******** Analyses
+
+- [ ] need reminder that we need to drop low info score EPIC SNPs
+- [-] fetch MAF for unknown SNPs
+  - [X] query gnomAD
+  - [X] plot effect size vs. maf
+  - [ ] get an idea of which data sets they come from, numbers
+  - [ ] refactor use of gnomad MAFs, stop fetching them in the =annotate_lead_snps= rules
+    - [ ] fix indentation issue
+  - [ ] write up findings
+- [ ] add IGH explanation
+- [ ] better Manhattan plots
+  - [ ] drop gene names; if want to restore, need a better way
+- [ ] compile rsids for meta-analyses
+  - [ ] add to annotated lead SNPs where it is missing
+- [ ] need to replace =global.yaml= with an R-specific one
+- [ ] exclusion of IGH when? Post meta-analysis? Definitely needs to be excluded from downstream analyses
+  - [ ] need an analysis of the Manhattan plots, locuszoomr at the IGH locus (IGK and IGL worth a look, too); code for this is in =pid_cfdr_pipeline=
+- [ ] Ig rg estimation
+  - [ ] run job
+- [ ] local rg with SUPERGNOVA
+
+********* Rules to crib from =pid_cfdr_pipeline=
+
+- [ ] Ig* lead SNP tables in =cvid_paper/tables.smk=
+- [ ] =pub/cvid_paper/ig_locuszoom_plots.smk=
+- [ ] =pub/cvid_paper/zscore_plots.smk=
+
+******** Outstanding harmoniser issues
+
+- [ ] need to ultimately reintegrate stuff on the =ebispot_harmoniser= branch back into the =master= branch
+- [X] =otherAllele= formatting is done by hand, is an issue with the Eldjarn data sets
+  - [X] investigate hypothesis that problem is that =other_allele= and =otherAllele= are both present in input to =gwas-ssf=
+  - [X] =gwas-ssf= worked the second time
+  - [X] not working again <2025-01-24 Fri>, problem with config output I think rather than the format step
+- [ ] needs to strip leading =chr= from chrom. column
+- [ ] should gwas-ssf md5sum be for file immediately prior to processing?
+
+******** Pipeline release issues
+
+- [ ] plink2 version available through bioconda is too old, doesn't have --r2-phased program like the more recent binaries
 
 ** TODO Setting up the pipeline
 
@@ -999,6 +1099,65 @@ aws s3 cp s3://largescaleplasma-2023/final_somascan_smp/Proteomics_SMP_PC0_2744_
 
 As the preponderance of the data comes from imputed SNP data sets, I choose [[https://dougspeed.com/pre-computed-tagging-files/][the HapMap3 panel over the smaller, directly genotyped set]].
 
+Tried to run tagging calculate for one of the 65 annotations, takes way too long!
+
+*** Trouble after rerunning <2025-02-14 Fri>
+
+**** Troublesome results
+
+Earlier I got much larger estimates (h2 = 0.18 and 0.16 with/out MHC) for IgA, but now:
+
+#+begin_quote
+Component Heritability Her_SD Influence Inf_SD
+Her_Base 0.086463 0.003757 0.005099 0.000222
+Her_All 0.086463 0.003757 0.005099 0.000222
+#+end_quote
+
+From the log:
+#+begin_quote
+Reading details for 4421450 predictors...
+
+[...]
+
+In total, 613226 predictors have ambiguous alleles
+
+[...]
+
+Warning, results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/with_mhc/snps_only/procd.assoc contains (valid) summary statistics for only 3918240 of the 4421450 predictors
+#+end_quote
+
+I have modified the code used to produce the =assoc= file.
+
+Ok, got it:
+
+#+begin_quote
+      chr      N
+   <char>  <int>
+1:      1 775449
+2:      2 830726
+3:      3 703194
+4:      4 722857
+5:      5 640607
+6:      6 245407
+#+end_quote
+
+Maybe the =tmp= directory was full? Rerunning these jobs now.
+
+**** Including IGH/K/L as annotations
+
+#+begin_quote
+Component Heritability Her_SD Influence Inf_SD
+Her_P1 0.005954 0.000641 0.001655 0.000178
+Her_P2 0.001351 -9999.000000 -0.000041 -304.042900
+Her_P3 0.000013 0.000110 0.000000 0.000000
+Her_P4 0.176995 0.005406 0.003981 0.000122
+Her_All 0.184312 0.005052 0.005595 0.000204
+#+end_quote
+
+** Genetic correlation estimation
+*** Does SumHer report the genetic covariance intercept?
+
+What does =Overlap= mean?
 
 ** New Ig associations
 *** Candidate novel IgA hits
@@ -1231,6 +1390,9 @@ If we log-transform them and standardise, naturally it makes no difference to th
 *** Constraining the LDSC intercept for the EPIC data
 
 **** IgG and IgA
+
+***** LDSC
+
 Without:
 #+begin_src
 Heritability of phenotype 1
@@ -1304,8 +1466,24 @@ Z-score: -0.0432
 P: 0.9655
 #+end_src
 
+***** SumHer
+
+#+begin_src
+Component Value SD
+Her1_All 0.418535 0.083220
+Her2_All 0.239618 0.105015
+Coher_All 0.104272 0.053953
+Cor_All 0.329262 0.133811
+Scaling1 1.002914 0.002977
+Scaling2 1.005616 0.003566
+Overlap 0.367195 0.001786
+#+end_src
+
+If =Overlap= is the intercept, it's pretty close to that estimated by LDSC.
+
 **** IgG and IgM
 
+***** LDSC
 Without:
 #+begin_quote
 Heritability of phenotype 1
@@ -1369,6 +1547,97 @@ Z-score: 1.6948
 P: 0.0901
 #+end_quote
 
+***** SumHer
+
+#+begin_quote
+Component Value SD
+Her1_All 0.239702 0.105021
+Her2_All 0.613568 0.147122
+Coher_All 0.066774 0.057580
+Cor_All 0.174116 0.139211
+Scaling1 1.005611 0.003566
+Scaling2 1.001453 0.004103
+Overlap 0.176587 0.002023
+#+end_quote
+
+**** IgA and IgM
+***** LDSC
+Without:
+
+#+begin_src
+Heritability of phenotype 1
+---------------------------
+Total Observed scale h2: 0.1909 (0.0564)
+Lambda GC: 1.0285
+Mean Chi^2: 1.0427
+Intercept: 1.0072 (0.0046)
+Ratio: 0.1686 (0.1067)
+
+Heritability of phenotype 2/2
+-----------------------------
+Total Observed scale h2: 0.3711 (0.0971)
+Lambda GC: 1.0466
+Mean Chi^2: 1.0702
+Intercept: 0.9983 (0.0057)
+Ratio < 0 (usually indicates GC correction).
+
+Genetic Covariance
+------------------
+Total Observed scale gencov: 0.0007 (0.0356)
+Mean z1*z2: 0.0845
+Intercept: 0.084 (0.0026)
+
+Genetic Correlation
+-------------------
+Genetic Correlation: 0.0026 (0.1473)
+Z-score: 0.0178
+P: 0.9858
+#+end_src
+
+With:
+
+#+begin_src 
+Heritability of phenotype 1
+---------------------------
+Total Observed scale h2: 0.1909 (0.0564)
+Lambda GC: 1.0285
+Mean Chi^2: 1.0427
+Intercept: 1.0072 (0.0046)
+Ratio: 0.1686 (0.1067)
+
+Heritability of phenotype 2/2
+-----------------------------
+Total Observed scale h2: 0.3711 (0.0971)
+Lambda GC: 1.0466
+Mean Chi^2: 1.0702
+Intercept: 0.9983 (0.0057)
+Ratio < 0 (usually indicates GC correction).
+
+Genetic Covariance
+------------------
+Total Observed scale gencov: 0.2177 (0.0275)
+Mean z1*z2: 0.0845
+Intercept: constrained to 0.0503
+
+Genetic Correlation
+-------------------
+Genetic Correlation: 0.818 (0.224)
+Z-score: 3.6519
+P: 0.0003
+#+end_src
+
+***** SumHer
+
+#+begin_quote
+Component Value SD
+Her1_All 0.419135 0.083249
+Her2_All 0.614008 0.146983
+Coher_All 0.010734 0.063136
+Cor_All 0.021158 0.129049
+Scaling1 1.003017 0.002967
+Scaling2 1.001453 0.004103
+Overlap 0.083595 0.002010
+#+end_quote
 ** Paper by the numbers
 *** Sample sizes
 - IgA: 85,204
