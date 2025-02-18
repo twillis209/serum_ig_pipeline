@@ -22,6 +22,7 @@
   - [X] draw them
   - [ ] inspect them
 - [ ] forest plots
+- [ ] use OTG to fetch list of all genes for lead SNPs and cross-reference with IEI list
 - [ ] coloc
 - [ ] analysis of heterogeneity
 - [ ] random effects? Kiryluk did it.
@@ -80,9 +81,9 @@ Seems like I have too many citations as it is!
 - [X] describe standardisation procedure
 - [X] reference IgAD paper for EPIC GWAS in Material and Methods
 - [X] was Pietzner SMP'd?
-- [ ] need to add GRAMD1B as known association for IgM via anti-PC IgM study in CLL (mentioned in the IgE publications, too, not sure if GWS), also Ig light chain amyloidosis
+- [X] need to add GRAMD1B as known association for IgM via anti-PC IgM study in CLL (mentioned in the IgE publications, too, not sure if GWS), also Ig light chain amyloidosis
 - [ ] mention SMP issue
-- [ ] exclusion of IGH
+- [X] exclusion of IGH
 - [ ] cite new locuszoomr paper
 
 ********* Discussion
@@ -95,10 +96,8 @@ Seems like I have too many citations as it is!
 - [-] fetch MAF for unknown SNPs
   - [X] query gnomAD
   - [X] plot effect size vs. maf
-  - [ ] get an idea of which data sets they come from, numbers
   - [ ] refactor use of gnomad MAFs, stop fetching them in the =annotate_lead_snps= rules
-    - [ ] fix indentation issue
-  - [ ] write up findings
+  - [ ] need to replace EAF where NA or 0 (for rarer SNPs)
 - [ ] add IGH explanation
 - [ ] better Manhattan plots
   - [ ] drop gene names; if want to restore, need a better way
@@ -1160,61 +1159,228 @@ Her_All 0.184312 0.005052 0.005595 0.000204
 What does =Overlap= mean?
 
 ** New Ig associations
-*** Candidate novel IgA hits
 
+*** Workflow
+
+- OMIM for text
+- OTG for PheWAS, candidate genes
+- 
+
+*** Candidate novel IgA hits
 **** POU3F1
 
-**** GOLPH3L
+Very far away from POU3F1 TSS (~127kb), which seems to relate to development of the myelin sheath in mice.
 
-**** SCYL3
+No obvious relationship to POU2AF1.
 
-**** FAM98A,RASGRP3
+Lead SNP is associated with a scattering of IMDs.
+
+**** GOLPH3L, HORMAD1
+
+This SNP is associated with a ton of white blood cell traits.
+
+It is an intronic variant in GOLPH3L.
+
+GOLPH3L is localised at Golgi stack, may have regulatory role in Golgi trafficking [[https://www.ncbi.nlm.nih.gov/gene/55204][GenBank]].
+
+Overexpressed in some cancers.
+
+HORMAD1 has some relationship with DSBs.
+
+**** SCYL3 (rs3766151)
+
+Intronic variant in SCYL3.
+
+SNP is associated with E-selectin levels; E-selectin is a cell adhesion molecule mediating attachment of leukocytes to endothelial cells.
+
+**** FAM98A,RASGRP3 (rs13388394)
+
+SNP is a missense variant in RASGRP3, I've written up more in the paper draft. This is a good hit.
 
 **** B3GNT2,COMMD1
 
+Intergenic SNP.
+
+COMMD1 has some relationship with NFKB regulation [[https://www.ncbi.nlm.nih.gov/gene/150684][GenBank]].
+
+B3GNT2 encodes a poly-N-acetyllactosamine poly-LacNAc synthase.
+
+[[https://www.nature.com/articles/s41467-022-29205-8][From]]:
+#+begin_quote
+In the immune system, B3GNT2 is upregulated in T cells upon activation and B3GNT2 knockout mice have lower poly-LacNAc on B and T cells, resulting in hyperactivity35,37. Single nucleotide polymorphisms that reduced expression of B3GNT2 have been associated with autoimmune diseases38,39,40.
+#+end_quote
+
+Other than being about ~48kb away from B3GNT2, there's not a good link between this SNP and B3GNT2.
+
 **** EIF2AK3,RPIA
 
-**** SP110,SP140
+[[https://genetics.opentargets.org/Variant/2_88613755_G_C/associations][OTG]]
 
-**** TSEN2,MKRN2
+Missense variant in EIF2AK3
+
+RPIA encodes ribose-5-phosphate isomerase A, part of pentose phosphate pathway.
+
+Mutations in EIF2AK3 (encodes PERK protein) cause IDDM as part of Wolcott-Rallison syndrome.
+
+This SNP is strongly associated with anthropometric traits like height and 'appendicular lean mass'.
+
+Linked to RPIA with PCHi-C data.
+
+eQTL for both genes in blood and brain.
+
+Apparently EIF2AK3 is largely suppressed in plasma cells and does not play a role in the unfolded protein response [[https://pubmed.ncbi.nlm.nih.gov/19898960/][paper.]]
+
+**** SP110,SP140 (rs62193147)
+
+[[https://genetics.opentargets.org/Variant/2_230251645_T_C/associations][otg]]
+
+Intronic variant in SP140, also an s-/eQTL for this gene.
+
+SP140 is a 'nuclear body protein', 'SP' is 'speckled protein' [[https://www.cell.com/trends/immunology/fulltext/S1471-4906(20)30072-7][review]]
+
+SNP's associated with a lot of blood cell traits, including 'lymphocyte percentage'-type traits.
+
+Abundantly expressed in B cells and linked with [[https://academic.oup.com/hmg/article/27/23/4012/5068135?login=false][IMDs]]
+
+**** TSEN2,MKRN2,RAF1 
+
+[[https://genetics.opentargets.org/Variant/3_12461456_G_T/associations][OTG]]
+
+MKRN2 encodes a E3 ubiquitin ligase which negatively regulates inflammatory responses, targets the p65 subunit of NF-kB [[https://www.nature.com/articles/srep46097][paper]].
+
+RAF1 encodes a protein in the MAPK-ERK pathway, involved in B cell development/plasma cell development [[https://pubmed.ncbi.nlm.nih.gov/33975980/#:~:text=By%20analyzing%20mice%20with%20B,B%20cells%20to%20pre%2Dplasmablasts][paper]]
+
+TSEN2 encodes a tRNA-splicing endonuclease, can't relate this easily to B cells.
+
+No e-/sQTL evidence for this SNP in B cells.
 
 **** ACTRT3
 
-**** TBL1XR1
+[[https://genetics.opentargets.org/Variant/3_169764547_T_C/associations][OTG]]
+
+Non-coding transcript exon variant.
+
+ACTRT3 encodes actin-related protein T3.
+
+GPR160 hsa some role in prostate cancer.
+
+SNP's associated with a lot of cancers and blood cell traits.
+
+**** TBL1XR1 (rs55901664)
+
+[[https://genetics.opentargets.org/Variant/3_177042914_A_T/associations][OTG]]
+
+Intronic variant in TBL1XR1.
 
 **** TP63
 
-**** TLR10
+[[https://genetics.opentargets.org/Variant/3_189683987_G_C/associations][OTG]]
+
+Intronic variant in TP63.
+
+
+**** TLR1
+
+[[https://genetics.opentargets.org/Variant/4_38809930_G_T/associations][OTG]]
+
+Relatively rare SNP
+
+Expressed in activated and memory B cells, TLR1/2 heterodimer senses bacterial lipoproteins [[https://pmc.ncbi.nlm.nih.gov/articles/PMC3401975/][paper]]
+
+TLR11 does not produce a functional protein.
 
 **** NFKB1
 
-**** IL7R
+[[https://genetics.opentargets.org/Variant/4_102523541_C_T/associations][OTG]]
 
-**** PTGER4
+**** IL7R (rs6890853)
+
+[[https://genetics.opentargets.org/Variant/5_35852209_G_A/associations][OTG]]
+
+**** PTGER4 (rs10440635)
+
+[[https://genetics.opentargets.org/Variant/5_40490688_G_A/associations][OTG]]
+
+
+PTGER4 encodes the PGE2 prostaglandin E2 receptor.
+
 
 **** HIVEP2
 
+This is in moderate LD (r2 = ~0.65) with a SNP which came up in a multivariate analysis of IgG N-glycosylation phenotypes.
+
 **** SNX13
+
+[[https://genetics.opentargets.org/Variant/7_17685515_C_T/associations][OTG]]
+
+Far away from SNX13, not much to say.
+
+SNX13 is a GTPase activating protein, some role in vesicular trafficking.
 
 **** POU5F1B
 
+[[https://genetics.opentargets.org/Variant/8_127210176_T_C/associations][OTG]]
+
+Gene may relate to prostate and colon cancer. SNP is ~113kb away from POU5F1B, though.
+
 **** SYK
 
-**** TRAF1
+[[https://genetics.opentargets.org/Variant/9_90792925_C_T/associations][OTG]]
+
+SYK is a non-receptor tyrosine kinase ('spleen-associated tyrosine kinase').
+
+**** TRAF1 (rs113495277)
+
+[[https://genetics.opentargets.org/Variant/9_120913617_A_G/associations][OTG]]
 
 **** IFITM1,IFITM2
+[[https://genetics.opentargets.org/Variant/11_308363_G_C/associations][OTG]]
+
+This SNP has extremely significant associations with lots of blood cell traits.
+
+IFITM1/2 are known as factors in cell-intrinsic antiviral immunity.
 
 **** PTPRJ/MTCH2
 
+[[https://genetics.opentargets.org/Variant/11_47947600_T_C/associations][OTG]]
+
+MTCH2 participates in apoptosis so probably easy to relate this to B cells.
+
+PTPRJ is CD148, a receptor-like PTP. CD148 is a 'Src-family
+
 **** TRIM49B,FOLH1
 
-**** GRAMD1B
+FOLH1 encodes a folate hydrolase.
 
-**** BCL2L14
+This SNP is an intronic variant in TRIM49B, thought to encode a ubiquitin ligase.
+
+SNP is an eQTL for PTPRJ.
+
+**** GRAMD1B (rs2714073)
+
+The lead SNP for IgM is rs735665, which is associated with IgM, lymphocyte counts, CLL, and follicular lymphoma.
+
+The anti-PC IgM lead SNP and rs735665 have r2 = ~1.
+
+**** BCL2L14 (rs1008866)
+
+[[https://genetics.opentargets.org/Variant/12_12022938_G_A/associations][OTG]]
+
+BCL2 family member, aka BCLG.
+
+Has some apoptic-related function but nothing I can find relating it to B cells specifically.
 
 **** FBRSL1
 
+[[https://genetics.opentargets.org/Variant/12_132469613_G_A/associations][OTG]]
+
+Variants in FBRSL1 cause intellectual disability and malformation syndrome.
+
 **** BMF
+
+[[https://genetics.opentargets.org/Variant/15_40105735_G_T/associations][OTG]]
+
+
 
 **** FRMD5,ADAL
 
@@ -1638,6 +1804,33 @@ Scaling1 1.003017 0.002967
 Scaling2 1.001453 0.004103
 Overlap 0.083595 0.002010
 #+end_quote
+** Effect allele frequencies
+
+Not able to fetch all EAFs from gnomAD r4. Can I use the =effect_allele_frequency= columns from the contributing studies?
+
+Would need to check that these columns are concordant with the gnomAD reports.
+
+What about the =AF1.dennis= and =ImpMAF.eldjarn= columns (latter in particular is quite comprehensive)?
+
+=ImpMAF.eldjarn= doesn't always give the effect allele; it's labelled 'MAF' after all. E.g. with the IgA lead SNPs:
+
+#+begin_src
+> dat[!is.na(EAF)][effect_allele_frequency.scepanovic > 0.5][1, .SD, .SDcols = patterns('rsid|EAF|freq|ImpMAF|AF1')]
+        rsid       EAF effect_allele_frequency.epic
+      <char>     <num>                        <num>
+1: rs3766151 0.6803925                     0.326583
+   effect_allele_frequency.pietzner effect_allele_frequency.scepanovic
+                              <num>                              <num>
+1:                           0.6645                           0.678068
+   AF1.dennis ImpMAF.eldjarn
+        <num>          <num>
+1:   0.316375        0.32104
+#+end_src
+
+Also note how the EPIC frequency looks to be wrongly specified and does not agree with EAF!
+
+When I do try to coalesce these in the absence of =EAF= from gnomAD, I will need to check that all columns are consistently >/< 0.5.
+
 ** Paper by the numbers
 *** Sample sizes
 - IgA: 85,204
