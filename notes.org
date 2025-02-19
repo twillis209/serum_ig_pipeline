@@ -25,7 +25,8 @@
 - [ ] use OTG to fetch list of all genes for lead SNPs and cross-reference with IEI list
 - [ ] coloc
 - [ ] analysis of heterogeneity
-- [ ] random effects? Kiryluk did it.
+- [ ] IEI gene enrichment? Wouldn't take much.
+- [ ] updated MR of IgAD?
 
 *** TODOs to integrate
 
@@ -1380,17 +1381,41 @@ Variants in FBRSL1 cause intellectual disability and malformation syndrome.
 
 [[https://genetics.opentargets.org/Variant/15_40105735_G_T/associations][OTG]]
 
-
+Bcl-2-modifying factor, another BCL2 family member.
 
 **** FRMD5,ADAL
 
+[[https://genetics.opentargets.org/Variant/15_44137670_A_T/associations][OTG]]
+
+SNP is an intronic variant in FRMD5.
+
 **** MAF,WWOX
 
-**** GSDMB
+[[https://genetics.opentargets.org/Variant/16_79076699_C_T/associations][OTG]]
+
+Intronic variant in WWOX.
+
+**** GSDMB (rs2872516)
+
+[[https://genetics.opentargets.org/Variant/17_39916474_C_T/associations][OTG]]
+
+Intronic variant in GSDMB, but an e-/sQTL for many genes at the 17q12-21 locus.
 
 **** PHOSPHO1,GNGT2
 
+[[https://genetics.opentargets.org/Variant/17_49286745_C_T/associations][OTG]]
+
+SNP is a downstream gene variant.
+
+GNGT2 encodes a gamma subunit of the G protein transducin in the retina.
+
+PHOSPHO1 encodes phosphocholine phosphatase 1, biomarker in 'tumourigenesis of DLBCL' [[https://pmc.ncbi.nlm.nih.gov/articles/PMC9360546/][paper]]
+
 **** CD79,FTSJ3
+
+[[https://genetics.opentargets.org/Variant/17_63932631_A_G/associations][OTG]]
+
+CD79B is closest gene by far, although this SNP is an eQTL for a number of genes in the area.
 
 **** SLC25A19,GRB2
 
@@ -1415,6 +1440,22 @@ There are more hits which were not annotated by OTG.
 **** RPP14,PXK
 **** HHEX
 **** ZPBP2,GSDMB
+
+[[https://genetics.opentargets.org/Variant/17_39893872_C_T/associations][OTG]]
+
+The IgA (rs2872516) and IgG (rs17676923) lead SNPs are not in LD [[https://ldlink.nih.gov/?var1=rs2872516&var2=rs17676923&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][LDlink]]. IgG SNP is an intergenic variant, where the IgA SNP is an intronic variant in GSDMB.
+
+The IgM (rs4795397) lead SNP is in LD with the IgA lead SNP (r2 = 0.83; [[https://ldlink.nih.gov/?var1=rs2872516&var2=rs4795397&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][query]]) but not the IgG SNP (r2 = 0.02; [[https://ldlink.nih.gov/?var1=rs17676923&var2=rs4795397&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][query]]).
+
+The IgG SNP is an eQTL for GSDMB, IZKF3, GSDMA, and PGAP3 in blood; specific for B cells and both CD4+ and CD8+ T cells
+
+I can't see an obvious pattern in these eQTL effects in light of the effect of the SNPs on Ig levels:
+
+| SNP              | IKZF3 (blood) | GSDMA (blood) | GSDMB (blood) | IKZF3 (Fairfax 2012, B cells) | GSDMB (Fairfax 2012, B cells) |
+|------------------+---------------+---------------+---------------+-------------------------------+-------------------------------|
+| rs2872516 (IgA)  |        -0.244 |         0.145 |         0.780 |                        -0.219 | 0.472                         |
+| rs17676923 (IgG) |         0.508 |         0.514 |        -0.259 |                         0.460 | na                            |
+| rs4795397 (IgM)  |         0.264 |        -0.135 |        -0.799 |                         0.233 | -0.482                        |
 
 *** Candidate novel IgM hits
 
