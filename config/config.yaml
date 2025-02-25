@@ -448,6 +448,97 @@ gwas_datasets:
         file_type: "GWAS-SSF v0.1"
         is_harmonised: false
         is_sorted: false
+  ra:
+    harmonised: True
+    accession_no: "GCST90132222"
+    sha256: "c2e3ac3e6151d9a0f7a04e704eda62fb9aa8cc68e4518d63e1b83869ad70f34d"
+    md5: "86c3aef2e7c00e902008bcf634c23b97"
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90132001-GCST90133000/GCST90132222/harmonised/GCST90132222.h.tsv.gz"
+  asthma-finngen:
+    harmonised: False
+    accession_no: ""
+    sha256: ""
+    md5: ""
+    url: "https://storage.googleapis.com/finngen-public-data-r12/summary_stats/release/finngen_J10_ASTHMA_EXMORE.gz"
+    cases: 59100
+    controls: 259839
+  asthma:
+    harmonised: True
+    sha256: "5a756b152a76ddf5f8752a2644d5a14c983b6b673a5f6b727f549c53ba0143fe"
+    accession_no: "GCST90399686"
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90399001-GCST90400000/GCST90399686/harmonised/GCST90399686.h.tsv.gz"
+    cases: 121940
+    controls: 1254131
+  hypothy:
+    # 'strict autoimmune hypothyroidism'
+    harmonised: False
+    accession_no: ""
+    sha256: ""
+    md5: ""
+    url: "https://storage.googleapis.com/finngen-public-data-r12/summary_stats/release/finngen_E4_HYTHY_AI_STRICT.gz"
+    cases: 54752
+    controls: 362639
+  derm-ecz:
+    harmonised: False
+    accession_no: ""
+    sha256: ""
+    md5: ""
+    url: "https://storage.googleapis.com/finngen-public-data-r12/summary_stats/release/finngen_L12_DERMATITISECZEMA.gz"
+    cases: 67474
+    controls: 432874
+  pbc:
+    harmonised: True
+    accession_no: "GCST90061440"
+    sha256: "279b64244fd5daca779e85c378888853c83d7b1e45c61c106bfbfe7ff44ef525"
+    md5: "78259ddd18c7274a0d98926c5e372fc9"
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90061001-GCST90062000/GCST90061440/harmonised/34033851-GCST90061440-EFO_1001486.h.tsv.gz"
+  addi:
+    harmonised: True
+    accession_no: "GCST90011871"
+    sha256: "ad7fae7d05cae457d567f6b4ebe00dc33ace4d16e9fd61effb516f16ce97df1c"
+    md5: "de748156d744689d0dcca29c8cd9113c"
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90011001-GCST90012000/GCST90011871/harmonised/33574239-GCST90011871-MONDO_0009410.h.tsv.gz"
+  psc:
+    harmonised: True
+    accession_no: "GCST004030"
+    sha256: "638fd1d6861ca9cf4f251c854b8df7a1d07e954c4a2fa9f81428039dd0d9f6f4"
+    md5: ""
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST004001-GCST005000/GCST004030/harmonised/27992413-GCST004030-EFO_0004268.h.tsv.gz"
+  jia:
+    harmonised: True
+    accession_no: "GCST90010715"
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90010001-GCST90011000/GCST90010715/harmonised/33106285-GCST90010715-EFO_0002609.h.tsv.gz"
+    md5: ""
+    sha256: "ea3618ba99e64fcbc267c5c4f0a149e2669537d2c8c3c79707779c00324f647d"
+# NB: GCST007400 is actually bigger by a couple of thousand
+  sle:
+    harmonised: True
+    accession_no: "GCST003156"
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST003001-GCST004000/GCST003156/harmonised/26502338-GCST003156-EFO_0002690.h.tsv.gz"
+    md5: ""
+    sha256: "4480ff36384f6587e2cafa4187da56e72c9551ccd2f99896c9f7f80c02bd6583"
+  crohns:
+    harmonised: True
+    accession_no: "GCST004132"
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST004001-GCST005000/GCST004132/harmonised/28067908-GCST004132-EFO_0000384.h.tsv.gz"
+    sha256: "d30661ed16b4bc8a0203c3ea1ad111b90e34ec797baa8a6c53b3c5dff01eff5d"
+  uc:
+    harmonised: True
+    accession_no: "GCST004133"
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST004001-GCST005000/GCST004133/harmonised/28067908-GCST004133-EFO_0000729.h.tsv.gz"
+    sha256: "dafed0dbff579e7a131a095ba8db7927c9d266f64ef9b35a496a7c380e57970f"
+  t1d:
+    harmonised: True
+    accession_no: "GCST90014023"
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90014001-GCST90015000/GCST90014023/harmonised/34012112-GCST90014023-EFO_0001359.h.tsv.gz"
+    sha256: "d5965d55922e46ee7056867770d4231ee67b4ae72715925f68b60353af896713"
+  ms:
+    harmonised: False
+    accession_no: ""
+  igan:
+    harmonised: False
+    url: "https://www.columbiamedicine.org/divisions/kiryluk/gwas/IgA_Summary/IgAN_Combined_metaanalysis.txt"
+    is_gz: False
 loci:
   igh:
     chrom: 14

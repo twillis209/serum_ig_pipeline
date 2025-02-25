@@ -34,3 +34,15 @@ use rule iga_lead_snps as igm_lead_snps with:
         novel = "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/candidate_novel_associations.tsv"
     output:
         "results/paper/tables/igm_lead_snps.tsv"
+
+rule iei_table:
+    input:
+        iga = "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps_with_ieis.tsv",
+        igg = "results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps_with_ieis.tsv",
+        igm = "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps_with_ieis.tsv",
+        ieis = "results/iei/sanitised_iei_table.tsv"
+    output:
+        "results/paper/tables/iei_table.tsv"
+    localrule: True
+    conda: env_path("global.yaml")
+    script: script_path("paper/tables/iei_table.R")

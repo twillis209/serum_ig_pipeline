@@ -1,0 +1,11 @@
+name: biomart
+channels:
+- conda-forge
+- bioconda
+dependencies:
+- r-base
+- r-data.table >= 1.15
+- r-stringr
+- r-r.utils
+- r-magrittr
+- bioconductor-biomart

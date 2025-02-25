@@ -15,6 +15,15 @@ use rule run_iga_meta_analysis as run_igg_meta_meta_analysis with:
     output:
         "results/igg_meta/{epic_inclusion}/{dennis_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz"
 
+
+use rule per_snp_sample_size_for_iga_meta as per_snp_sample_size_for_igg_meta with:
+    input:
+        "results/igg_meta/merged.tsv.gz"
+    output:
+        "results/igg_meta/{epic_inclusion}/{dennis_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/per_snp_sample_size.tsv.gz"
+    params:
+        isotype = 'igg'
+
 use rule drop_selected_loci_from_iga_meta_analysis as drop_selected_loci_from_igg_meta_analysis with:
     input:
         "results/igg_meta/{epic_inclusion}/{dennis_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz"
@@ -56,6 +65,13 @@ use rule add_study_sumstats_to_annotated_lead_snps_for_iga_meta as add_study_sum
         merged = "results/igg_meta/merged.tsv.gz"
     output:
         "results/igg_meta/{epic_inclusion}/{dennis_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_study_sumstats.tsv"
+
+use rule add_ieis_to_annotated_lead_snps_for_iga_meta as add_ieis_to_annotated_lead_snps_for_igg_meta with:
+    input:
+        lead = "results/igg_meta/{epic_inclusion}/{dennis_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps.tsv",
+        ieis = "results/iei/gene_coordinates.tsv"
+    output:
+        "results/igg_meta/{epic_inclusion}/{dennis_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_ieis.tsv"
 
 use rule draw_manhattan_with_lead_snp_annotation as draw_igg_meta_manhattan with:
     input:

@@ -43,6 +43,7 @@ include: 'rules/gwas/igg/existing_igg_associations.smk'
 include: 'rules/gwas/ig_meta_sumher.smk'
 include: 'rules/gwas/ig.smk'
 include: 'rules/gwas/locuszoomr.smk'
+include: 'rules/iei.smk'
 include: 'rules/zscore_plots.smk'
 include: 'rules/paper/tables.smk'
 

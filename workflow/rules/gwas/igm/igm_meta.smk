@@ -14,6 +14,14 @@ use rule run_iga_meta_analysis as run_igm_meta_meta_analysis with:
     output:
         "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz"
 
+use rule per_snp_sample_size_for_iga_meta as per_snp_sample_size_for_igm_meta with:
+    input:
+        "results/igm_meta/merged.tsv.gz"
+    output:
+        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/per_snp_sample_size.tsv.gz"
+    params:
+        isotype = 'igm'
+
 use rule drop_selected_loci_from_iga_meta_analysis as drop_selected_loci_from_igm_meta_analysis with:
     input:
         "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz"
@@ -66,6 +74,13 @@ use rule add_study_sumstats_to_annotated_lead_snps_for_iga_meta as add_study_sum
         merged = "results/igm_meta/merged.tsv.gz"
     output:
         "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_study_sumstats.tsv"
+
+use rule add_ieis_to_annotated_lead_snps_for_iga_meta as add_ieis_to_annotated_lead_snps_for_igm_meta with:
+    input:
+        lead = "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps.tsv",
+        ieis = "results/iei/gene_coordinates.tsv"
+    output:
+        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_ieis.tsv"
 
 use rule make_plink_range as make_plink_range_for_igm_meta with:
     input:

@@ -28,6 +28,20 @@ rule run_iga_meta_analysis:
     conda: env_path("global.yaml")
     script: script_path("gwas/iga_meta/run_meta_analysis.R")
 
+rule per_snp_sample_size_for_iga_meta:
+    input:
+        "results/iga_meta/merged.tsv.gz"
+    output:
+        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/per_snp_sample_size.tsv.gz"
+    params:
+        isotype = 'iga'
+    threads: 16
+    resources:
+        runtime = 30
+    group: "gwas"
+    conda: env_path("global.yaml")
+    script: script_path("gwas/iga_meta/per_snp_sample_size.R")
+
 rule drop_selected_loci_from_iga_meta_analysis:
     input:
         "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz"
@@ -98,6 +112,16 @@ rule add_study_sumstats_to_annotated_lead_snps_for_iga_meta:
     localrule: True
     conda: env_path("global.yaml")
     script: script_path("gwas/iga_meta/add_study_sumstats_to_annotated_lead_snps.R")
+
+rule add_ieis_to_annotated_lead_snps_for_iga_meta:
+    input:
+        lead = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps.tsv",
+        ieis = "results/iei/gene_coordinates.tsv"
+    output:
+        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_ieis.tsv"
+    localrule: True
+    conda: env_path("global.yaml")
+    script: script_path("gwas/iga_meta/add_iei_genes.R")
 
 use rule draw_manhattan_with_lead_snp_annotation as draw_iga_meta_manhattan with:
     input:
@@ -189,66 +213,3 @@ use rule preprocess_sumstats_for_ldsc_munging as preprocess_iga_meta_sumstats_fo
         maf = "results/1kG/hg38/eur/snps_only/005/merged.afreq"
     output:
         temp("results/ldsc/iga/preprocessed_sumstats.tsv.gz")
-#
-#use rule subset_summary_statistics_about_variant as subset_summary_statistics_about_variant_for_iga_meta with:
-#    input:
-#        "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/meta_prescreen.tsv.gz"
-#    output:
-#        sum_stats = temp("results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/{variant_id}/{window_size}/sum_stats.tsv.gz"),
-#        ids = temp("results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/{variant_id}/{window_size}/ids.txt")
-#
-#use rule subset_1kGP_data_for_ld_matrix as subset_1kGP_data_for_iga_meta_ld_matrix with:
-#    input:
-#        multiext("results/1kG/hg38/eur/snps_only/005/qc/all/merged", ".pgen", ".pvar.zst", ".psam"),
-#        ids = "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/{variant_id}/{window_size}/ids.txt"
-#    output:
-#        temp(multiext("results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/{variant_id}/{window_size}/subset", ".pgen", ".pvar.zst", ".psam"))
-#    params:
-#        in_stem = "results/1kG/hg38/eur/snps_only/005/qc/all/merged",
-#        out_stem = "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/{variant_id}/{window_size}/subset"
-#
-#use rule calculate_ld_for_subset_about_variant as calculate_ld_for_subset_about_iga_meta_variant with:
-#    input:
-#        multiext("results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/{variant_id}/{window_size}/subset", ".pgen", ".pvar.zst", ".psam")
-#    output:
-#        temp(multiext("results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/{variant_id}/{window_size}/subset.phased", ".vcor2", ".vcor2.vars"))
-#    params:
-#        stem = "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/{variant_id}/{window_size}/subset",
-#        variant_id = lambda w: w.variant_id.replace('_', ':')
-#
-#use rule fetch_rsids_for_sum_stats_about_igad_meta_variant as fetch_rsids_for_sum_stats_about_iga_meta_variant with:
-#    input:
-#        "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/{variant_id}/{window_size}/sum_stats.tsv.gz"
-#    output:
-#        temp("results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/{variant_id}/{window_size}/sum_stats_with_rsids.tsv.gz")
-#
-#use rule merge_sumstats_with_r2 as merge_iga_meta_sumstats_with_r2 with:
-#    input:
-#        gwas = "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/{variant_id}/{window_size}/sum_stats.tsv.gz",
-#        ld = "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/{variant_id}/{window_size}/subset.phased.vcor2",
-#        ld_vars = "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/{variant_id}/{window_size}/subset.phased.vcor2.vars"
-#    output:
-#        temp("results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/{variant_id}/{window_size}/ld_friends.tsv.gz")
-#
-#use rule draw_locuszoom_plot_without_r2 as draw_locuszoom_plot_without_r2_for_iga_meta with:
-#    input:
-#        gwas = "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/{variant_id}/{window_size}/sum_stats.tsv.gz",
-#        rsIDs = "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/lead_snps.distance_clumped.rsIDs"
-#    output:
-#        "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/{variant_id}/{window_size}/locuszoom_sans_r2_{gene_track}.png"
-#
-#use rule draw_locuszoom_plot_with_r2 as draw_locuszoom_plot_with_r2_for_iga_meta with:
-#    input:
-#        gwas = "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/{variant_id}/{window_size}/ld_friends.tsv.gz",
-#        rsIDs = "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/lead_snps.distance_clumped.rsIDs"
-#    output:
-#        "results/iga_meta/{decode_inclusion}/{dennis_inclusion}/{screen}/{threshold}/{variant_id}/{window_size}/locuszoom_with_r2_{gene_track}.png"
-#
-#rule plot_all_meta_gws_loci:
-#    input:
-#        [f"results/iga_meta/with_decode/with_dennis/prescreen/gws/locus_plots/{locus}/index_snp.png" for locus in config.get('iga').get('all')]
-#    output:
-#        "results/iga_meta/with_decode/with_dennis/prescreen/gws/locus_plots/meta_gws.done"
-#    localrule: True
-#    shell: "touch {output}"
-#
