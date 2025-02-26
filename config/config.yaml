@@ -454,6 +454,8 @@ gwas_datasets:
     sha256: "c2e3ac3e6151d9a0f7a04e704eda62fb9aa8cc68e4518d63e1b83869ad70f34d"
     md5: "86c3aef2e7c00e902008bcf634c23b97"
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90132001-GCST90133000/GCST90132222/harmonised/GCST90132222.h.tsv.gz"
+    gwas_ssf:
+      file_type: 'pre-GWAS-SSF'
   asthma-finngen:
     harmonised: False
     accession_no: ""
@@ -486,24 +488,28 @@ gwas_datasets:
     url: "https://storage.googleapis.com/finngen-public-data-r12/summary_stats/release/finngen_L12_DERMATITISECZEMA.gz"
     cases: 67474
     controls: 432874
+    # TODO missing an hm_standard_error column, has the original
   pbc:
     harmonised: True
     accession_no: "GCST90061440"
     sha256: "279b64244fd5daca779e85c378888853c83d7b1e45c61c106bfbfe7ff44ef525"
     md5: "78259ddd18c7274a0d98926c5e372fc9"
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90061001-GCST90062000/GCST90061440/harmonised/34033851-GCST90061440-EFO_1001486.h.tsv.gz"
+    # TODO beta and hm_beta are na, hm_odds_ratio present, standard error (for OR?) present
   addi:
     harmonised: True
     accession_no: "GCST90011871"
     sha256: "ad7fae7d05cae457d567f6b4ebe00dc33ace4d16e9fd61effb516f16ce97df1c"
     md5: "de748156d744689d0dcca29c8cd9113c"
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90011001-GCST90012000/GCST90011871/harmonised/33574239-GCST90011871-MONDO_0009410.h.tsv.gz"
+    # TODO beta and hm_beta are na, hm_odds_ratio present, standard error (for OR?) present
   psc:
     harmonised: True
     accession_no: "GCST004030"
     sha256: "638fd1d6861ca9cf4f251c854b8df7a1d07e954c4a2fa9f81428039dd0d9f6f4"
     md5: ""
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST004001-GCST005000/GCST004030/harmonised/27992413-GCST004030-EFO_0004268.h.tsv.gz"
+    # TODO neither OR nor beta! p-value and SE only
   jia:
     harmonised: True
     accession_no: "GCST90010715"
@@ -511,6 +517,7 @@ gwas_datasets:
     md5: ""
     sha256: "ea3618ba99e64fcbc267c5c4f0a149e2669537d2c8c3c79707779c00324f647d"
 # NB: GCST007400 is actually bigger by a couple of thousand
+# TODO standard_error, p_value does not have hm prefix
   sle:
     harmonised: True
     accession_no: "GCST003156"
@@ -539,6 +546,22 @@ gwas_datasets:
     harmonised: False
     url: "https://www.columbiamedicine.org/divisions/kiryluk/gwas/IgA_Summary/IgAN_Combined_metaanalysis.txt"
     is_gz: False
+  lymphocyte-counts:
+    harmonised: True
+    accession_no: "GCST90002316"
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90002001-GCST90003000/GCST90002316/harmonised/32888493-GCST90002316-EFO_0004587.h.tsv.gz"
+    sha256sum: "986f09ef8b63b24bf3f459351985db0cc386daef21474ea3c998cec0555204b3"
+    samples: 524923
+    pretty_study: "Chen et al."
+    gwas_ssf:
+        date_metadata_last_modified: "2025-01-14"
+        genome_assembly: GRCh38
+        coordinate_system: "1-based"
+        data_file_name: lymphocyte-counts.tsv
+        data_file_md5sum: ""
+        file_type: "pre-GWAS-SSF"
+        is_harmonised: true
+        is_sorted: false
 loci:
   igh:
     chrom: 14

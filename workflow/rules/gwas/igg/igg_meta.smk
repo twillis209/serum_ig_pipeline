@@ -30,6 +30,14 @@ use rule drop_selected_loci_from_iga_meta_analysis as drop_selected_loci_from_ig
     output:
         "results/igg_meta/{epic_inclusion}/{dennis_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/filtered_meta.tsv.gz"
 
+rule copy_igg_meta_to_harmonised_gwas:
+    input:
+        "results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/filtered_meta.tsv.gz"
+    output:
+        "resources/harmonised_gwas/igg-meta.tsv.gz"
+    localrule: True
+    shell: "cp {input} {output}"
+
 checkpoint distance_clump_igg_meta:
     input:
         "results/igg_meta/{epic_inclusion}/{dennis_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz"

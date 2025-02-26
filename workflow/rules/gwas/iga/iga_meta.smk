@@ -56,6 +56,14 @@ rule drop_selected_loci_from_iga_meta_analysis:
     conda: env_path("global.yaml")
     script: script_path("gwas/iga_meta/drop_loci_from_meta_analysis.R")
 
+rule copy_iga_meta_to_harmonised_gwas:
+    input:
+        "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/filtered_meta.tsv.gz"
+    output:
+        "resources/harmonised_gwas/iga-meta.tsv.gz"
+    localrule: True
+    shell: "cp {input} {output}"
+
 checkpoint distance_clump_iga_meta:
     input:
         "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz"
