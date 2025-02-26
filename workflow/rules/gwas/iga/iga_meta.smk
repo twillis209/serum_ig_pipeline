@@ -116,9 +116,11 @@ rule add_study_sumstats_to_annotated_lead_snps_for_iga_meta:
 rule add_ieis_to_annotated_lead_snps_for_iga_meta:
     input:
         lead = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps.tsv",
-        ieis = "results/iei/gene_coordinates.tsv"
+        ieis = "results/iei/ieis_by_gene.tsv"
     output:
         "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_ieis.tsv"
+    params:
+        flank = 2e5
     localrule: True
     conda: env_path("global.yaml")
     script: script_path("gwas/iga_meta/add_iei_genes.R")

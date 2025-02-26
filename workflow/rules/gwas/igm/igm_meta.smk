@@ -78,7 +78,7 @@ use rule add_study_sumstats_to_annotated_lead_snps_for_iga_meta as add_study_sum
 use rule add_ieis_to_annotated_lead_snps_for_iga_meta as add_ieis_to_annotated_lead_snps_for_igm_meta with:
     input:
         lead = "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps.tsv",
-        ieis = "results/iei/gene_coordinates.tsv"
+        ieis = "results/iei/ieis_by_gene.tsv"
     output:
         "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_ieis.tsv"
 
