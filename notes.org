@@ -3,30 +3,24 @@
 
 *** Analyses
 
-- [-] redo h2 and rg after excluding IGK and IGL
-  - [X] run jobs 5057310
-  - [-] h2 for IgA has plummeted, what's up?
-    - [X] rerun with inclusion of IGH/K/L
-    - [X] calculate h2 enrichments
-    - [X] check logs
-    - [ ] rerunning missing result 5183642
-  - [ ] rewrite rg to omit IGH/K/L
-    - [ ] write
-    - [ ] run
-    - [ ] check logs
-  - [-] update Google Sheets
-    - [X] h2
-    - [ ] rg
+- [-] standardising GWAS datasets
+  - [-] pre-GWAS-SSF datasets
+- [ ] harmonisation
+  - [ ] jia
+  - [ ] igan
+  - [ ] ms
+- [ ] 5781382 ig_imd_rg_estimates
 - [ ] redo beta vs maf plot once we have all EAF
 - [-] Z-score plots
   - [X] draw them
   - [ ] inspect them
 - [ ] forest plots
-- [ ] use OTG to fetch list of all genes for lead SNPs and cross-reference with IEI list
 - [ ] coloc
 - [ ] analysis of heterogeneity
-- [ ] IEI gene enrichment? Wouldn't take much.
+- [ ] IEI gene enrichment? Wouldn't take much, need to tabulate new IEIs, merge, etc.
 - [ ] updated MR of IgAD?
+- [ ] tabulate Ig glycosylation phenotype associations, some overlap
+- [ ] lead SNP tables have been edited by hand to update genes, e.g. EPS15L1 for rs754292
 
 *** TODOs to integrate
 
@@ -39,6 +33,7 @@
 ******** Ideas
 
 - [ ] Chen lymphocyte count trait?
+  - [ ] MR?
 - [ ] vaccine response GWAS
   - [ ] Bian would be good to look at as it's large, accession GCST90295945
 - [ ] MTAG-type modelling of architecture of different isotype production?
@@ -699,6 +694,148 @@ ldsc_and_sumher/process_sum_stats_for_merged_gwas.R:se_a_col <- snakemake@params
 
 Need to replace the likes of =snakemake@params[['chr_col']]= with =snakemake@config$chr_col=
 
+**** Additional IMD datasets <2025-02-26 Wed>
+
+According to a [[https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST004001-GCST005000/GCST004030/harmonised/readme.txt][README]], the =hm_= columns are the harmonised ones. Some, like =p_value= and =standard_error=, are left unchanged. Note that =effect_allele_frequency= is harmonised.
+
+| Dataset | Format |   |
+|---------+--------+---|
+| ra      | False  |   |
+| asthma  | False  |   |
+| pbc     | True   |   |
+| addi    | True   |   |
+| psc     |        |   |
+| jia     |        |   |
+
+***** ra
+
+#+begin_src
+> dat <- fread('ra.tsv.gz')
+|--------------------------------------------------|
+|==================================================|
+> names(dat)
+ [1] "chromosome"                "base_pair_location"       
+ [3] "effect_allele"             "other_allele"             
+ [5] "beta"                      "standard_error"           
+ [7] "effect_allele_frequency"   "p_value"                  
+ [9] "variant_id"                "variant_id_hg19"          
+[11] "base_pair_location_grch38" "hm_coordinate_conversion" 
+[13] "hm_code"                   "rsid"                     
+#+end_src
+
+***** asthma
+
+NB: doesn't need harmonising, I think, could at most drop some columns.
+
+#+begin_src
+> dat <- fread('asthma.tsv.gz')
+#+end_src
+
+***** pbc
+
+#+begin_src
+> names(dat)
+ [1] "hm_variant_id"              "hm_rsid"                   
+ [3] "hm_chrom"                   "hm_pos"                    
+ [5] "hm_other_allele"            "hm_effect_allele"          
+ [7] "hm_beta"                    "hm_odds_ratio"             
+ [9] "hm_ci_lower"                "hm_ci_upper"               
+[11] "hm_effect_allele_frequency" "hm_code"                   
+[13] "variant_id"                 "chromosome"                
+[15] "base_pair_location"         "effect_allele"             
+[17] "other_allele"               "p_value"                   
+[19] "beta"                       "standard_error"            
+[21] "odds_ratio"                 "ci_lower"                  
+[23] "ci_upper"                   "effect_allele_frequency"
+> remap <- dat[, .(rsid = hm_rsid, chromosome = hm_chrom, base_pair_location = hm_pos, effect_allele = hm_effect_allele, other_allele = hm_other_allele, beta = hm_beta, standard_error, p_value)]
+> dat <- na.omit(remap, c('base_pair_location', 'beta', 'standard_error', 'p_value'))
+> fwrite(dat, file = 'pbc.tsv.gz', sep = '\t')
+#+end_src
+
+***** addi
+
+I checked st
+
+#+begin_src
+> dat <- fread('addi.tsv.gz')
+> dat[, tst_p := pchisq((log(odds_ratio)/standard_error)^2, df = 1, lower.tail = F)]
+> dat[, .(odds_ratio, standard_error, p_value, tst_p)]
+> dat[, hm_beta := log(hm_odds_ratio)]
+> dat <- dat[, .(rsid = hm_rsid, chromosome = hm_chrom, base_pair_location = hm_pos, effect_allele = hm_effect_allele, other_allele = hm_other_allele, beta = hm_beta, standard_error, p_value, effect_allele_frequency = hm_effect_allele_frequency)]                                    
+> dat <- na.omit(dat, c('base_pair_location', 'beta', 'standard_error', 'p_value'))
+> fwrite(dat, file = 'addi.tsv.gz', sep = '\t')
+#+end_src
+
+***** psc
+
+#+begin_src
+dat <- fread('psc.tsv.gz')
+dat[, hm_beta := log(hm_odds_ratio)]
+dat[!is.na(effect_allele_frequency), .N]
+dat <- dat[, .(rsid = hm_rsid, chromosome = hm_chrom, base_pair_location = hm_pos, effect_allele = hm_effect_allele, other_allele = hm_other_allele, beta = hm_beta, standard_error, p_value, effect_allele_frequency = hm_effect_allele_frequency)]                                    
+dat <- na.omit(dat, c('base_pair_location', 'beta', 'standard_error', 'p_value'))
+fwrite(dat, file = 'psc.tsv.gz', sep = '\t')
+#+end_src
+
+***** jia
+
+#+begin_src 
+#+end_src
+
+***** sle
+
+#+begin_src
+dat <- fread('sle.tsv.gz')
+dat <- dat[, .(rsid = hm_rsid, chromosome = hm_chrom, base_pair_location = hm_pos, effect_allele = hm_effect_allele, other_allele = hm_other_allele, beta = hm_beta, standard_error, p_value)]
+dat <- na.omit(dat, c('base_pair_location', 'beta', 'standard_error', 'p_value'))
+fwrite(dat, file = 'sle.tsv.gz', sep = '\t')
+#+end_src
+
+***** crohns
+
+#+begin_src
+dat <- fread('crohns.tsv.gz')
+dat <- dat[, .(rsid = hm_rsid, chromosome = hm_chrom, base_pair_location = hm_pos, effect_allele = hm_effect_allele, other_allele = hm_other_allele, beta = hm_beta, standard_error, p_value)]
+dat <- na.omit(dat, c('base_pair_location', 'beta', 'standard_error', 'p_value'))
+fwrite(dat, file = 'crohns.tsv.gz', sep = '\t')
+#+end_src
+
+***** uc
+
+#+begin_src
+dat <- fread('uc.tsv.gz')
+dat <- dat[, .(rsid = hm_rsid, chromosome = hm_chrom, base_pair_location = hm_pos, effect_allele = hm_effect_allele, other_allele = hm_other_allele, beta = hm_beta, standard_error, p_value)]
+dat <- na.omit(dat, c('base_pair_location', 'beta', 'standard_error', 'p_value'))
+fwrite(dat, file = 'uc.tsv.gz', sep = '\t')
+#+end_src
+
+***** t1d
+
+#+begin_src
+dat <- fread('t1d.tsv.gz')
+dat <- dat[, .(rsid = hm_rsid, chromosome = hm_chrom, base_pair_location = hm_pos, effect_allele = hm_effect_allele, other_allele = hm_other_allele, beta = hm_beta, standard_error, p_value, effect_allele_frequency = hm_effect_allele_frequency)]
+dat <- na.omit(dat, c('base_pair_location', 'beta', 'standard_error', 'p_value'))
+fwrite(dat, file = 't1d.tsv.gz', sep = '\t')
+#+end_src
+
+***** lymphocyte-counts
+
+#+begin_src
+dat <- fread('lymphocyte-counts.tsv.gz')
+dat <- dat[, .(rsid = hm_rsid, chromosome = hm_chrom, base_pair_location = hm_pos, effect_allele = hm_effect_allele, other_allele = hm_other_allele, beta = hm_beta, standard_error, p_value, effect_allele_frequency = hm_effect_allele_frequency)]
+dat <- na.omit(dat, c('base_pair_location', 'beta', 'standard_error', 'p_value'))
+fwrite(dat, file = 'lymphocyte-counts.tsv.gz', sep = '\t')
+#+end_src
+
+***** ms (IC)
+
+#+begin_src
+dat <- fread('ms.tsv.gz')
+dat <- dat[, .(rsid = hm_rsid, chromosome = hm_chrom, base_pair_location = hm_pos, effect_allele = hm_effect_allele, other_allele = hm_other_allele, beta = hm_beta, standard_error, p_value)]
+dat <- na.omit(dat, c('base_pair_location', 'beta', 'standard_error', 'p_value'))
+fwrite(dat, file = 'ms.tsv.gz', sep = '\t')
+#+end_src
+
 *** Notes on harmoniser pipeline
 **** Process
 
@@ -1165,7 +1302,6 @@ What does =Overlap= mean?
 
 - OMIM for text
 - OTG for PheWAS, candidate genes
-- 
 
 *** Candidate novel IgA hits
 **** POU3F1
@@ -1415,30 +1551,85 @@ PHOSPHO1 encodes phosphocholine phosphatase 1, biomarker in 'tumourigenesis of D
 
 [[https://genetics.opentargets.org/Variant/17_63932631_A_G/associations][OTG]]
 
-CD79B is closest gene by far, although this SNP is an eQTL for a number of genes in the area.
+CD79B is closest gene by far, although this SNP is an eQTL for a number of genes in the area. In B cells (Fairfax), it's only an eQTL for CD79B.
 
 **** SLC25A19,GRB2
 
+[[https://genetics.opentargets.org/Variant/17_75324509_T_C/associations][OTG]]
+
+Intronic variant in GRB2, eQTL for a few genes, eQTL for GRB2 only in CD4+ T cells to date.
+
+GRB2 is linked to B cell signalling (naturally e.g. [[https://www.nature.com/articles/s41598-018-22544-x][paper]]), but no eQTL evidence here.
+
 **** CBX4,TBC1D16
+
+[[https://genetics.opentargets.org/Variant/17_79935827_G_A/associations][OTG]]
+
+3' UTR variant in TBC1D16, eQTL for this and CBX4 in B cells, eQTL for CBX2 and CBX8 in blood.
+
+[[https://v19.proteinatlas.org/ENSG00000167291-TBC1D16/blood][TBC1D16]] is allegedly expressed in naive B cells. Acts as GAP for Rab proteins.
+
+Other TBC1 domain family genes have come up before: TBC1D2B came up for IgG in a previous meta-analysis, TBC1x came up in a GWAS of IgG glycosylation phenotypes.
 
 **** ZBTB7A
 
+[[https://genetics.opentargets.org/Variant/19_4053015_G_A/associations][OTG]]
+
+
+
 **** SLC35E1,C19orf44
+
+[[https://genetics.opentargets.org/Variant/19_16589002_C_T/associations][OTG]]
+
+Intronic variant in MED26. eQTL for SLC35E1, C19orf44, and EPS15L1.
+
+EPS15 is involved with MZ B cells but that's not the gene here.
 
 **** CLASRP
 
+[[https://genetics.opentargets.org/Variant/19_45053960_G_A/associations][OTG]]
+
+SNP's intronic variant in CLASRP, but also an eQTL for RELB, encoding an NF-kB subunit.
+
 **** MYBPC2,SPIB
+
+[[https://genetics.opentargets.org/Variant/19_50431721_G_T/associations][OTG]]
+
+Upstream of MYBPC2, I think. Big eQTL for SPIB.
 
 **** RIMBP3C,UBE2L3
 
-**** DERL3
-*** TODO Candidate novel IgG hits
+[[https://genetics.opentargets.org/Variant/22_21570728_A_G/associations][OTG]]
+
+Intronic variant in UBE2L3, eQTL for the same gene in blood and B cells.
+
+**** DERL3 (rs3177243)
+
+[[https://genetics.opentargets.org/Variant/22_23837735_G_C/associations][OTG]]
+
+SNP is a missense variant in DERL3, but also an eQTL for a number of genes including DRICH1, SMARCB1, CHCHD10, MMP11, RGL4.
+
+This SNP has previously been associated with serum globulin levels and Ig N-glycan 10 levels.
+
+*** Candidate novel IgG hits
 
 There are more hits which were not annotated by OTG.
 
 **** AFF3
 **** RPP14,PXK
+
+rs9864859 is an intronic variant in ABHD6.
+
+SNP is an eQTL for PXK in blood, but for RPP14 in B cells (Schmiedel). RPP14 encodes ribonuclease P protein subunit p14, not much interesting to say, I think.
+
+This SNP is in LD with an SLE SNP mapped to PXK [[https://ldlink.nih.gov/?var1=rs9864859&var2=rs6445972&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][LDlink]]
+**** UNC5A
+
+Quite far away from UNC5A, ~60kb, no eQTL, PC-HiC data.
+
 **** HHEX
+
+
 **** ZPBP2,GSDMB
 
 [[https://genetics.opentargets.org/Variant/17_39893872_C_T/associations][OTG]]
@@ -1457,83 +1648,238 @@ I can't see an obvious pattern in these eQTL effects in light of the effect of t
 | rs17676923 (IgG) |         0.508 |         0.514 |        -0.259 |                         0.460 | na                            |
 | rs4795397 (IgM)  |         0.264 |        -0.135 |        -0.799 |                         0.233 | -0.482                        |
 
+**** RALGAPA2
+
+180kb away from RALGAPA2, no QTL evidence.
+
 *** Candidate novel IgM hits
 
 **** LAPTM5
 
 **** TARS2,ADAMTSL4
 
+eQTL for ADAMTSL4, makes a fibrillin-1 protein.
+
+Intronic variant in RPRD2, encodes the REAF innate antiviral factor.
+
 **** MTIF2,CLHC1
+
+[[https://genetics.opentargets.org/Variant/2_55285800_G_A/associations][OTG]]
 
 **** STK25,FARP2
 
+[[https://genetics.opentargets.org/Variant/2_241466693_C_G/associations][OTG]]
+
+Intronic variant in FARP2.
+
+Also an eQTL for SEPTIN2 in B cells (Fairfax).
+
 **** SLC35G2
+
+[[https://genetics.opentargets.org/Variant/3_136795300_C_G/associations][OTG]]
+
+Intergenic.
+
+STAG1 might relate to risk of haematological malignancy.
+
+NCK1 maybe has something to do with BCR signalling.
 
 **** MBNL1
 
+[[https://genetics.opentargets.org/Variant/3_152504354_T_C/associations][OTG]]
+
+eQTL for MBNL1, which is implicated in B-cell specification [[https://www.sciencedirect.com/science/article/pii/S0006497118604070][paper]]
+
 **** RHOH
 
-**** STAP1,UBA6
+[[https://genetics.opentargets.org/Variant/4_40185976_A_G/associations][OTG]]
+
+eQTL for RHOH in blood.
+
+**** STAP1,UBA6 (rs67960624)
+
+[[https://genetics.opentargets.org/Variant/4_67613670_G_A/associations][OTG]]
+
+3' UTR variant in UBA6.
+
+UBA6 apparently more relevant in T cells, but SNP is an eQTL for UBA6 in B cells.
 
 **** unlabelled chr6:121,440,620
 
 **** HIVEP2,HIVEP2
 
+[[https://genetics.opentargets.org/Variant/6_142848586_A_G/associations][OTG]]
+
+Intronic variant in HIVEP2. 
+
 **** CARD11
+
+[[https://genetics.opentargets.org/Variant/7_3037424_A_T/associations][OTG]]
 
 IEI gene?
 
 **** TRA2A,CCDC126
 
+[[https://genetics.opentargets.org/Variant/7_23551590_G_A/associations][OTG]]
+
+GPNMB is related to DLBCL.
+
 **** PRKAR2B,HBP1
+
+[[https://genetics.opentargets.org/Variant/7_107046003_G_T/associations][OTG]]
+
+Intron variant in PRKAR2B.
+
+Also an eQTL for COG5.
 
 **** BCAP29,HBP1
 
+[[https://genetics.opentargets.org/Variant/7_107614773_A_C/associations][OTG]]
+
+Intronic variant in BCAP29.
+
+Not that far away from the SNP above.
+
+SNP's an sQTL for BCAP29, which is B cell associated protein 29. Has some chaperone role in the ER but not fully understood.
+
 **** RPS20,LYN
 
-**** PAX5,ZCCHC7
+[[https://genetics.opentargets.org/Variant/8_55985392_A_G/associations][OTG]]
+
+Intronic variant in LYN. SNP's an sQTL for LYN.
+
+**** PAX5,ZCCHC7 (rs12554596)
+
+[[https://genetics.opentargets.org/Variant/9_37002145_A_G/associations][OTG]]
+
+Intronic variant in PAX5.
 
 **** SYK
 
+[[https://genetics.opentargets.org/Variant/9_90809055_G_A/associations][OTG]]
+
+Intronic variant in SYK.
+
 **** KLF6
+
+[[https://genetics.opentargets.org/Variant/10_3876889_G_A/associations][OTG]]
+
+KLF6 interacts with BCL6 in macrophages [[https://pubmed.ncbi.nlm.nih.gov/27539853/][paper]]
 
 **** DUSP5
 
+[[https://genetics.opentargets.org/Variant/10_110423817_G_C/associations][OTG]]
+
+Inactivates ERK1, slight link to B cells there.
+
 **** TCIRG1
+
+[[https://genetics.opentargets.org/Variant/11_68041801_C_T/associations][OTG]]
+
+Missense variant in TCIRG1.
+
+Bizarrely, makes a subunit of the V-ATPase. Also encodes a T-cell-specific membrane protein (alternative splice).
 
 **** COLCA2,POU2AF1
 
+[[https://genetics.opentargets.org/Variant/11_111376136_T_C/associations][OTG]]
+
+rs4938518 is the IgA-associated SNP, r2 < 0.3 [[https://ldlink.nih.gov/?var1=rs4938518&var2=rs6589225&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][LDlink]]
+
 **** NXPE1,REX02
 
-**** RAB21
+[[https://genetics.opentargets.org/Variant/11_114519937_T_G/associations][OTG]]
+
+**** RAB21, TBC1D15
+
+[[https://genetics.opentargets.org/Variant/12_71786078_T_G/associations][OTG]]
+
+3' UTR variant in RAB21.
 
 **** SLITRK6
 
+[[https://genetics.opentargets.org/Variant/13_86109332_A_T/associations][OTG]]
+
+Intronic variant but actually far from SLITRK6, in some random transcript.
+
 **** BATF,NEK9
+
+BATF is close and lymphocyte-related.
+
+PCHi-C for NEK9 but not BATF, links the former to all kinds of immune cells.
 
 **** LGMN,RIN3
 
-**** unlabelled chr15:50,492,793
+[[https://genetics.opentargets.org/Variant/14_92637727_T_C/associations][OTG]]
 
+Intronic variant in RIN3, eQTL for it in sigmoid colon.
+
+**** unlabelled chr15:50,492,793
 **** CPLX3,ULK3
 
-**** CIITA
+[[https://genetics.opentargets.org/Variant/15_74833304_A_C/associations][OTG]]
+
+QTL for Src family kinase CSK
+
+**** CIITA (rs34033173)
+
+[[https://genetics.opentargets.org/Variant/16_10889076_G_A/associations][OTG]]
+
+Intronic variant in CIITA and eQTL for the same.
 
 **** PLCG2
 
+[[https://genetics.opentargets.org/Variant/16_81831630_C_A/associations][OTG]]
+
+Intronic variant in PLCG2, eQTL for the same in blood.
+
+IEI gene.
+
 **** IRF8
+
+[[https://genetics.opentargets.org/Variant/16_85908168_C_T/associations][OTG]]
 
 **** TNFRSF13B
 
+[[https://genetics.opentargets.org/Variant/17_16989369_A_T/associations][OTG]]
+
+This SNP is in an intron of a [[https://gnomad.broadinstitute.org/gene/ENSG00000230969?dataset=gnomad_r4][LINC]]
+
+eQTL for NT5M.
+
+Need to plot this locus, only link to TNFRSF13B is distance, really.
+
 **** BCL2
+
+[[https://genetics.opentargets.org/Variant/18_63279878_T_C/associations][OTG]]
+
+Intronic variant in BCL2.
 
 **** KLF2
 
+[[https://genetics.opentargets.org/Variant/19_16309861_T_G/associations][OTG]]
+
+Intronic but not in KLF2, OTG doesn't give the gene so probably a LINC.
+
+eQTL for KLF2 in blood.
+
 **** COLGALT1,NIBAN3
+
+[[https://genetics.opentargets.org/Variant/19_17549491_G_A/associations][OTG]]
+
+Missense variant in NIBAN3 aka BCNP1
 
 **** KASH5,DKKL1
 
+[[https://genetics.opentargets.org/Variant/19_49381238_G_A/associations][OTG]]
+
+eQTL for a number of genes. In B cells, CD37, 
+
 **** GRIK1
+
+[[https://genetics.opentargets.org/Variant/21_29697533_C_T/associations][OTG]]
+
+Intronic variant in GRIK1
 
 **** unlabelled chr22:50,704,843
 ** EPIC phenotypic correlations
