@@ -45,3 +45,21 @@ rule iei_table:
     localrule: True
     conda: env_path("global.yaml")
     script: script_path("paper/tables/iei_table.R")
+
+rule imd_dataset_table:
+    output:
+        "results/paper/tables/imd_table.tsv"
+    localrule: True
+    run:
+        dafs = []
+        for x in config['imds']:
+            dafs.append(pd.DataFrame([{k: config['gwas_datasets'].get(x).get(k, None) for k in ('pretty_phenotype', 'cases', 'controls', 'samples', 'pretty_study', 'accession_no')}]))
+
+        daf = pd.concat(dafs)
+
+        daf.rename(columns = {'pretty_phenotype': 'Phenotype', 'cases': 'Cases', 'controls': 'Controls', 'samples': 'Samples', 'pretty_study': 'Study', 'accession_no': 'GWAS Catalog accession'}, inplace = True)
+
+        daf.to_csv(output[0], sep = '\t', index = False)
+
+
+

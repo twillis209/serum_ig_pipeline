@@ -1,4 +1,4 @@
-from scipy.stats import chi2
+from scipy.stats import chi2, false_discovery_control
 
 rule ig_manhattans:
     input:
@@ -40,6 +40,36 @@ rule ig_h2_estimates:
             dafs.append(daf)
 
             pd.concat(dafs)[['Isotype', 'Heritability model', 'MHC', 'Heritability estimate', 'Standard error']].to_csv(output[0], sep = '\t', index = False)
+
+rule ig_imd_rg_estimates:
+    input:
+        [f"results/ldak/ldak-thin/{x}-meta_and_{y}/inner/sans_mhc/snps_only/sumher.cors.full" for x in ["iga", "igg", "igm"] for y in config.get('imds')]
+    output:
+        "results/ig/imd_rg_estimates.tsv"
+    localrule: True
+    run:
+        dafs = []
+
+        for x in input:
+            isotype = config['pretty_isotypes'].get(x.split('/')[3].split('_and_')[0])
+            imd = config['gwas_datasets'].get(x.split('/')[3].split('_and_')[1]).get('pretty_phenotype')
+            daf = pd.read_csv(x, sep = ' ')
+            daf = daf.loc[daf['Category'] == 'ALL', ['Correlation', 'SD']]
+            daf['Isotype'] = isotype
+            daf['Immune phenotype'] = imd
+            daf['p-value'] = chi2.sf((daf['Correlation']/daf['SD'])**2, df = 1)
+            daf = daf.rename({'Correlation': 'Genetic correlation estimate', 'SD': 'Standard error'}, axis = 1)
+            daf['Heritability model'] = 'LDAK-Thin'
+            daf['MHC'] = True if 'with_mhc' in x else False
+            dafs.append(daf)
+
+        daf = pd.concat(dafs)
+
+        daf['FDR'] = false_discovery_control(daf['p-value'], method = 'bh')
+
+        daf = daf[['Isotype', 'Immune phenotype', 'Heritability model', 'MHC', 'Genetic correlation estimate', 'Standard error', 'p-value', 'FDR']]
+
+        daf.to_csv(output[0], sep = '\t', index = False)
 
 rule ig_rg_estimates:
     input:

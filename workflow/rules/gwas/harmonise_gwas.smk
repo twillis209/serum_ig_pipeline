@@ -35,6 +35,7 @@ rule download_human_vcf_and_rsid_reference:
 #        else:
 #            shell("exit -1")
 
+# TODO not sure whether this is the right way to handle it given it's frequently necessary to edit the output by hand
 rule generate_gwas_format_report:
     input:
         "resources/gwas/{trait}.tsv"

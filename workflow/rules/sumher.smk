@@ -133,4 +133,4 @@ rule estimate_rg_with_ldak_thin:
         ldak --sum-cors {params.output_stem} --tagfile {input.tagging_file} --summary {input.gwas_file_A} --summary2 {input.gwas_file_B} --allow-ambiguous YES --check-sums NO --cutoff 0.01 --max-threads {threads} > {log.log_file}
         """
 
-imd_trait_pairs = [f"{imd_a}_and_{imd_b}" for imd_a, imd_b in combinations(config.get('imd_traits'), 2)]
+imd_trait_pairs = [f"{imd_a}_and_{imd_b}" for imd_a, imd_b in combinations(config.get('imds'), 2)]

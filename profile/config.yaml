@@ -15,6 +15,6 @@ software-deployment-method: "conda"
 scheduler: greedy
 rerun-incomplete: True
 rerun-triggers: "mtime"
-notemp: True
+notemp: False
 keep-going: True
 nolock: True

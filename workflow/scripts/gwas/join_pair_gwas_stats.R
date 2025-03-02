@@ -23,6 +23,9 @@ suffix_B <- sprintf('.%s', snakemake@wildcards$trait_B)
 
 coord_cols <- c(chr_col, bp_col, ref_col, alt_col)
 
+dat_a[, chr := as.character(chr), env = list(chr = chr_col)]
+dat_b[, chr := as.character(chr), env = list(chr = chr_col)]
+
 if(join == 'inner') {
   merged_dat <- merge(dat_a, dat_b, by = coord_cols, suffixes = c(suffix_A, suffix_B))
 } else if(join == 'left') {

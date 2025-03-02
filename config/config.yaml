@@ -62,9 +62,8 @@ beta_col: 'beta'
 se_col: 'standard_error'
 rsid_col: 'rsid'
 id_col: 'variant_id'
-pretty_isotypes: {"igm": "IgM", "iga": "IgA", "igg": "IgG"}
-imds: ['asthma', 'pbc', 'psc', 'ra', 'sle', 'crohns', 't1d', 'uc', 'ms', 'derm', 'hypothy', 'celiac', 'igan']
-immune_traits: ['lymphocyte-counts', 'covid-igg']
+pretty_isotypes: {"igm": "IgM", "igm-meta": "IgM", "iga": "IgA", "iga-meta": "IgA", "igg": "IgG", "igg-meta": "IgG"}
+imds: ['asthma', 'pbc', 'psc', 'ra', 'sle', 'crohns', 't1d', 'uc', 'ms', 'derm', 'hypothy', 'celiac', 'igan', 'lymphocyte-counts', 'covid-igg']
 iga_studies: ['epic', 'liu', 'dennis', 'scepanovic', 'pietzner', 'eldjarn']
 igg_studies: ['epic', 'dennis', 'scepanovic', 'pietzner', 'eldjarn']
 igm_studies: ['epic', 'scepanovic', 'pietzner', 'eldjarn']
@@ -451,6 +450,8 @@ gwas_datasets:
     samples: 276020
     cases: 35871
     controls: 240149
+    pretty_phenotype: "rheumatoid arthritis"
+    pretty_study: "Ishigaki et al."
     gwas_ssf:
       file_type: 'pre-GWAS-SSF'
   asthma-finngen:
@@ -462,6 +463,8 @@ gwas_datasets:
     cases: 59100
     controls: 259839
     samples: 318939
+    pretty_phenotype: "asthma"
+    pretty_study: "FinnGen R12"
   asthma:
     harmonised: True
     sha256: "5a756b152a76ddf5f8752a2644d5a14c983b6b673a5f6b727f549c53ba0143fe"
@@ -470,6 +473,8 @@ gwas_datasets:
     cases: 121940
     controls: 1254131
     samples: 1376071
+    pretty_phenotype: "asthma"
+    pretty_study: "Zhou et al."
   hypothy-finngen:
     # 'strict autoimmune hypothyroidism'
     harmonised: False
@@ -485,6 +490,9 @@ gwas_datasets:
     samples: 691986
     cases: 58783
     controls: 633203
+    pretty_phenotype: "hypothyroidism"
+    pretty_study: "Figueredo et al."
+    accession_no: "GCST90319320"
     harmonised: True
   derm-ecz:
     harmonised: False
@@ -495,6 +503,8 @@ gwas_datasets:
     samples: 500348
     cases: 67474
     controls: 432874
+    pretty_phenotype: "dermatitis/eczema"
+    pretty_study: "FinnGen R12"
   derm:
     harmonised: True
     accession_no: "GCST90297795"
@@ -502,13 +512,19 @@ gwas_datasets:
     samples:  1094060
     cases: 37541
     controls: 1056519
+    pretty_phenotype: "dermatitis"
+    pretty_study: "Pasanen et al."
   pbc:
     harmonised: True
     accession_no: "GCST90061440"
     sha256: "279b64244fd5daca779e85c378888853c83d7b1e45c61c106bfbfe7ff44ef525"
     md5: "78259ddd18c7274a0d98926c5e372fc9"
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90061001-GCST90062000/GCST90061440/harmonised/34033851-GCST90061440-EFO_1001486.h.tsv.gz"
+    cases: 8021
+    controls: 16489
     samples: 24510
+    pretty_phenotype: "primary biliary cholangitis"
+    pretty_study: "Cordell et al."
   addi:
     harmonised: True
     accession_no: "GCST90011871"
@@ -518,6 +534,8 @@ gwas_datasets:
     samples: 5320
     cases: 1223
     controls: 4097
+    pretty_phenotype: "Addison's disease"
+    pretty_study: "Eriksson et al."
   psc:
     harmonised: True
     accession_no: "GCST004030"
@@ -527,6 +545,8 @@ gwas_datasets:
     samples: 14890
     cases: 2871
     controls: 12019
+    pretty_phenotype: "primary sclerosing cholangitis"
+    pretty_study: "Ji et al."
   jia:
     harmonised: False
     accession_no: "GCST90010715"
@@ -537,6 +557,8 @@ gwas_datasets:
     samples: 12501
     cases: 3305
     controls: 9196
+    pretty_phenotype: "juvenile idiopathic arthritis"
+    pretty_study: "Lopez-Isac et al."
     gwas_ssf:
         date_metadata_last_modified: "2025-01-14"
         genome_assembly: GRCh37
@@ -555,6 +577,8 @@ gwas_datasets:
     samples: 14267
     cases: 5201
     controls: 9066
+    pretty_phenotype: "systemic lupus erythematosus"
+    pretty_study: "Bentham et al."
   crohns:
     harmonised: True
     accession_no: "GCST004132"
@@ -563,6 +587,8 @@ gwas_datasets:
     samples: 40266
     cases: 12194
     controls: 28072
+    pretty_phenotype: "Crohn's disease"
+    pretty_study: "de Lange et al."
   uc:
     harmonised: True
     accession_no: "GCST004133"
@@ -571,6 +597,8 @@ gwas_datasets:
     samples: 45795
     cases: 12366
     controls: 33609
+    pretty_phenotype: "ulcerative colitis"
+    pretty_study: "de Lange et al."
   t1d:
     harmonised: True
     accession_no: "GCST90014023"
@@ -579,7 +607,27 @@ gwas_datasets:
     cases: 18942
     controls: 501638
     samples: 520580
+    pretty_phenotype: "type 1 diabetes"
+    pretty_study: "Chiou et al."
   ms:
+    harmonised: False
+    accession_no: "GCST009597"
+    pmid: 31604244
+    samples: 115803
+    cases: 47429
+    controls: 68374
+    pretty_phenotype: "multiple sclerosis"
+    pretty_study: "IMSGC"
+    gwas_ssf:
+      genome_assembly: "GRCh37"
+      coordinate_system: "1-based"
+      is_harmonised: false
+      is_sorted: false
+      date_metadata_last_modified: "2025-02-03"
+      data_file_name: ms.tsv
+      file_type: "GWAS-SSF v1.0"
+      data_file_md5sum: "947de95a0dfca1089b4d8074b3e0d696"
+  ms-ic:
     harmonised: True
     accession_no: "GCST005531"
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST005001-GCST006000/GCST005531/harmonised/24076602-GCST005531-EFO_0003885.h.tsv.gz"
@@ -587,6 +635,8 @@ gwas_datasets:
     samples: 38589
     cases: 14498
     controls: 24091
+    pretty_phenotype: "multiple sclerosis"
+    pretty_study: "Beecham et al."
   igan:
     harmonised: False
     url: "https://www.columbiamedicine.org/divisions/kiryluk/gwas/IgA_Summary/IgAN_Combined_metaanalysis.txt"
@@ -596,6 +646,8 @@ gwas_datasets:
     cases: 10146
     controls: 28751
     samples: 38897
+    pretty_phenotype: "IgA nephropathy"
+    pretty_study: "Kiryluk et al."
     gwas_ssf:
         date_metadata_last_modified: "2025-02-27"
         genome_assembly: "GRCh37"
@@ -611,6 +663,7 @@ gwas_datasets:
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90002001-GCST90003000/GCST90002316/harmonised/32888493-GCST90002316-EFO_0004587.h.tsv.gz"
     sha256sum: "986f09ef8b63b24bf3f459351985db0cc386daef21474ea3c998cec0555204b3"
     samples: 524923
+    pretty_phenotype: "lymphocyte count"
     pretty_study: "Chen et al."
     gwas_ssf:
         date_metadata_last_modified: "2025-01-14"
@@ -632,6 +685,8 @@ gwas_datasets:
     # 'cases' are seronegative after first COVID-19 vaccine
     cases: 37229
     controls: 16837
+    pretty_phenotype: "IgG seronegativity after COVID-19 vaccine"
+    pretty_study: "Bian et al."
     gwas_ssf:
       genome_assembly: GRCh38
       data_file_name: covid-igg.tsv
@@ -649,10 +704,18 @@ gwas_datasets:
     samples: 24269
     cases: 12041
     controls: 12228
+    pretty_phenotype: "celiac disease"
+    pretty_study: "Trynka et al."
     gwas_ssf:
       genome_assembly: GRCh38
       coordinate_system: 1-based
       is_harmonised: true
+      is_sorted: false
+  igad:
+    gwas_ssf:
+      genome_assembly: GRCh37
+      coordinate_system: 1-based
+      is_harmonised: false
       is_sorted: false
 loci:
   igh:
