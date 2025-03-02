@@ -63,14 +63,8 @@ se_col: 'standard_error'
 rsid_col: 'rsid'
 id_col: 'variant_id'
 pretty_isotypes: {"igm": "IgM", "iga": "IgA", "igg": "IgG"}
-# NB: some redundancy here to cover alternative names for known loci
-epic-iga:
-  known_iga_gwas_loci: ["ANKRD55", "IL6ST", "ASCC2|MTMR3", "ATP5PBP6|FILNC1", "CITED2", "CTF1", "DYSF|RPS20P10", "ELL2", "FADS1|FADS2", "GALNT12|NME2P3", "GPATCH2", "HDAC7", "HORMAD2|LIF", "IL1R1", "LINC02655|RPS7P9", "LITAF", "OVOL1|RELA", "POU2AF1", "RUNX2", "RUNX3", "RUNX3|MIR4425", "SH2B3", "ATXN2", "TMEM258", "TNFSF13", "TNFSF15", "TNFSF4|TNFSF18", "TNFSF8", "TRAF3", "ZP3|SSC4D"]
-  all: ["RUNX3", "FCGR2B", "TNFSF4", "INAVA", "FADS2", "EFEMP2", "POU2AF1", "HDAC7", "SH2B3", "TRAF3", "LITAF", "CFAP119", "TNFSF13", "TNFRSF13B", "SANBR", "IL1R2", "UQCR10", "ANKRD55", "ELL2", "RUNX2", "PRDM1", "CITED2", "IKZF1", "DTX2", "IRF5", "TNFSF8"]
-  novel: ["FCGR2B", "TNFRSF13B|NT5M", "INAVA", "SANBR", "PRDM1", "IKZF1", "IRF5", "TNFSF12|TNFSF13"]
-  # Novel and non-novel alike
-  iei_genes: ['IL6ST', 'FCGR2B|FCGR3A', "TNFRSF13B", 'POU2AF1', 'TRAF3', 'IKZF1', 'TNFSF13']
-imd_traits: ['asthma-ex', 'hyperpara', 'hypothy', 'derm-ecz', 'pbc', 'addi', 'psc', 'ra', 'jia', 'sle', 'crohns', 't1d', 'ms', 'uc-delange', 'liu-decode-lyons-dennis-iga', 'igan']
+imds: ['asthma', 'pbc', 'psc', 'ra', 'sle', 'crohns', 't1d', 'uc', 'ms', 'derm', 'hypothy', 'celiac', 'igan']
+immune_traits: ['lymphocyte-counts', 'covid-igg']
 iga_studies: ['epic', 'liu', 'dennis', 'scepanovic', 'pietzner', 'eldjarn']
 igg_studies: ['epic', 'dennis', 'scepanovic', 'pietzner', 'eldjarn']
 igm_studies: ['epic', 'scepanovic', 'pietzner', 'eldjarn']
@@ -454,6 +448,9 @@ gwas_datasets:
     sha256: "c2e3ac3e6151d9a0f7a04e704eda62fb9aa8cc68e4518d63e1b83869ad70f34d"
     md5: "86c3aef2e7c00e902008bcf634c23b97"
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90132001-GCST90133000/GCST90132222/harmonised/GCST90132222.h.tsv.gz"
+    samples: 276020
+    cases: 35871
+    controls: 240149
     gwas_ssf:
       file_type: 'pre-GWAS-SSF'
   asthma-finngen:
@@ -464,6 +461,7 @@ gwas_datasets:
     url: "https://storage.googleapis.com/finngen-public-data-r12/summary_stats/release/finngen_J10_ASTHMA_EXMORE.gz"
     cases: 59100
     controls: 259839
+    samples: 318939
   asthma:
     harmonised: True
     sha256: "5a756b152a76ddf5f8752a2644d5a14c983b6b673a5f6b727f549c53ba0143fe"
@@ -471,7 +469,8 @@ gwas_datasets:
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90399001-GCST90400000/GCST90399686/harmonised/GCST90399686.h.tsv.gz"
     cases: 121940
     controls: 1254131
-  hypothy:
+    samples: 1376071
+  hypothy-finngen:
     # 'strict autoimmune hypothyroidism'
     harmonised: False
     accession_no: ""
@@ -480,72 +479,132 @@ gwas_datasets:
     url: "https://storage.googleapis.com/finngen-public-data-r12/summary_stats/release/finngen_E4_HYTHY_AI_STRICT.gz"
     cases: 54752
     controls: 362639
+  hypothy:
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90319001-GCST90320000/GCST90319320/harmonised/GCST90319320.h.tsv.gz"
+    sha256sum: "7ce31a44ebfa274ce820b94a3b1212ff77070c9eece916a7c795235b16c8b668"
+    samples: 691986
+    cases: 58783
+    controls: 633203
+    harmonised: True
   derm-ecz:
     harmonised: False
     accession_no: ""
     sha256: ""
     md5: ""
     url: "https://storage.googleapis.com/finngen-public-data-r12/summary_stats/release/finngen_L12_DERMATITISECZEMA.gz"
+    samples: 500348
     cases: 67474
     controls: 432874
-    # TODO missing an hm_standard_error column, has the original
+  derm:
+    harmonised: True
+    accession_no: "GCST90297795"
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90297001-GCST90298000/GCST90297795/harmonised/GCST90297795.h.tsv.gz"
+    samples:  1094060
+    cases: 37541
+    controls: 1056519
   pbc:
     harmonised: True
     accession_no: "GCST90061440"
     sha256: "279b64244fd5daca779e85c378888853c83d7b1e45c61c106bfbfe7ff44ef525"
     md5: "78259ddd18c7274a0d98926c5e372fc9"
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90061001-GCST90062000/GCST90061440/harmonised/34033851-GCST90061440-EFO_1001486.h.tsv.gz"
-    # TODO beta and hm_beta are na, hm_odds_ratio present, standard error (for OR?) present
+    samples: 24510
   addi:
     harmonised: True
     accession_no: "GCST90011871"
     sha256: "ad7fae7d05cae457d567f6b4ebe00dc33ace4d16e9fd61effb516f16ce97df1c"
     md5: "de748156d744689d0dcca29c8cd9113c"
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90011001-GCST90012000/GCST90011871/harmonised/33574239-GCST90011871-MONDO_0009410.h.tsv.gz"
-    # TODO beta and hm_beta are na, hm_odds_ratio present, standard error (for OR?) present
+    samples: 5320
+    cases: 1223
+    controls: 4097
   psc:
     harmonised: True
     accession_no: "GCST004030"
     sha256: "638fd1d6861ca9cf4f251c854b8df7a1d07e954c4a2fa9f81428039dd0d9f6f4"
     md5: ""
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST004001-GCST005000/GCST004030/harmonised/27992413-GCST004030-EFO_0004268.h.tsv.gz"
-    # TODO neither OR nor beta! p-value and SE only
+    samples: 14890
+    cases: 2871
+    controls: 12019
   jia:
-    harmonised: True
+    harmonised: False
     accession_no: "GCST90010715"
-    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90010001-GCST90011000/GCST90010715/harmonised/33106285-GCST90010715-EFO_0002609.h.tsv.gz"
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90010001-GCST90011000/GCST90010715/GCST90010715_buildGRCh37.tsv"
     md5: ""
-    sha256: "ea3618ba99e64fcbc267c5c4f0a149e2669537d2c8c3c79707779c00324f647d"
-# NB: GCST007400 is actually bigger by a couple of thousand
-# TODO standard_error, p_value does not have hm prefix
+    sha256: "04f3071de6e5ab5f096d0527cc1275bc49bd710ef5d5afb55b287d816d5a3f1f"
+    is_gz: False
+    samples: 12501
+    cases: 3305
+    controls: 9196
+    gwas_ssf:
+        date_metadata_last_modified: "2025-01-14"
+        genome_assembly: GRCh37
+        coordinate_system: "1-based"
+        data_file_name: jia.tsv
+        data_file_md5sum: "e0004f7967afe2538857254bf4a16363"
+        file_type: "pre-GWAS-SSF"
+        is_harmonised: false
+        is_sorted: false
   sle:
     harmonised: True
     accession_no: "GCST003156"
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST003001-GCST004000/GCST003156/harmonised/26502338-GCST003156-EFO_0002690.h.tsv.gz"
     md5: ""
     sha256: "4480ff36384f6587e2cafa4187da56e72c9551ccd2f99896c9f7f80c02bd6583"
+    samples: 14267
+    cases: 5201
+    controls: 9066
   crohns:
     harmonised: True
     accession_no: "GCST004132"
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST004001-GCST005000/GCST004132/harmonised/28067908-GCST004132-EFO_0000384.h.tsv.gz"
     sha256: "d30661ed16b4bc8a0203c3ea1ad111b90e34ec797baa8a6c53b3c5dff01eff5d"
+    samples: 40266
+    cases: 12194
+    controls: 28072
   uc:
     harmonised: True
     accession_no: "GCST004133"
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST004001-GCST005000/GCST004133/harmonised/28067908-GCST004133-EFO_0000729.h.tsv.gz"
     sha256: "dafed0dbff579e7a131a095ba8db7927c9d266f64ef9b35a496a7c380e57970f"
+    samples: 45795
+    cases: 12366
+    controls: 33609
   t1d:
     harmonised: True
     accession_no: "GCST90014023"
     url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90014001-GCST90015000/GCST90014023/harmonised/34012112-GCST90014023-EFO_0001359.h.tsv.gz"
     sha256: "d5965d55922e46ee7056867770d4231ee67b4ae72715925f68b60353af896713"
+    cases: 18942
+    controls: 501638
+    samples: 520580
   ms:
-    harmonised: False
-    accession_no: ""
+    harmonised: True
+    accession_no: "GCST005531"
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST005001-GCST006000/GCST005531/harmonised/24076602-GCST005531-EFO_0003885.h.tsv.gz"
+    sha256: "2e8ced6fd425d59dad99866e81aac6753d64aaa5d0218861265ad35d3c0ba314"
+    samples: 38589
+    cases: 14498
+    controls: 24091
   igan:
     harmonised: False
     url: "https://www.columbiamedicine.org/divisions/kiryluk/gwas/IgA_Summary/IgAN_Combined_metaanalysis.txt"
     is_gz: False
+    sha256: "35b603e9f912ec0ed1a04a9aa6cf76c35b75998161e0d1ccbba4d0ded0d2c140"
+    accession_no: "GCST002655"
+    cases: 10146
+    controls: 28751
+    samples: 38897
+    gwas_ssf:
+        date_metadata_last_modified: "2025-02-27"
+        genome_assembly: "GRCh37"
+        coordinate_system: "1-based"
+        data_file_name: igan.tsv
+        data_file_md5sum: ""
+        file_type: "pre-GWAS-SSF"
+        is_harmonised: false
+        is_sorted: false
   lymphocyte-counts:
     harmonised: True
     accession_no: "GCST90002316"
@@ -562,6 +621,39 @@ gwas_datasets:
         file_type: "pre-GWAS-SSF"
         is_harmonised: true
         is_sorted: false
+  covid-igg:
+    accession_no: "GCST90295945"
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90295001-GCST90296000/GCST90295945/harmonised/GCST90295945.h.tsv.gz"
+    harmonised: True
+    coordinate_system: "1-based"
+    genotyping_technology:
+      - Genome-wide genotyping array
+    samples: 54066
+    # 'cases' are seronegative after first COVID-19 vaccine
+    cases: 37229
+    controls: 16837
+    gwas_ssf:
+      genome_assembly: GRCh38
+      data_file_name: covid-igg.tsv
+      file_type: GWAS-SSF v1.0
+      data_file_md5sum: 817e2fe4134eb0aa52d99691f152f25d
+    is_harmonised: true
+    is_sorted: true
+    harmonisation_reference: ftp://ftp.ensembl.org/pub/release-95/fasta/homo_sapiens/dna/
+  celiac:
+    url: "https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST005001-GCST006000/GCST005523/harmonised/22057235-GCST005523-EFO_0001060.h.tsv.gz"
+    accession_no: "GCST005523"
+    sha256sum: "d704544b62f85f71a2103ad04b849d8b20274bfef5272301b11612bdcc85bddd"
+    genotyping_technology:
+      - Targeted genotyping array
+    samples: 24269
+    cases: 12041
+    controls: 12228
+    gwas_ssf:
+      genome_assembly: GRCh38
+      coordinate_system: 1-based
+      is_harmonised: true
+      is_sorted: false
 loci:
   igh:
     chrom: 14
