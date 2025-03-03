@@ -214,3 +214,15 @@ rule plot_beta_vs_maf_for_all_isotypes:
     localrule: True
     conda: env_path("global.yaml")
     script: script_path("gwas/ig/plot_beta_vs_maf_at_ig_lead_snps.R")
+
+rule estimate_phenotypic_correlations_for_epic_ig:
+    input:
+        "resources/epic/ig_phenotypes.csv"
+    output:
+        "results/ig/epic_ig_phenotypic_correlations.tsv"
+    params:
+        seed = 143,
+        reps = 1000
+    localrule: True
+    conda: env_path("boot.yaml")
+    script: script_path("gwas/ig/estimate_phenotypic_correlations_for_epic_ig.R")

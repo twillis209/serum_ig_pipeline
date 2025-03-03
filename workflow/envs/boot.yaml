@@ -1,0 +1,9 @@
+name: serum-ig-pipeline-boot
+channels:
+- conda-forge
+dependencies:
+- r-base
+- r-data.table >= 1.15
+- r-stringr
+- r-r.utils
+- r-boot
