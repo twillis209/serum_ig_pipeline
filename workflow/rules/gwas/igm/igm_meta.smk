@@ -13,12 +13,6 @@ use rule run_iga_meta_analysis as run_igm_meta_meta_analysis with:
         "results/igm_meta/merged.tsv.gz"
     output:
         "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz"
-
-use rule per_snp_sample_size_for_iga_meta as per_snp_sample_size_for_igm_meta with:
-    input:
-        "results/igm_meta/merged.tsv.gz"
-    output:
-        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/per_snp_sample_size.tsv.gz"
     params:
         isotype = 'igm'
 

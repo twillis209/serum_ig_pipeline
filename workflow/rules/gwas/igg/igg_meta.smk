@@ -9,18 +9,11 @@ use rule merge_iga_gwas as merge_igg_gwas with:
     output:
         "results/igg_meta/merged.tsv.gz"
 
-use rule run_iga_meta_analysis as run_igg_meta_meta_analysis with:
+use rule run_iga_meta_analysis as run_igg_meta_analysis with:
     input:
         "results/igg_meta/merged.tsv.gz"
     output:
         "results/igg_meta/{epic_inclusion}/{dennis_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz"
-
-
-use rule per_snp_sample_size_for_iga_meta as per_snp_sample_size_for_igg_meta with:
-    input:
-        "results/igg_meta/merged.tsv.gz"
-    output:
-        "results/igg_meta/{epic_inclusion}/{dennis_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/per_snp_sample_size.tsv.gz"
     params:
         isotype = 'igg'
 

@@ -15,6 +15,14 @@ cols <- c(chr_col, bp_col, ref_col, alt_col, rsid_col, beta_col, se_col, p_col)
 coord_cols <- c(chr_col, bp_col, ref_col, alt_col)
 cols_to_relabel <- c(rsid_col, beta_col, se_col, p_col)
 
+if(!is.null(snakemake@params$include_sample_size)) {
+  if(snakemake@params$include_sample_size) {
+    n_col <- 'sample_size'
+    cols <- c(cols, n_col)
+    cols_to_relabel <- c(cols_to_relabel, n_col)
+  }
+}
+
 dats <- list()
 
 studies <- names(snakemake@input)[names(snakemake@input) != ""]
