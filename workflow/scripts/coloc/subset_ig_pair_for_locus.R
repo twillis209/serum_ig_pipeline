@@ -1,6 +1,9 @@
 library(data.table)
 setDTthreads(snakemake@threads)
 
+#save.image('sub.RData')
+#stop()
+
 merged <- fread(snakemake@input$merged)
 
 leads <- fread(snakemake@input$lead_snps)

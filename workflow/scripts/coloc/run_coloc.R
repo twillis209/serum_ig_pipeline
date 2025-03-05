@@ -2,7 +2,7 @@ library(data.table)
 setDTthreads(snakemake@threads)
 library(coloc)
 
-save.image('coloc.RData')
+#save.image('coloc.RData')
 
 beta_a <- sprintf('beta.%s', snakemake@wildcards$first_isotype)
 beta_b <- sprintf('beta.%s', snakemake@wildcards$second_isotype)
@@ -12,6 +12,8 @@ n_a <- sprintf('sample_size.%s', snakemake@wildcards$first_isotype)
 n_b <- sprintf('sample_size.%s', snakemake@wildcards$second_isotype)
 
 dat <- fread(snakemake@input[[1]])
+
+dat <- unique(dat, by = 'rsid')
 
 dat <- na.omit(dat, c(beta_a, beta_b, se_a, se_b))
 
