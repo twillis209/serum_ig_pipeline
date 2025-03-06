@@ -43,14 +43,16 @@ rule ig_h2_estimates:
 
 rule ig_imd_rg_estimates:
     input:
-        [f"results/ldak/ldak-thin/{x}-meta_and_{y}/inner/sans_mhc/snps_only/sumher.cors.full" for x in ["iga", "igg", "igm"] for y in config.get('imds')]
+        cor = [f"results/ldak/ldak-thin/{x}-meta_and_{y}/inner/sans_mhc/snps_only/sumher.cors.full" for x in ["iga", "igg", "igm"] for y in config.get('imds')],
+        log = [f"results/ldak/ldak-thin/{x}-meta_and_{y}/inner/sans_mhc/snps_only/sumher.log" for x in ["iga", "igg", "igm"] for y in config.get('imds')]
     output:
-        "results/ig/imd_rg_estimates.tsv"
+        neat = "results/ig/imd_rg_estimates.tsv",
+        with_nsnps = "results/ig/imd_rg_estimates_with_nsnps.tsv"
     localrule: True
     run:
         dafs = []
 
-        for x in input:
+        for x in input.cor:
             isotype = config['pretty_isotypes'].get(x.split('/')[3].split('_and_')[0])
             imd = config['gwas_datasets'].get(x.split('/')[3].split('_and_')[1]).get('pretty_phenotype')
             daf = pd.read_csv(x, sep = ' ')
@@ -69,7 +71,11 @@ rule ig_imd_rg_estimates:
 
         daf = daf[['Isotype', 'Immune phenotype', 'Heritability model', 'MHC', 'Genetic correlation estimate', 'Standard error', 'p-value', 'FDR']]
 
-        daf.to_csv(output[0], sep = '\t', index = False)
+        daf.to_csv(output.neat, sep = '\t', index = False)
+
+        nsnps_daf = tally_predictors_from_log_files(input.log)
+
+        daf.merge(nsnps_daf, left_on = ['Isotype', 'Immune phenotype'], right_on = ['trait.A', 'trait.B']).to_csv(output.with_nsnps, sep = '\t', index = False)
 
 rule ig_rg_estimates:
     input:

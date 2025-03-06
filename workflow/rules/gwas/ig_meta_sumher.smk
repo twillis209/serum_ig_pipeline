@@ -24,3 +24,7 @@ use rule merge_iga_gwas as merge_igg_and_igm_meta with:
         "results/merged_gwas/igg_and_igm/{join,inner}/{variant_set}/merged.tsv.gz"
     params:
         include_sample_size = True
+
+ruleorder: merge_iga_and_igg_meta > join_pair_gwas
+ruleorder: merge_iga_and_igm_meta > join_pair_gwas
+ruleorder: merge_igg_and_igm_meta > join_pair_gwas

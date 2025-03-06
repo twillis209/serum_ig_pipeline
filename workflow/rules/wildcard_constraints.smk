@@ -27,4 +27,5 @@ wildcard_constraints:
     snp_id = "\\d+_\\d+_\\w+_\\w+",
     decode_inclusion = "with_decode|without_decode",
     screen = "prescreen|postscreen",
-    locus = "[\\w-]+"
+    locus = "[\\w-]+",
+    non_ig = "^!(ig(g|a|m))$"

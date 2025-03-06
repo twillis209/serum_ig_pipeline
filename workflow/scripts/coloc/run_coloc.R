@@ -2,8 +2,6 @@ library(data.table)
 setDTthreads(snakemake@threads)
 library(coloc)
 
-#save.image('coloc.RData')
-
 beta_a <- sprintf('beta.%s', snakemake@wildcards$first_isotype)
 beta_b <- sprintf('beta.%s', snakemake@wildcards$second_isotype)
 se_a <- sprintf('standard_error.%s', snakemake@wildcards$first_isotype)
@@ -22,6 +20,9 @@ dat[, n_frac_b := as.integer(n_b)/as.integer(snakemake@params$second_isotype_max
 
 dat <- dat[abs(n_frac_a - n_frac_b) < 0.1]
 
+min_p_first_isotype <- dat[, min(p), env = list(p = sprintf("p_value.%s", snakemake@wildcards$first_isotype))]
+min_p_second_isotype <- dat[, min(p), env = list(p = sprintf("p_value.%s", snakemake@wildcards$second_isotype))]
+
 first_dataset <- list(snp = dat[, rsid],
                       beta = dat[, beta, env = list(beta = beta_a)],
                       varbeta = dat[, se^2, env = list(se = se_a)],
@@ -38,4 +39,12 @@ second_dataset <- list(snp = dat[, rsid],
                       sdY = 1
                       )
 
-saveRDS(coloc.abf(first_dataset, second_dataset), file = snakemake@output[[1]])
+res <- coloc.abf(first_dataset, second_dataset)
+
+saveRDS(res, file = snakemake@output[['rds']])
+
+res_dat <- data.table(t(res$summary))
+
+res_dat[, `:=` (first_trait = snakemake@wildcards$first_isotype, second_trait = snakemake@wildcards$second_isotype, first_snp = snakemake@wildcards$first_rsid, second_snp = snakemake@wildcards$second_rsid, min_p.first = min_p_first_isotype, min_p.second = min_p_second_isotype)]
+
+fwrite(res_dat, file = snakemake@output$tsv, sep = '\t')
