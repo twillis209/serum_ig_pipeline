@@ -5,11 +5,6 @@
 
 - [-] standardising GWAS datasets
   - [-] pre-GWAS-SSF datasets
-- [ ] harmonisation
-  - [ ] jia
-  - [ ] igan
-  - [ ] ms
-- [ ] 5781382 ig_imd_rg_estimates
 - [ ] redo beta vs maf plot once we have all EAF
 - [-] Z-score plots
   - [X] draw them
@@ -32,18 +27,19 @@
 
 ******** Ideas
 
-- [ ] Chen lymphocyte count trait?
-  - [ ] MR?
-- [ ] vaccine response GWAS
-  - [ ] Bian would be good to look at as it's large, accession GCST90295945
-- [ ] MTAG-type modelling of architecture of different isotype production?
-- [ ] comparison with 23andme infection summary statistics
+- [-] vaccine response GWAS
+  - [X] Bian would be good to look at as it's large, accession GCST90295945
+  - [X] Covid?
+  - [ ] should say in paper it's the only big one (check this statement)
+- comparison with 23andme infection summary statistics
+  - issue here is time needed to harmonise data sets
 - [ ] do loci influencing volume of ab production also affect antibody repertoires?
-- [ ] h2 enrichment in relevant cell type annotations?
 - [ ] local rg estimation with SUPERGNOVA?
   - [ ] LD score calculation would be a PITA
 
 ******** Writing
+
+- [ ] Genes and Immunity format?
 
 ********* Introduction
 
@@ -698,15 +694,6 @@ Need to replace the likes of =snakemake@params[['chr_col']]= with =snakemake@con
 
 According to a [[https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST004001-GCST005000/GCST004030/harmonised/readme.txt][README]], the =hm_= columns are the harmonised ones. Some, like =p_value= and =standard_error=, are left unchanged. Note that =effect_allele_frequency= is harmonised.
 
-| Dataset | Format |   |
-|---------+--------+---|
-| ra      | False  |   |
-| asthma  | False  |   |
-| pbc     | True   |   |
-| addi    | True   |   |
-| psc     |        |   |
-| jia     |        |   |
-
 ***** ra
 
 #+begin_src
@@ -835,6 +822,16 @@ dat <- dat[, .(rsid = hm_rsid, chromosome = hm_chrom, base_pair_location = hm_po
 dat <- na.omit(dat, c('base_pair_location', 'beta', 'standard_error', 'p_value'))
 fwrite(dat, file = 'ms.tsv.gz', sep = '\t')
 #+end_src
+
+***** celiac
+
+#+begin_src
+dat <- fread('celiac.tsv.gz')
+dat <- dat[, .(rsid = hm_rsid, chromosome = hm_chrom, base_pair_location = hm_pos, effect_allele = hm_effect_allele, other_allele = hm_other_allele, beta = hm_beta, standard_error, p_value)]
+dat <- na.omit(dat, c('base_pair_location', 'beta', 'standard_error', 'p_value'))
+fwrite(dat, file = 'celiac.tsv.gz', sep = '\t')
+#+end_src
+
 
 *** Notes on harmoniser pipeline
 **** Process
@@ -2218,6 +2215,26 @@ Also note how the EPIC frequency looks to be wrongly specified and does not agre
 
 When I do try to coalesce these in the absence of =EAF= from gnomAD, I will need to check that all columns are consistently >/< 0.5.
 
+** Effect of truncated IgM filtered_meta.tsv.gz <2025-03-06 Thu>
+
+#+begin_src
+-rw-rw----+ 1 tw395 wgs10k 635483867 Mar  5 22:02 results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/filtered_meta.tsv.gz
+-rw-rw----+ 1 tw395 wgs10k 961435284 Mar  4 23:40 results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/meta.tsv.gz
+#+end_src
+
+There were problems with =tmp= on 5/3/25 which makes me hopeful this has not affected previous analyses. Note how much smaller the =filtered= file is.
+
+#+begin_src
+(snakemake) [tw395@login-q-2 serum_ig_pipeline]$ for x in results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/*meta*; do echo $x; zcat $x | wc -l; done  results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/filtered_meta.tsv.gz
+18026636
+results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/meta.tsv.gz
+27312063
+#+end_src
+
+We had no SNPs beyond chromosome 11 in the =filtered= dataset.
+
+I checked IgG and IgA and these were fine.
+
 ** Paper by the numbers
 *** Sample sizes
 - IgA: 85,204
@@ -2232,3 +2249,7 @@ When I do try to coalesce these in the absence of =EAF= from gnomAD, I will need
 - IgG: 9
 - IgM: 37
 **** TODO Number of known associations prior to this study
+** Publication
+*** Genes and Immunity
+
+[[https://www.nature.com/gene/authors-and-referees/gta][Guide to authors]]
