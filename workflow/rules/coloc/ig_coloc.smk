@@ -13,7 +13,8 @@ checkpoint merge_ig_lead_snps:
         iga_igm = "results/coloc/iga_and_igm/merged_lead_snps.tsv",
         igg_igm = "results/coloc/igg_and_igm/merged_lead_snps.tsv"
     params:
-        window = 1e6
+        window = 1e6,
+        loci_to_drop = ['igh', 'igk', 'igl']
     localrule: True
     conda: env_path("global.yaml")
     script: script_path("coloc/merge_ig_lead_snps.R")

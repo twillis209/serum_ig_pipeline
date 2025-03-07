@@ -19,6 +19,17 @@ setnames(igm, cols, paste(cols, 'igm', sep = '.'))
 igm[, `:=` (start.igm = base_pair_location.igm - flank, end.igm = base_pair_location.igm + flank)]
 setkey(igm, chromosome.igm, start.igm, end.igm)
 
+for(x in snakemake@params$loci_to_drop) {
+  iga <- iga[!(chromosome.iga == snakemake@config$loci[[x]]$chrom &
+               base_pair_location.iga %between% c(snakemake@config$loci[[x]]$start, snakemake@config$loci[[x]]$stop))]
+
+  igg <- igg[!(chromosome.igg == snakemake@config$loci[[x]]$chrom &
+               base_pair_location.igg %between% c(snakemake@config$loci[[x]]$start, snakemake@config$loci[[x]]$stop))]
+
+  igm <- igm[!(chromosome.igm == snakemake@config$loci[[x]]$chrom &
+               base_pair_location.igm %between% c(snakemake@config$loci[[x]]$start, snakemake@config$loci[[x]]$stop))]
+}
+
 iga_igg <- foverlaps(iga, igg, mult = 'all')[!is.na(rsid.igg)]
 iga_igg[, distance := abs(base_pair_location.iga - base_pair_location.igg)]
 fwrite(iga_igg, file = snakemake@output$iga_igg, sep = '\t')

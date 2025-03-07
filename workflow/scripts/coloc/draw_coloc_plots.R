@@ -34,5 +34,3 @@ zscore_plot <- ggplot(dat)+
   coord_fixed(ratio = 1)
 
 ggsave(locus_plot+zscore_plot+plot_annotation(title = sprintf('%s and %s', snakemake@wildcards$first_rsid, snakemake@wildcards$second_rsid)), width = 6, height = 4, file = snakemake@output[[1]])
-
-

@@ -96,3 +96,4 @@ collapsed <- merged[, .(disorder = paste(unique(Disease), collapse = ', ')), by 
 fwrite(merged, file = snakemake@output[['sanitised']], sep = '\t')
 
 fwrite(collapsed, file = snakemake@output[['collapsed']], sep = '\t')
+
