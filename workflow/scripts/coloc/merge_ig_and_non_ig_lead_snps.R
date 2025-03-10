@@ -25,6 +25,6 @@ non_ig_dat[, `:=` (start = bp - flank, end = bp + flank), env = list(start = spr
    ]
 setkeyv(non_ig_dat, c(sprintf("chromosome.%s", non_ig), sprintf("start.%s", non_ig), sprintf("end.%s", non_ig)))
 
-ig_non_ig <- foverlaps(ig, non_ig_dat, mult = 'all')[!is.na(rsid), env = list(rsid = sprintf("rsid.%s", iso))]
+ig_non_ig <- foverlaps(ig, non_ig_dat, mult = 'all')[!is.na(rsid), env = list(rsid = sprintf("rsid.%s", non_ig))]
 ig_non_ig[, distance := abs(bp1 - bp2), env = list(bp1 = sprintf("base_pair_location.%s", iso), bp2 = sprintf("base_pair_location.%s", non_ig))]
 fwrite(ig_non_ig, file = snakemake@output[[1]], sep = '\t')

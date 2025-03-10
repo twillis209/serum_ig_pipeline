@@ -2,6 +2,9 @@ library(data.table)
 setDTthreads(snakemake@threads)
 library(magrittr)
 
+#save.image('clump.RData')
+#stop()
+
 chr_col <- snakemake@config$chr_col
 bp_col <- snakemake@config$bp_col
 ref_col <- snakemake@config$ref_col
@@ -20,14 +23,11 @@ if(!snakemake@params$mhc) {
   dat <- dat[!(get(chr_col) == 6 & get(bp_col) %between% c(24e6, 45e6))]
 }
 
-dat[, (chr_col) := as.character(get(chr_col))]
-dat[, (bp_col) := as.integer(get(bp_col))]
+dat[, `:=` (chr = as.character(chr), pos = as.integer(pos), p = as.numeric(p)), env = list(chr = chr_col, pos = bp_col, p = p_col)]
 
-#dat <- dat[!(get(snp_col) %in% snakemake@params$snps_to_ignore)]
+dat <- dat[p <= index_threshold, env = list(p = p_col)]
 
-dat <- dat[get(p_col) <= index_threshold]
-
-dat <- dat[order(get(p_col))]
+setorderv(dat, p_col)
 
 for(i in unique(dat[[chr_col]])) {
   j <- 1

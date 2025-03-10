@@ -28,4 +28,6 @@ wildcard_constraints:
     decode_inclusion = "with_decode|without_decode",
     screen = "prescreen|postscreen",
     locus = "[\\w-]+",
-    non_ig = "^!(ig(g|a|m))$"
+    isotype = "iga|igg|igm",
+    first_isotype = "iga|igg|igm",
+    second_isotype = "iga|igg|igm"

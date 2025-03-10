@@ -24,5 +24,6 @@ setkey(all_pairs, second_snp)
 all_pairs[rbound_genes, genes.second_snp := genes]
 
 all_pairs[, max_post := names(.SD)[max.col(.SD, ties.method = 'first')], .SDcols = patterns('PP.H')]
+all_pairs[, max_post := gsub('PP\\.|\\.abf', '', max_post)]
 
 fwrite(all_pairs, file = snakemake@output[[1]], sep = '\t')
