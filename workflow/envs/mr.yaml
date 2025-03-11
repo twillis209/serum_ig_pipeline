@@ -1,0 +1,13 @@
+name: serum-ig-pipeline-mr
+channels:
+- conda-forge
+- bioconda
+- twillis209
+dependencies:
+- r-base
+- r-data.table >= 1.15
+- r-stringr
+- r-r.utils
+- r-magrittr
+- r-ggplot2
+- r-mendelianrandomization

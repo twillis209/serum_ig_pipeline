@@ -47,6 +47,7 @@ include: 'rules/iei.smk'
 include: 'rules/coloc/ig_coloc.smk'
 include: 'rules/coloc/ig_and_non_ig_coloc.smk'
 include: 'rules/zscore_plots.smk'
+include: 'rules/mr.smk'
 include: 'rules/paper/tables.smk'
 include: 'rules/python/export.py'
 
