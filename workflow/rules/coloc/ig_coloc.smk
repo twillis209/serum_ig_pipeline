@@ -52,6 +52,15 @@ rule draw_coloc_plots_for_ig_pair:
     conda: env_path("global.yaml")
     script: script_path("coloc/draw_coloc_plots.R")
 
+rule draw_locuszoomr_plot_for_coloc_ig_pair:
+    input:
+        "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/sumstats.tsv"
+    output:
+        "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/lz_plots.png"
+    localrule: True
+    conda: env_path("global.yaml")
+    script: script_path("coloc/draw_locuszoomr_plots.R")
+
 rule run_coloc_for_all_ig_pairs:
     input:
         iga_igg = lambda w: [f"results/coloc/iga_and_igg/{first_rsid}_and_{second_rsid}/coloc.tsv" for first_rsid, second_rsid in get_rsids_from_merged_lead_snps(w, isotype_a = 'iga', isotype_b = 'igg')],

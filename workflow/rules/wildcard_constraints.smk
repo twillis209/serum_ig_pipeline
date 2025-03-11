@@ -31,3 +31,4 @@ wildcard_constraints:
     isotype = "iga|igg|igm",
     first_isotype = "iga|igg|igm",
     second_isotype = "iga|igg|igm"
+   # non_ig = r"^(?!.*\b(iga|igg|igm)\b).+$"

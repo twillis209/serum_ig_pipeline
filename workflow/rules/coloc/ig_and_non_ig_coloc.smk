@@ -65,3 +65,9 @@ rule add_genes_to_ig_and_non_ig_coloc_pair:
     localrule: True
     conda: env_path("global.yaml")
     script: script_path("coloc/add_genes_to_ig_and_non_ig_coloc_pair.R")
+
+use rule draw_locuszoomr_plot_for_coloc_ig_pair as draw_locuszoomr_plot_for_coloc_ig_and_non_ig_pair with:
+    input:
+        "results/coloc/{isotype}_and_{non_ig}/{first_rsid}_and_{second_rsid}/sumstats.tsv"
+    output:
+        "results/coloc/{isotype}_and_{non_ig}/{first_rsid}_and_{second_rsid}/lz_plots.png"
