@@ -1,3 +1,8 @@
+def get_rsid_and_coordinates_from_igm_lead_snps(w):
+    daf = pd.read_csv(checkpoints.distance_clump_igm_meta.get(**w).output[0], sep = '\t')
+
+    return zip(daf.rsid, daf.chromosome, daf.base_pair_location)
+
 use rule merge_iga_gwas as merge_igm_gwas with:
     input:
         epic = "results/restandardised_gwas/epic-igm.tsv.gz",
@@ -46,6 +51,27 @@ checkpoint distance_clump_igm_meta:
     group: "gwas"
     conda: env_path("global.yaml")
     script: script_path("gwas/distance_clump.R")
+
+use rule draw_iga_distance_clump_plot as draw_igm_distance_clump_plot with:
+    input:
+        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz"
+    output:
+        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}/{lead_rsid}_chr{chrom}_{start}_{end}.png"
+    threads: 16
+
+use rule draw_loci_from_iga_distance_clump as draw_loci_from_igm_distance_clump with:
+    input:
+        lambda w: [f"results/igm_meta/{{epic_inclusion}}/{{scepanovic_inclusion}}/{{pietzner_inclusion}}/{{gudjonsson_inclusion}}/{{eldjarn_inclusion}}/{{window_size}}_{{threshold}}/{rsid}_chr{chrom}_{int(int(pos)-2e6)}_{int(int(pos)+2e6)}.png" for rsid, chrom, pos in get_rsid_and_coordinates_from_igm_lead_snps(w)]
+    output:
+        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}/locus_plots.done"
+
+use rule collapse_clumped_iga_lead_snps as collapse_clumped_igm_lead_snps with:
+    input:
+        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_lead_snps.tsv"
+    output:
+        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_collapsed_lead_snps.tsv"
+    params:
+        snps_to_remove = config.get('gwas_datasets').get('igm-meta').get('lead_snps_to_remove')
 
 use rule annotate_lead_snps as annotate_igm_meta_lead_snps with:
     input:

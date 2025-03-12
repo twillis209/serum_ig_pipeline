@@ -2,25 +2,25 @@ library(data.table)
 library(MendelianRandomization)
 setDTthreads(snakemake@threads)
 
-beta_x <- sprintf("beta.%s", snakemake@isotype)
-se_x <- sprintf("se.%s", snakemake@isotype)
-beta_y <- sprintf("beta.%s", snakemake@non_ig)
-se_y <- sprintf("se.%s", snakemake@non_ig)
+beta_y <- sprintf("beta.%s-meta", snakemake@wildcards$isotype)
+se_y <- sprintf("standard_error.%s-meta", snakemake@wildcards$isotype)
+beta_x <- sprintf("beta.%s", snakemake@wildcards$non_ig)
+se_x <- sprintf("standard_error.%s", snakemake@wildcards$non_ig)
 
 merged <- fread(snakemake@input$merged, select = c('rsid', "chromosome", "base_pair_location", beta_x, se_x, beta_y, se_y))
 
-lead_snps <- fread(snakemake@input$lead_snps)
+lead_snps <- fread(snakemake@input$ig)
 
-dat <- merge(lead_snps, merged, by = 'rsid', all.x = T)
+dat <- merge(lead_snps, merged, by = 'rsid')
 
 dat <- dat[!(rsid %in% snakemake@params$snps_to_exclude)]
 
 dat <- na.omit(dat, c(beta_x, beta_y))
 
-mr_input_obj <- mr_input(bx = dat[, beta_x],
-                         bxse = dat[, se_x],
-                         by = dat[, beta_y],
-                         byse = dat[, se_y],
+mr_input_obj <- mr_input(bx = dat[, get(beta_x)],
+                         bxse = dat[, get(se_x)],
+                         by = dat[, get(beta_y)],
+                         byse = dat[, get(se_y)],
                          snps = dat[, rsid])
 
 res <- mr_allmethods(mr_input_obj, method = 'all')

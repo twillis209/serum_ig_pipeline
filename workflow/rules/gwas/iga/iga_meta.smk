@@ -1,3 +1,8 @@
+def get_rsid_and_coordinates_from_iga_lead_snps(w):
+    daf = pd.read_csv(checkpoints.distance_clump_iga_meta.get(**w).output[0], sep = '\t')
+
+    return zip(daf.rsid, daf.chromosome, daf.base_pair_location)
+
 rule merge_iga_gwas:
     input:
         epic = "results/restandardised_gwas/epic-iga.tsv.gz",
@@ -69,9 +74,41 @@ checkpoint distance_clump_iga_meta:
     conda: env_path("global.yaml")
     script: script_path("gwas/distance_clump.R")
 
-use rule annotate_lead_snps as annotate_iga_meta_lead_snps with:
+rule draw_iga_distance_clump_plot:
+    input:
+        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz"
+    output:
+        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}/{lead_rsid}_chr{chrom}_{start}_{end}.png"
+    threads: 12
+    resources:
+        runtime = 10
+    group: "gwas"
+    conda: env_path("global.yaml")
+    script: script_path("gwas/locuszoomr/plot_locus.R")
+
+rule draw_loci_from_iga_distance_clump:
+    input:
+        lambda w: [f"results/iga_meta/{{epic_inclusion}}/{{liu_inclusion}}/{{scepanovic_inclusion}}/{{dennis_inclusion}}/{{pietzner_inclusion}}/{{gudjonsson_inclusion}}/{{eldjarn_inclusion}}/{{window_size}}_{{threshold}}/{rsid}_chr{chrom}_{int(int(pos)-2e6)}_{int(int(pos)+2e6)}.png" for rsid, chrom, pos in get_rsid_and_coordinates_from_iga_lead_snps(w)]
+    output:
+        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}/locus_plots.done"
+    params:
+        flank = 2e6
+    shell: "touch {output}"
+
+rule collapse_clumped_iga_lead_snps:
     input:
         "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_lead_snps.tsv"
+    output:
+        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_collapsed_lead_snps.tsv"
+    params:
+        snps_to_remove = config.get('gwas_datasets').get('iga-meta').get('lead_snps_to_remove')
+    localrule: True
+    run:
+        pd.read_csv(input[0], sep = '\t').query("rsid not in @params.snps_to_remove").to_csv(output[0], sep = '\t', index = False)
+
+use rule annotate_lead_snps as annotate_iga_meta_lead_snps with:
+    input:
+        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_collapsed_lead_snps.tsv"
     output:
         "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps.tsv"
 
