@@ -76,7 +76,7 @@ gwas_datasets:
     lead_snps_to_remove: ['rs542980898', 'rs750880374']
   igm-meta:
     samples: 55368
-    lead_snps_to_remove: []
+    lead_snps_to_remove: ['rs12061333', 'rs34635213', 'rs2336142', 'rs2395833', 'rs118008550']
   iga:
     samples: 85204
   igg:
