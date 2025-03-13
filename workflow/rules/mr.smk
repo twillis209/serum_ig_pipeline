@@ -9,6 +9,7 @@ rule run_mr_on_ig_and_non_ig:
         ),
         merged = "results/merged_gwas/{isotype}-meta_and_{non_ig}/inner/with_mhc/merged.tsv.gz"
     output:
+        mr_input = "results/mr/{isotype}_and_{non_ig}/mr_input.rds",
         tsv = "results/mr/{isotype}_and_{non_ig}/mr.tsv",
         png = "results/mr/{isotype}_and_{non_ig}/mr.png",
         png_ivw = "results/mr/{isotype}_and_{non_ig}/mr_ivw.png"

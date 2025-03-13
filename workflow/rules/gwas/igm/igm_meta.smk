@@ -75,7 +75,7 @@ use rule collapse_clumped_iga_lead_snps as collapse_clumped_igm_lead_snps with:
 
 use rule annotate_lead_snps as annotate_igm_meta_lead_snps with:
     input:
-        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_lead_snps.tsv"
+        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_collapsed_lead_snps.tsv"
     output:
         "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps.tsv"
 

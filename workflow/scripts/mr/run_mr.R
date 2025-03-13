@@ -23,6 +23,8 @@ mr_input_obj <- mr_input(bx = dat[, get(beta_x)],
                          byse = dat[, get(se_y)],
                          snps = dat[, rsid])
 
+saveRDS(mr_input_obj, snakemake@output$mr_input)
+
 res <- mr_allmethods(mr_input_obj, method = 'all')
 
 fwrite(res@Values, file = snakemake@output$tsv, sep = '\t')

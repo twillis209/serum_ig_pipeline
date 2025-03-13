@@ -35,6 +35,12 @@ use rule iga_lead_snps as igm_lead_snps with:
     output:
         "results/paper/tables/igm_lead_snps.tsv"
 
+rule ig_lead_snp_tables:
+    input:
+        "results/paper/tables/iga_lead_snps.tsv",
+        "results/paper/tables/igg_lead_snps.tsv",
+        "results/paper/tables/igm_lead_snps.tsv"
+
 rule iei_table:
     input:
         iga = "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps_with_ieis.tsv",

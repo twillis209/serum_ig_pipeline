@@ -217,13 +217,6 @@ else:
                 'mostSevereConsequence' : v['variantInfo']['mostSevereConsequence'],
                 'gnomadFIN' : v['variantInfo']['gnomadFIN'],
                 'gnomadNFE' : v['variantInfo']['gnomadNFE'],
-                'gnomadAFR' : v['variantInfo']['gnomadAFR'],
-                'gnomadAMR' : v['variantInfo']['gnomadAMR'],
-                'gnomadASJ' : v['variantInfo']['gnomadASJ'],
-                'gnomadEAS' : v['variantInfo']['gnomadEAS'],
-                'gnomadNFEEST' : v['variantInfo']['gnomadNFEEST'],
-                'gnomadNFENWE' : v['variantInfo']['gnomadNFENWE'],
-                'gnomadNFESEU' : v['variantInfo']['gnomadNFESEU']
                 #'associatedTraits' : study_string
             }
             )
