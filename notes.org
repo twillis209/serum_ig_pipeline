@@ -1,31 +1,22 @@
 * The serum Ig paper <2024-11-02 Sat>
 ** TODO list
 
-*** Analyses
-
-- [-] redo h2 and rg after excluding IGK and IGL
-  - [X] run jobs 5057310
-  - [-] h2 for IgA has plummeted, what's up?
-    - [X] rerun with inclusion of IGH/K/L
-    - [X] calculate h2 enrichments
-    - [X] check logs
-    - [ ] rerunning missing result 5183642
-  - [ ] rewrite rg to omit IGH/K/L
-    - [ ] write
-    - [ ] run
-    - [ ] check logs
-  - [-] update Google Sheets
-    - [X] h2
-    - [ ] rg
+- [ ] rerun MR downstream of new lead SNP datasets
+  - [ ] IgA
+  - [ ] IgM
+  - [ ] IgA
+- [ ] need some sort of consensus MAF rule based on best available estimate
 - [ ] redo beta vs maf plot once we have all EAF
 - [-] Z-score plots
   - [X] draw them
   - [ ] inspect them
-- [ ] forest plots
-- [ ] use OTG to fetch list of all genes for lead SNPs and cross-reference with IEI list
-- [ ] coloc
-- [ ] analysis of heterogeneity
-- [ ] random effects? Kiryluk did it.
+- [-] coloc
+  - [ ] talk to Chris about approach, need to make clear I'm not using all of her code and why
+  - [ ] inspect plots
+  - [ ] 17q11-21 locuszoomr plot
+  - [X] Ig
+- [ ] MR needs some consideration:
+  - [ ] heterogeneity and use of penalty
 
 *** TODOs to integrate
 
@@ -37,15 +28,9 @@
 
 ******** Ideas
 
-- [ ] Chen lymphocyte count trait?
-- [ ] vaccine response GWAS
-  - [ ] Bian would be good to look at as it's large, accession GCST90295945
-- [ ] MTAG-type modelling of architecture of different isotype production?
 - [ ] comparison with 23andme infection summary statistics
 - [ ] do loci influencing volume of ab production also affect antibody repertoires?
-- [ ] h2 enrichment in relevant cell type annotations?
 - [ ] local rg estimation with SUPERGNOVA?
-  - [ ] LD score calculation would be a PITA
 
 ******** Writing
 
@@ -1831,6 +1816,199 @@ Also note how the EPIC frequency looks to be wrongly specified and does not agre
 
 When I do try to coalesce these in the absence of =EAF= from gnomAD, I will need to check that all columns are consistently >/< 0.5.
 
+*** Harmonising the 'sign'
+
+Need to make sure that I am dealing with the effect allele frequency when considering all of the columns.
+
+E.g. AF1.dennis was > 0.5 for one SNP in the IgA meta-analysis, so close to being the MAF but not quite. Of three datasets for which I had =effect_allele_frequency= estimates, two were >0.5. ImpMAF.eldjarn was <0.5 for all (as per the name).
+
+*** Pooling EAF estimates?
+
+Could we weight estimates by sample size and get a pooled estimate from a 'meta-analysis' of MAF estimates? The problem is that we don't get genotype calls for every individual in the sample.
+
+**** Datasets
+
+***** IgA
+
+We have
+
+**** Method
+
+#+begin_ai
+I have a data.table with columns corresponding to MAF estimates. These columns contain NA values. I want to compute sample size-weighted meta-analytic MAF estimates using these columns.
+
+
+[AI]: Below is one way to do this in R using data.table. The idea is to compute a weighted average for each row where the weights are the sample sizes, so that the metaâanalytic MAF is
+
+ââmeta_MAF = (ââ nâ Ã MAFâ) / (ââ nâ)
+
+In the example below, we assume your table (called dt) has, for example, three MAF columns (e.g., MAF_1, MAF_2, MAF_3) and corresponding sample size columns (e.g., N_1, N_2, N_3). We then use rowSums (with na.rm=TRUE) to âskip overâ any NA values in the weighted average calculation. (Be cautious: if a particular row has NA for all sample sizes, the denominator will be 0 and you might want to handle that case.)
+
+Hereâs some example code:
+
+-------------------------------------------------
+library(data.table)
+
+# Example data
+dt <- data.table(
+  MAF_1 = c(0.10, NA, 0.15, 0.20),
+  MAF_2 = c(0.12, 0.14, NA, 0.18),
+  MAF_3 = c(NA, 0.13, 0.16, 0.19),
+  N_1   = c(100, 150, 120, 130),
+  N_2   = c(200, 220, 180, 210),
+  N_3   = c(150, 160, 140, 190)
+)
+
+# Compute the meta-analytic MAF as sample size-weighted average across the MAF columns.
+# The formula is: meta_MAF = (MAF_1*N_1 + MAF_2*N_2 + MAF_3*N_3) / (N_1+N_2+N_3)
+# We want to remove NA values â meaning if a particular MAF is missing, we ignore its sample size as well.
+
+dt[, meta_MAF := {
+  # Compute weighted contributions; NA values in multiplication will yield NA so we use cbind() with na.rm
+  # For each row, the weighted sum is:
+  numer <- rowSums(cbind(MAF_1 * N_1, MAF_2 * N_2, MAF_3 * N_3), na.rm = TRUE)
+  # And the total weight is the sum of sample sizes, but only for non-NA MAF estimates.
+  denom <- rowSums(cbind(ifelse(is.na(MAF_1), 0, N_1),
+                         ifelse(is.na(MAF_2), 0, N_2),
+                         ifelse(is.na(MAF_3), 0, N_3)),
+                    na.rm = TRUE)
+  # Avoid division by zero:
+  out <- ifelse(denom > 0, numer/denom, NA_real_)
+  out
+}]
+
+print(dt)
+-------------------------------------------------
+
+Explanation:
+1. We create a weighted sum in the numerator. Multiplying MAF_i * N_i results in NA if MAF_i is NA. Using rowSums with na.rm = TRUE ignores those NA contributions.
+2. For the denominator, we only want to add the sample size N_i if the corresponding MAF_i is not NA. We use ifelse(is.na(MAF_i), 0, N_i) to achieve that.
+3. The meta_MAF is then the weighted sum divided by the total sample size for which we had a MAF estimate.
+4. We use an ifelse to return NA in cases where no valid MAFs are available (denom is 0).
+
+This approach easily scales for more than three columns. Just adjust the column names (or use patterns / .SDcols if they follow a naming convention).
+
+Alternate Approach Using .SD:
+If your column names have a clear pattern, you can take advantage of .SD. For example:
+
+-------------------------------------------------
+# Suppose your MAF columns all start with "MAF" and sample size columns with "N".
+mafcols <- grep("^MAF", names(dt), value = TRUE)
+ncols   <- grep("^N",   names(dt), value = TRUE)
+
+dt[, meta_MAF := {
+  numer <- rowSums(mapply(function(maf, n){
+    # For each pair, replace MAF NA with 0 so it doesn't contribute.
+    ifelse(is.na(maf), 0, maf * n)
+  }, .SD[[mafcols]], .SD[[ncols]]), na.rm=TRUE)
+  
+  denom <- rowSums(mapply(function(maf, n){
+    ifelse(is.na(maf), 0, n)
+  }, .SD[[mafcols]], .SD[[ncols]]), na.rm=TRUE)
+  
+  ifelse(denom > 0, numer/denom, NA_real_)
+}, .SDcols = c(mafcols, ncols)]
+-------------------------------------------------
+
+Choose the approach that best fits your data setup. This method correctly handles NA values and yields the sample sizeâweighted meta-analytic MAF estimate for each row.
+
+[ME]: What if I have the sample sizes in a separate vector?
+
+[AI]: Assume you have a data.table with several MAF columns (which may contain NA values) and that your sample sizes for these columns are stored in a separate vector. For example, suppose your data.table (named dt) looks like this:
+
+  MAF_1   MAF_2   MAF_3
+1  0.10    0.12     NA
+2   NA     0.14    0.13
+3  0.15     NA     0.16
+4  0.20    0.18    0.19
+
+and your sample sizes vector is defined as
+
+  sample_sizes = c(100, 200, 150)
+
+That is, the weight for MAF_1 is 100, for MAF_2 is 200, and for MAF_3 is 150. The desired meta-analytic MAF estimate for each row is computed as:
+
+ââmeta_MAF = (MAF_1*100 + MAF_2*200 + MAF_3*150) / (sum of sample sizes for nonâmissing MAF values)
+
+Below are two ways to do this in R. Both methods construct a weighted average for each row by zeroing out weights corresponding to NA MAF estimates.
+
+ââââââââââââââââââââââââââ
+Method 1: Using Matrix Operations
+
+In this example we convert the relevant MAF columns into a matrix, compute the numerator and denominator rowâwise, and properly handle the NA values:
+
+-------------------------------------------------
+library(data.table)
+
+# Example data.table with MAF columns
+dt <- data.table(
+  MAF_1 = c(0.10, NA, 0.15, 0.20),
+  MAF_2 = c(0.12, 0.14, NA, 0.18),
+  MAF_3 = c(NA, 0.13, 0.16, 0.19)
+)
+
+# Sample sizes vector corresponding to the MAF columns
+sample_sizes <- c(100, 200, 150)
+
+# Calculate meta-analytic MAF weighted by sample sizes
+dt[, meta_MAF := {
+  # Create matrix from the selected MAF columns
+  maf_mat <- as.matrix(.SD)
+  
+  # Multiply each element by its corresponding sample size.
+  # Here we replicate the sample_sizes vector by row.
+  weight_mat <- matrix(sample_sizes, nrow(maf_mat), length(sample_sizes), byrow = TRUE)
+  
+  # For NA values, set the effective weight to 0.
+  effective_weights <- ifelse(is.na(maf_mat), 0, weight_mat)
+  
+  # Compute the weighted sum for each row.
+  numerator <- rowSums(ifelse(is.na(maf_mat), 0, maf_mat) * weight_mat)
+  
+  # Compute the total weight for each row (only counting non-NA MAF estimates).
+  denominator <- rowSums(effective_weights)
+  
+  # Return the weighted average; if no weights present (denom==0), return NA.
+  ifelse(denominator > 0, numerator / denominator, NA_real_)
+}, .SDcols = c("MAF_1", "MAF_2", "MAF_3")]
+
+print(dt)
+-------------------------------------------------
+
+ââââââââââââââââââââââââââ
+Method 2: Using apply() Over Rows
+
+This approach processes each row separately. The function checks whether a given MAF value is missing; if it is, its corresponding weight is set to zero. Then it computes the weighted mean for that row.
+
+-------------------------------------------------
+dt[, meta_MAF := apply(.SD, 1, function(maf_row) {
+  # Use the provided sample_sizes vector.
+  # Create a weight vector where NA MAF's get a weight of zero.
+  effective_weights <- ifelse(is.na(maf_row), 0, sample_sizes)
+  
+  # Calculate the weighted average.
+  if(sum(effective_weights) > 0) {
+    sum(maf_row * sample_sizes, na.rm = TRUE) / sum(effective_weights)
+  } else {
+    NA_real_
+  }
+}), .SDcols = c("MAF_1", "MAF_2", "MAF_3")]
+
+print(dt)
+-------------------------------------------------
+
+ââââââââââââââââââââââââââ
+Explanation
+
+â¢ For each row the numerator is calculated as the sum of (MAF Ã corresponding sample size). If a MAF value is NA, its contribution is zero.
+â¢ The denominator is the sum of the sample sizes for positions where the MAF value is not missing.
+â¢ Finally, the meta-analytic MAF is computed as the numerator divided by the denominator (or NA if no valid data exist).
+
+Choose whichever method best fits your coding style or performance needs. Both methods correctly account for NA values by âdropping outâ the sample size associated with any missing MAF estimate.
+
+[ME]: 
+#+end_ai
+
 ** Paper by the numbers
 *** Sample sizes
 - IgA: 85,204
@@ -1845,3 +2023,652 @@ When I do try to coalesce these in the absence of =EAF= from gnomAD, I will need
 - IgG: 9
 - IgM: 37
 **** TODO Number of known associations prior to this study
+** DONE Slow =distance_clump= <2025-03-10 Mon>
+
+#+begin_org-ai
+Can you optimise the following R code? It uses data.table.
+dat <- fread(snakemake@input[[1]], sep = '\t', select = c(chr_col, bp_col, ref_col, alt_col, rsid_col, p_col, beta_col, se_col))
+
+if(!snakemake@params$mhc) {
+  dat <- dat[!(get(chr_col) == 6 & get(bp_col) %between% c(24e6, 45e6))]
+}
+
+dat[, (chr_col) := as.character(get(chr_col))]
+dat[, (bp_col) := as.integer(get(bp_col))]
+
+#dat <- dat[!(get(snp_col) %in% snakemake@params$snps_to_ignore)]
+
+dat <- dat[get(p_col) <= index_threshold]
+
+dat <- dat[order(get(p_col))]
+
+for(i in unique(dat[[chr_col]])) {
+  j <- 1
+
+  while(j <= dat[get(chr_col) == i, .N]) {
+    bp <- dat[get(chr_col) == i][j][[bp_col]]
+
+    dat <- dat[!(get(chr_col) == i & get(bp_col) != bp & get(bp_col) %between% c(bp-distance_window/2, bp+distance_window/2))]
+
+    j <- j + 1
+  }
+}
+
+dat <- dat[order(get(chr_col), get(bp_col))]
+
+fwrite(dat, file = snakemake@output[[1]], sep = '\t')
+
+[AI]: Here's an optimized and vectorized version of your code:
+
+```r
+library(data.table)
+
+# Read file into a data.table
+dat <- fread(snakemake@input[[1]], sep = '\t', select = c(chr_col, bp_col, ref_col, alt_col, rsid_col, p_col, beta_col, se_col))
+
+# Remove rows if conditions hold
+if (!snakemake@params$mhc) {
+  dat <- dat[!(chr_col == 6 & bp_col %between% c(24e6, 45e6))]
+} # Convert desired columns to specific types dat[, c(chr_col, bp_col) := .(as.character(chr_col), as.integer(bp_col))]
+
+# Filter out rows based on column values
+dat <- dat[p_col <= index_threshold]
+
+# Order rows based on column values
+setorder(dat, p_col)
+
+dat <- dat[, !ranges := data.table::frankv(bp_col, ties.method = "dense")]
+
+median_bp <- median(bp_col)
+dat[, !rows_to_remove := abs(bp_col - median_bp) > distance_window/2]
+dat <- dat[!(rows_to_remove == TRUE),]
+
+# Order rows based on column values
+setorder(dat, chr_col, bp_col)
+
+# Write updated data.table to a file
+fwrite(dat, file = snakemake@output[[1]], sep = '\t')
+```
+
+This optimized version of the code accomplishes the same tasks as the original while providing several enhancements:
+
+1. The code uses direct reference to the column names instead of the `get()` function. You should notice a performance boost as a result, especially for larger data.
+
+2. The nested loop to remove rows has been replaced. While loops can be slower in R, this vectorized solution should also improve performance. 
+
+3. The code removes a redundant ordering operation (`setorder`) by ordering the data only once after all filtering operations have been performed.
+
+4. It simplifies your conditions to make your code cleaner as well as potentially faster.
+
+5. It adds measures to use `data.table`'s fast grouping and sorting capabilities, which is specially designed for large datasets.
+
+Overall, the optimization should make the code faster and easier to read and maintain.
+
+#+end_org-ai
+
+
+I don't think o3-mini got this right and the problem in any case was that the =p_value= column was identified as a =character= column.
+** Mendelian randomisation <2025-03-11 Tue>
+*** Ig and lymphocyte counts
+**** Ig variants as instruments
+
+Penalty is intended to account for heterogeneous (i.e. outlying) 'variant-specific estimates' as per the package docs.
+
+IgA only has a significant slope for 'penalized weighted median' and it's negative!
+
+IgM has significant estimates for quite a few methods but the sign and magnitude of the estimates are all over the place.
+
+IgG also has many significant estimates, all positive, a couple of non-significant negative estimates.
+
+***** IgA
+#+begin_quote
+Method	Estimate	Std Error	95% CI 	 	P-value
+Simple median	-0.292064393989576	1.02754215266547	-2.30601000581065	1.7218812178315	0.776229586316705
+Weighted median	-0.0980488058570843	0.0913206241374101	-0.277033940212127	0.0809363284979587	0.282967708481664
+Penalized weighted median	-1.27016375861641	0.239104810849575	-1.73880057641184	-0.801526940820985	1.08331564326494e-07
+IVW	-0.1881572616759	0.382821856682402	-0.938474313268161	0.562159789916362	0.623072262668913
+Penalized IVW	-1.26592488783181	5.66157926594536	-12.3624163447034	9.83056656903982	0.823069145911547
+Robust IVW	-0.0965570025077066	0.365299328081112	-0.812530529123367	0.619416524107954	0.791531063749147
+Penalized robust IVW	4.51737658865183	365.35937530395	-711.573840421143	720.608593598447	0.990135046624313
+MR-Egger	-0.122307819343941	0.525132877013255	-1.15154934538782	0.906933706699941	0.815832592965151
+(intercept)	-0.00159329081857271	0.00863110486620945	-0.0185099455031316	0.0153233638659862	0.853543798334486
+Penalized MR-Egger	-0.291351956132472	34.0133401179445	-66.9562735812151	66.3735696689501	0.99316555257444
+(intercept)	-0.0287278795017248	0.651226776416716	-1.30510890704661	1.24765314804316	0.964813947606332
+Robust MR-Egger	0.0017187864826584	0.488444660548349	-0.955615156632997	0.959052729598314	0.99719233215478
+(intercept)	-0.00239763149004518	0.00814582019106475	-0.0183631456890713	0.0135678827089809	0.768498975368123
+Penalized robust MR-Egger	0.0942327922857483	2703.35308313857	-5298.38044765463	5298.5689132392	0.999972187543484
+(intercept)	0.0309013102803779	13.1667286438924	-25.7754126259607	25.8372152465214	0.998127427365292
+#+end_quote
+
+***** IgM
+#+begin_quote
+Method	Estimate	Std Error	95% CI 	 	P-value
+Simple median	-3.34015790060455	1.05222034448571	-5.40247187959686	-1.27784392161223	0.00150151712255519
+Weighted median	0.825649575810365	0.266578438796665	0.303165436713987	1.34813371490674	0.00195351012385157
+Penalized weighted median	0.735448240003086	0.356246024683081	0.0372188619886812	1.43367761801749	0.0389760978366902
+IVW	0.498710868412086	0.439805317008841	-0.363291713134464	1.36071344995864	0.256821598574481
+Penalized IVW	-4.11999943233784	0.169503376985081	-4.45221994648651	-3.78777891818916	1.68171071954369e-130
+Robust IVW	0.511947836055821	0.34397429613672	-0.162229395979665	1.18612506809131	0.136663448807116
+Penalized robust IVW	-15.6397231431124	2.02878926149754	-19.6160770278692	-11.6633692583556	1.2691189627104e-14
+MR-Egger	1.12243133197234	0.584464933229058	-0.0230988873832241	2.2679615513279	0.0548020221528087
+(intercept)	-0.0149065441177159	0.00931657547777612	-0.0331666965134062	0.00335360827797432	0.109598027323663
+Penalized MR-Egger	1.04970448429729	0.300105601849476	0.461508313113603	1.63790065548098	0.000469141439228382
+(intercept)	-0.0238603806136729	0.0218010005995588	-0.0665895566157442	0.0188687953883984	0.27375212530677
+Robust MR-Egger	1.14670731822549	0.410139197831176	0.342849261828234	1.95056537462274	0.00517557494763765
+(intercept)	-0.016128356774393	0.0105704982055032	-0.0368461525558247	0.00458943900703861	0.127062258713992
+Penalized robust MR-Egger	-1.01915552314282	91.8997649373893	-181.139384988123	179.101073941837	0.991151753326959
+(intercept)	-0.0481736569465471	0.111770045775175	-0.267238921216283	0.170891607323189	0.666463379400734
+#+end_quote
+
+***** IgG
+#+begin_quote
+Method	Estimate	Std Error	95% CI 	 	P-value
+Simple median	5.63406968944305	3.46959759298169	-1.16621663364792	12.434356012534	0.104410063162765
+Weighted median	0.73788689696536	0.262852770660672	0.222704933233877	1.25306886069684	0.00499703089600192
+Penalized weighted median	2.58604904284121	0.378864896354241	1.84348749098039	3.32861059470202	8.74478752236686e-12
+IVW	0.97435698644189	1.25793640323428	-1.49115305873914	3.43986703162292	0.438595112109611
+Penalized IVW	5.65472086147145	0.437253210100625	4.7977203175497	6.5117214053932	2.95560284428802e-38
+Robust IVW	1.01165371608812	1.7443761764979	-2.40726076533744	4.43056819751368	0.561947272147809
+Penalized robust IVW	15.015900933128	0.0545733522403012	14.9089391282214	15.1228627380346	0
+MR-Egger	-0.869263863519347	2.01496943991424	-4.81853139570011	3.08000366866141	0.6661753681487
+(intercept)	0.0348099362210029	0.0299864496937379	-0.0239624252029456	0.0935822976449514	0.245700652420514
+Penalized MR-Egger	2.14819833522738	5.95465715737566	-9.52271523351256	13.8191119039673	0.718279341934751
+(intercept)	0.0349013720596397	0.0105159992308394	0.0142903923057435	0.0555123518135359	0.000903782580283119
+Robust MR-Egger	-0.949850503978567	1.98190934234803	-4.83432143560418	2.93462042764704	0.631753447557911
+(intercept)	0.0371216636774121	0.0216196829472359	-0.00525213625634494	0.0794954636111692	0.0859735262168735
+Penalized robust MR-Egger	13.9034818541937	1.07154020532637	11.8033016437674	16.00366206462	0
+(intercept)	0.00559001430322851	0.00257302020754335	0.000546987364949762	0.0106330412415072	0.0298142244842223
+#+end_quote
+
+**** Lymphocyte counts variants as instruments
+
+***** How many lead SNPs/discrete signals?
+
+| Window (Mb) | No. of lead SNPs |
+|-------------+------------------|
+|           1 |              782 |
+|           2 |              587 |
+|           3 |              509 |
+
+****** 1000kb
+
+******* IgM
+#+begin_quote
+                       Method Estimate Std Error  95% CI       V5 P-value
+                       <char>    <num>     <num>   <num>    <num>   <num>
+ 1:             Simple median  -0.0380   0.02200 -0.0810  5.5e-03 0.08700
+ 2:           Weighted median  -0.0082   0.02500 -0.0560  4.0e-02 0.74000
+ 3: Penalized weighted median  -0.0280   0.02400 -0.0760  2.0e-02 0.25000
+ 4:                       IVW   0.0130   0.02400 -0.0340  6.1e-02 0.58000
+ 5:             Penalized IVW  -0.0510   0.01500 -0.0810 -2.1e-02 0.00076
+ 6:                Robust IVW  -0.0360   0.02000 -0.0750  3.6e-03 0.07500
+ 7:      Penalized robust IVW  -0.0510   0.01600 -0.0820 -2.0e-02 0.00120
+ 8:                  MR-Egger   0.0900   0.05000 -0.0070  1.9e-01 0.06900
+ 9:               (intercept)  -0.0019   0.00110 -0.0041  2.1e-04 0.07700
+10:        Penalized MR-Egger   0.0410   0.03100 -0.0200  1.0e-01 0.19000
+11:               (intercept)  -0.0019   0.00068 -0.0032 -5.6e-04 0.00540
+12:           Robust MR-Egger   0.0310   0.03900 -0.0450  1.1e-01 0.43000
+13:               (intercept)  -0.0017   0.00081 -0.0032 -7.2e-05 0.04000
+14: Penalized robust MR-Egger   0.0350   0.03100 -0.0250  9.6e-02 0.25000
+15:               (intercept)  -0.0019   0.00069 -0.0032 -5.3e-04 0.00620
+#+end_quote
+
+#+begin_quote
+r$> dat[`P-value` < 0.05]
+                 Method     Estimate    Std Error       95% CI            V5      P-value
+                 <char>        <num>        <num>        <num>         <num>        <num>
+1:        Penalized IVW -0.051099495 0.0151703206 -0.080832777 -2.136621e-02 0.0007560966
+2: Penalized robust IVW -0.051376365 0.0158371907 -0.082416688 -2.033604e-02 0.0011785020
+3:          (intercept) -0.001885270 0.0006781865 -0.003214491 -5.560486e-04 0.0054380813
+4:          (intercept) -0.001659810 0.0008100085 -0.003247398 -7.222251e-05 0.0404497330
+5:          (intercept) -0.001877946 0.0006854810 -0.003221464 -5.344276e-04 0.0061513496
+#+end_quote
+
+******* IgA
+
+#+begin_quote
+                       Method Estimate Std Error  95% CI      V5 P-value
+                       <char>    <num>     <num>   <num>   <num>   <num>
+ 1:             Simple median  0.05600   0.02000  0.0180 0.09500 4.0e-03
+ 2:           Weighted median  0.08900   0.02100  0.0480 0.13000 1.9e-05
+ 3: Penalized weighted median  0.03600   0.02100 -0.0049 0.07600 8.5e-02
+ 4:                       IVW  0.08700   0.01900  0.0490 0.12000 8.6e-06
+ 5:             Penalized IVW  0.06300   0.01400  0.0360 0.08900 3.7e-06
+ 6:                Robust IVW  0.08400   0.02100  0.0430 0.13000 6.5e-05
+ 7:      Penalized robust IVW  0.06200   0.01500  0.0330 0.09200 3.8e-05
+ 8:                  MR-Egger  0.14000   0.04100  0.0570 0.22000 8.0e-04
+ 9:               (intercept) -0.00130   0.00090 -0.0030 0.00050 1.6e-01
+10:        Penalized MR-Egger  0.10000   0.02900  0.0450 0.16000 4.9e-04
+11:               (intercept) -0.00058   0.00061 -0.0018 0.00062 3.4e-01
+12:           Robust MR-Egger  0.09500   0.05100 -0.0054 0.20000 6.4e-02
+13:               (intercept) -0.00025   0.00093 -0.0021 0.00160 7.9e-01
+14: Penalized robust MR-Egger  0.09300   0.03700  0.0210 0.17000 1.2e-02
+15:               (intercept) -0.00043   0.00073 -0.0019 0.00100 5.5e-01
+#+end_quote
+
+#+begin_quote
+r$> dat[`P-value` < 0.05]
+                      Method   Estimate  Std Error     95% CI         V5      P-value
+                      <char>      <num>      <num>      <num>      <num>        <num>
+1:             Simple median 0.05631537 0.01956148 0.01797557 0.09465518 3.990767e-03
+2:           Weighted median 0.08903488 0.02079334 0.04828069 0.12978908 1.853084e-05
+3:                       IVW 0.08673600 0.01948868 0.04853889 0.12493312 8.563736e-06
+4:             Penalized IVW 0.06280727 0.01357837 0.03619416 0.08942039 3.736271e-06
+5:                Robust IVW 0.08443516 0.02113811 0.04300524 0.12586509 6.484395e-05
+6:      Penalized robust IVW 0.06238698 0.01513828 0.03271649 0.09205747 3.770033e-05
+7:                  MR-Egger 0.13678992 0.04078692 0.05684902 0.21673081 7.971888e-04
+8:        Penalized MR-Egger 0.10191782 0.02922567 0.04463657 0.15919908 4.879767e-04
+9: Penalized robust MR-Egger 0.09298107 0.03689118 0.02067569 0.16528645 1.172166e-02
+#+end_quote
+
+******* IgG
+
+#+begin_quote
+                       Method Estimate Std Error  95% CI      V5 P-value
+                       <char>    <num>     <num>   <num>   <num>   <num>
+ 1:             Simple median  0.03500   0.02000 -0.0048 0.07500  0.0840
+ 2:           Weighted median  0.03600   0.02300 -0.0086 0.08100  0.1100
+ 3: Penalized weighted median  0.03600   0.02300 -0.0086 0.08100  0.1100
+ 4:                       IVW  0.03900   0.01500  0.0097 0.06800  0.0089
+ 5:             Penalized IVW  0.04200   0.01300  0.0160 0.06800  0.0018
+ 6:                Robust IVW  0.04200   0.01500  0.0120 0.07300  0.0061
+ 7:      Penalized robust IVW  0.04300   0.01400  0.0150 0.07200  0.0027
+ 8:                  MR-Egger  0.06200   0.03000  0.0022 0.12000  0.0420
+ 9:               (intercept) -0.00058   0.00068 -0.0019 0.00074  0.3900
+10:        Penalized MR-Egger  0.07400   0.02700  0.0210 0.13000  0.0063
+11:               (intercept) -0.00079   0.00060 -0.0020 0.00038  0.1900
+12:           Robust MR-Egger  0.07100   0.03000  0.0120 0.13000  0.0190
+13:               (intercept) -0.00072   0.00063 -0.0020 0.00051  0.2500
+14: Penalized robust MR-Egger  0.07600   0.02900  0.0200 0.13000  0.0078
+15:               (intercept) -0.00081   0.00060 -0.0020 0.00037  0.1800
+#+end_quote
+
+All IVW estimates were significant.
+
+#+begin_quote
+r$> dat[`P-value` < 0.05]
+                      Method Estimate Std Error 95% CI    V5 P-value
+                      <char>    <num>     <num>  <num> <num>   <num>
+1:                       IVW    0.039     0.015 0.0097 0.068  0.0089
+2:             Penalized IVW    0.042     0.013 0.0160 0.068  0.0018
+3:                Robust IVW    0.042     0.015 0.0120 0.073  0.0061
+4:      Penalized robust IVW    0.043     0.014 0.0150 0.072  0.0027
+5:                  MR-Egger    0.062     0.030 0.0022 0.120  0.0420
+6:        Penalized MR-Egger    0.074     0.027 0.0210 0.130  0.0063
+7:           Robust MR-Egger    0.071     0.030 0.0120 0.130  0.0190
+8: Penalized robust MR-Egger    0.076     0.029 0.0200 0.130  0.0078
+#+end_quote
+
+****** 2000kb
+
+******* IgA
+
+#+begin_quote
+r$> iga
+                       Method Estimate Std Error  95% CI      V5 P-value
+                       <char>    <num>     <num>   <num>   <num>   <num>
+ 1:             Simple median  5.4e-02   0.02200  0.0120 0.09700 1.2e-02
+ 2:           Weighted median  9.3e-02   0.02300  0.0480 0.14000 4.1e-05
+ 3: Penalized weighted median  4.2e-02   0.02300 -0.0020 0.08700 6.1e-02
+ 4:                       IVW  9.1e-02   0.02100  0.0490 0.13000 2.1e-05
+ 5:             Penalized IVW  5.8e-02   0.01500  0.0290 0.08800 1.0e-04
+ 6:                Robust IVW  7.9e-02   0.02300  0.0330 0.12000 7.1e-04
+ 7:      Penalized robust IVW  5.8e-02   0.01700  0.0250 0.09100 5.4e-04
+ 8:                  MR-Egger  1.3e-01   0.04400  0.0450 0.22000 3.0e-03
+ 9:               (intercept) -1.1e-03   0.00100 -0.0031 0.00093 3.0e-01
+10:        Penalized MR-Egger  9.7e-02   0.03200  0.0350 0.16000 2.3e-03
+11:               (intercept) -5.8e-04   0.00069 -0.0019 0.00078 4.0e-01
+12:           Robust MR-Egger  8.1e-02   0.05500 -0.0260 0.19000 1.4e-01
+13:               (intercept) -4.7e-05   0.00100 -0.0021 0.00200 9.6e-01
+14: Penalized robust MR-Egger  9.1e-02   0.03900  0.0140 0.17000 2.0e-02
+15:               (intercept) -5.2e-04   0.00082 -0.0021 0.00110 5.3e-01
+#+end_quote
+
+******* IgG
+
+#+begin_quote
+r$> dat
+                       Method Estimate Std Error   95% CI      V5 P-value
+                       <char>    <num>     <num>    <num>   <num>   <num>
+ 1:             Simple median  0.01800   0.02300 -0.02600 0.06300   0.420
+ 2:           Weighted median  0.03600   0.02600 -0.01400 0.08600   0.160
+ 3: Penalized weighted median  0.03600   0.02600 -0.01400 0.08600   0.160
+ 4:                       IVW  0.03100   0.01700 -0.00160 0.06400   0.062
+ 5:             Penalized IVW  0.02700   0.01500 -0.00190 0.05700   0.067
+ 6:                Robust IVW  0.03300   0.01700 -0.00080 0.06700   0.056
+ 7:      Penalized robust IVW  0.03100   0.01600 -0.00033 0.06200   0.053
+ 8:                  MR-Egger  0.05400   0.03400 -0.01200 0.12000   0.110
+ 9:               (intercept) -0.00061   0.00078 -0.00210 0.00092   0.440
+10:        Penalized MR-Egger  0.05500   0.03000 -0.00400 0.11000   0.068
+11:               (intercept) -0.00061   0.00069 -0.00200 0.00075   0.380
+12:           Robust MR-Egger  0.05800   0.03400 -0.00790 0.12000   0.084
+13:               (intercept) -0.00066   0.00073 -0.00210 0.00078   0.370
+14: Penalized robust MR-Egger  0.05900   0.03000  0.00067 0.12000   0.047
+15:               (intercept) -0.00067   0.00068 -0.00200 0.00065   0.320
+#+end_quote
+
+****** 3000kb
+
+Reran this with 3Mb clumping windows for fear of counting some signals many times over, no time to check almost 800 loci.
+
+IVW convincing for IgA, marginal for IgG, unconvincing for IgM.
+
+Estimate signs are mixed for IgM, too, whereas they are concordant across methods for IgA and for IgG, too.
+
+I haven't looked at enough of these plots to judge, but there are also a lot of SNPs looking quite null around the origin.
+
+There's maybe an argument for some penalty given the outlying variant effect estimates in each plot.
+
+We know these are associated with the exposure, but not the outcome.
+
+******* IgA
+
+#+begin_quote
+r$> iga
+                       Method Estimate Std Error  95% CI     V5 P-value
+                       <char>    <num>     <num>   <num>  <num>   <num>
+ 1:             Simple median  6.9e-02   0.02200  0.0250 0.1100 2.1e-03
+ 2:           Weighted median  6.8e-02   0.02300  0.0230 0.1100 3.4e-03
+ 3: Penalized weighted median  3.5e-02   0.02300 -0.0110 0.0800 1.4e-01
+ 4:                       IVW  8.0e-02   0.02300  0.0350 0.1300 5.2e-04
+ 5:             Penalized IVW  6.8e-02   0.01600  0.0370 0.0980 1.2e-05
+ 6:                Robust IVW  7.9e-02   0.02300  0.0340 0.1300 6.2e-04
+ 7:      Penalized robust IVW  6.7e-02   0.01800  0.0330 0.1000 1.5e-04
+ 8:                  MR-Egger  8.3e-02   0.04800 -0.0120 0.1800 8.7e-02
+ 9:               (intercept) -6.6e-05   0.00110 -0.0023 0.0022 9.5e-01
+10:        Penalized MR-Egger  6.8e-02   0.03300  0.0027 0.1300 4.1e-02
+11:               (intercept)  1.6e-04   0.00075 -0.0013 0.0016 8.3e-01
+12:           Robust MR-Egger  4.2e-02   0.05300 -0.0630 0.1500 4.3e-01
+13:               (intercept)  9.4e-04   0.00110 -0.0012 0.0030 3.8e-01
+14: Penalized robust MR-Egger  5.8e-02   0.04300 -0.0260 0.1400 1.8e-01
+15:               (intercept)  3.3e-04   0.00092 -0.0015 0.0021 7.2e-01
+#+end_quote
+
+******* IgM
+
+#+begin_quote
+r$> igm
+                       Method Estimate Std Error  95% CI       V5 P-value
+                       <char>    <num>     <num>   <num>    <num>   <num>
+ 1:             Simple median -0.02900   0.02500 -0.0790  2.1e-02  0.2500
+ 2:           Weighted median  0.00038   0.02800 -0.0540  5.5e-02  0.9900
+ 3: Penalized weighted median -0.02800   0.02800 -0.0830  2.6e-02  0.3100
+ 4:                       IVW  0.01100   0.02800 -0.0440  6.6e-02  0.6900
+ 5:             Penalized IVW -0.04900   0.01700 -0.0820 -1.6e-02  0.0035
+ 6:                Robust IVW -0.03800   0.02300 -0.0830  6.6e-03  0.0950
+ 7:      Penalized robust IVW -0.04900   0.01800 -0.0850 -1.4e-02  0.0062
+ 8:                  MR-Egger  0.11000   0.05700 -0.0060  2.2e-01  0.0640
+ 9:               (intercept) -0.00260   0.00130 -0.0052  7.8e-05  0.0570
+10:        Penalized MR-Egger  0.05000   0.03400 -0.0160  1.2e-01  0.1400
+11:               (intercept) -0.00230   0.00079 -0.0039 -7.7e-04  0.0034
+12:           Robust MR-Egger  0.03300   0.04500 -0.0550  1.2e-01  0.4600
+13:               (intercept) -0.00190   0.00098 -0.0038  4.7e-05  0.0560
+14: Penalized robust MR-Egger  0.04400   0.03700 -0.0280  1.2e-01  0.2400
+15:               (intercept) -0.00220   0.00083 -0.0039 -6.1e-04  0.0071
+#+end_quote
+
+******* IgG
+
+#+begin_quote
+r$> igg
+                       Method Estimate Std Error  95% CI     V5 P-value
+                       <char>    <num>     <num>   <num>  <num>   <num>
+ 1:             Simple median  3.5e-02   0.02400 -0.0110 0.0820   0.140
+ 2:           Weighted median  3.6e-02   0.02600 -0.0160 0.0870   0.170
+ 3: Penalized weighted median  3.6e-02   0.02600 -0.0150 0.0880   0.170
+ 4:                       IVW  3.2e-02   0.01800 -0.0024 0.0660   0.069
+ 5:             Penalized IVW  3.4e-02   0.01500  0.0038 0.0650   0.027
+ 6:                Robust IVW  3.6e-02   0.01700  0.0028 0.0700   0.034
+ 7:      Penalized robust IVW  3.7e-02   0.01600  0.0059 0.0690   0.020
+ 8:                  MR-Egger  2.9e-02   0.03600 -0.0410 0.0990   0.420
+ 9:               (intercept)  8.5e-05   0.00085 -0.0016 0.0017   0.920
+10:        Penalized MR-Egger  3.7e-02   0.03100 -0.0240 0.0990   0.240
+11:               (intercept) -9.3e-05   0.00074 -0.0016 0.0014   0.900
+12:           Robust MR-Egger  4.0e-02   0.03200 -0.0220 0.1000   0.210
+13:               (intercept) -9.2e-05   0.00073 -0.0015 0.0013   0.900
+14: Penalized robust MR-Egger  4.4e-02   0.03000 -0.0140 0.1000   0.140
+15:               (intercept) -1.9e-04   0.00069 -0.0015 0.0012   0.790
+#+end_quote
+
+
+*** Notes on reading
+
+#+begin_ai
+I know about Mendelian randomisation, but what is the 'MR-Egger' method?
+
+[AI]: MRâEgger is an extension of the standard Mendelian randomisation (MR) framework that helps detect and adjust for a common problem known as directional (or unbalanced) pleiotropy. Hereâs what that means and how MRâEgger works:
+
+1. Background in MR:  
+   In MR studies, genetic variants (usually single nucleotide polymorphisms, or SNPs) are used as instrumental variables (IVs) to estimate the causal effect of an exposure on an outcome. A key assumption here is that these genetic instruments affect the outcome only through the exposure, not through any other pathway. When a genetic variant influences the outcome via additional pathways, itâs said to exhibit "pleiotropy."
+
+2. The Challenge of Pleiotropy:  
+   Pleiotropy becomes particularly problematic when it is directionalâmeaning the pleiotropic effects are not balanced around zero but tend to push the outcome in one direction. This violates one of the core assumptions of a valid IV, potentially biasing the causal estimate.
+
+3. What MRâEgger Does:  
+   MRâEgger regression adapts the idea of Egger regression (originally developed to detect publication bias in meta-analyses) to MR:
+   - It involves regressing the SNPâoutcome association estimates against the SNPâexposure association estimates.
+   - Unlike the traditional inverse-variance weighted (IVW) MR method (which assumes the intercept is zero), MRâEgger allows the intercept to be non-zero.
+   - This intercept represents the average pleiotropic effect across the genetic instruments. If it is significantly different from zero, that suggests the presence of directional pleiotropy.
+
+4. How to Interpret the MRâEgger Output:  
+   - The Slope: It represents the causal effect of the exposure on the outcome, adjusted for the pleiotropic effects.
+   - The Intercept: A statistically significant intercept is an indication that the IVs collectively are affecting the outcome via pathways independent of the exposure. In other words, it signals directional pleiotropy.
+
+5. Assumptions and Limitations:  
+   - MRâEgger relies on the Instrument Strength Independent of Direct Effect (InSIDE) assumption. This means that the magnitude of the pleiotropic effects should be independent of the strength of the SNPâexposure association.
+   - While MRâEgger can provide a more robust estimate in the presence of pleiotropy, it often comes at the cost of decreased precision (i.e., a wider confidence interval) compared to standard methods.
+   - It is best seen as a sensitivity analysis tool, used alongside other methods to gauge the robustness of the findings.
+
+In summary, MRâEgger regression is a useful tool in the MR toolkit. It helps to test for and adjust the causal estimates for the influence of directional pleiotropy, thereby enhancing the reliability of MR inferences when the standard IV assumptions might be violated.
+
+[ME]: 
+#+end_ai
+
+** DONE Bias in sign of lead SNPs for IgA
+
+Found this while doing MR, e.g. for IgA:
+#+begin_src
+> dat[, .N, by = sign(beta)]
+    sign     N
+   <num> <int>
+1:    -1    61
+2:     1    44
+#+end_src
+
+IgM:
+#+begin_src
+> dat[, .N, by = sign(beta)]
+    sign     N
+   <num> <int>
+1:     1    42
+2:    -1    46
+#+end_src
+
+IgG:
+#+begin_src
+> dat[, .N, by = sign(beta)]
+    sign     N
+   <num> <int>
+1:    -1    11
+2:     1     7
+#+end_src
+
+For IgA, there are 19 SNPs with beta < -0.5 and 16 of these are on chromosome 1. These do look quite close, all between 19.4Mb and 31Mb. They may just be one continuous signal.
+
+Turns out there is just one big signal on chromosome 1. I will need to reconsider clumping.
+** DONE Reconsidering the clumping approach <2025-03-12 Wed>
+
+Problem is the RUNX3 signal in IgA, GWS SNPs spanning the interval 19.5-31Mb and beyond.
+
+How can we do it? Can use =distance_clump= as a checkpoint then generate plots with 1Mb either side.
+
+Logging the candidate lead SNPs to drop in =config.yaml=
+
+*** IgA
+**** Chromosome 1
+#+begin_quote
+            rsid chromosome base_pair_location       p_value
+          <char>      <int>              <int>         <num>
+ 1:  rs746234782          1           19432479  6.140871e-09
+ 2:  rs543261951          1           20344243  3.259902e-11
+ 3:  rs762141322          1           21376594  8.899024e-12
+ 4:  rs535269494          1           21998347  5.539661e-16
+ 5:  rs765348868          1           22971602  4.219736e-11
+ 6:  rs781445232          1           23501623  5.569659e-17
+ 7:  rs546722789          1           24306004  6.446018e-33
+ 8:  rs188468174          1           24965206 1.668808e-308
+ 9:   rs74593753          1           25499340  3.107399e-63
+10:  rs760351385          1           26014185  9.730406e-24
+11:  rs765183915          1           26699947  8.382099e-23
+12:  rs200807314          1           27595000  3.801186e-21
+13:   rs11582631          1           28731992  2.360482e-19
+14:  rs755241705          1           29303382  1.050294e-17
+15:  rs762472871          1           30028204  6.390226e-15
+16: rs1053363817          1           30966900  2.179885e-10
+17:    rs7544568          1           38173536  2.282975e-10
+18:   rs11204701          1          150689703  1.110827e-08
+19:   rs79316700          1          161595524  3.264760e-10
+20:    rs3766151          1          169886435  1.741997e-11
+21:    rs4090390          1          173177782  1.266369e-15
+22:   rs10920074          1          200943599  2.730469e-25
+23:   rs73100295          1          217389764  3.848169e-08
+#+end_quote
+
+You can even see the signal decaying in the p-values here. Was silly to identify this as distinct hits.
+
+rs188468174 and rs7544568
+
+On chromosome 4, two SNPs [[https://ldlink.nih.gov/?var1=rs2101521&var2=rs10517538&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][are within 1.5Mb but are not in LD]]
+
+On chromosome 5, [[https://ldlink.nih.gov/?var1=rs28744551&var2=rs6859219&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][same story again]]
+
+*** IgG
+
+Just dropped a handful here.
+
+*** IgM
+
+**** To drop
+
+- rs12061333 (chr1)
+- rs34635213 (chr2)
+- rs2336142 (chr3)
+- rs2395833 (chr7)
+- rs118008550 (chr14)
+
+['rs12061333', 'rs34635213', 'rs2336142', 'rs2395833', 'rs118008550']
+
+**** TODO chr1
+
+Not sure about rs12040769 and rs188468174, they look to be separate but they're still close, I want to check the [[https://ldlink.nih.gov/?var1=rs12040769&var2=rs188468174&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][LD]]. Ok, they're not in LD.
+
+**** chr4
+
+See rs865020 plot: close but all three seem independent.
+
+#+begin_src
+         rsid chromosome base_pair_location      p_value
+       <char>      <int>              <int>        <num>
+1:  rs1397934          4           40185976 3.077926e-15
+2: rs67960624          4           67613670 3.188564e-09
+3: rs17611664          4           99837400 1.234269e-09
+4:   rs865020          4          101398129 7.050093e-13
+5:  rs1080081          4          103029268 1.759724e-11
+#+end_src
+
+[[https://ldlink.nih.gov/?var1=rs17611664&var2=rsrs865020&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][rs17611664 and rs865020 are not in LD]] and [[https://ldlink.nih.gov/?var1=rs1080081&var2=rs865020&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][rs865020 and rs1080081]] are not either.
+
+**** chr9
+
+[[https://ldlink.nih.gov/?var1=rs140275930&var2=rs12554596&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][rs140275930 and rs12554596 are not in LD]]
+
+*** Lymphocyte counts
+
+I collapsed variants by hand by inspecting locuszoomr plots, checking the r2 for variants close to one another, and removing the less significant. Can I automate this?
+
+**** The script
+
+#+begin_ai
+I have a data.table object containing SNPs. I want to look at pairs of SNPs which lie within a specified minimum distance of one another on the same chromosome. Are there any features of data.table that will allow me to do this efficiently?
+
+[AI]: Yes â you can do this very efficiently with data.tableâs nonâequi joins (and, if you prefer, rolling joins or foverlaps). The idea is to âself joinâ your SNP table by matching records on the same chromosome and then enforcing a condition on the positions (e.g., that the distance is less than your minimum threshold). Because data.table maintains the keys in a sorted order and uses binary search for joins, these non-equi joins can be extremely fast even for large datasets.
+
+For example, suppose your data.table (called DT) has columns "chr" (chromosome) and "pos" (position). You can do something like the following (assuming you want to find pairs where SNP2 is within min_dist of SNP1):
+
+ââlibrary(data.table)
+
+ââ# Example data
+ââDT <- data.table(chr = c("chr1", "chr1", "chr1", "chr2","chr2"),
+ââââââââââpos = c(100, 110, 130, 50, 55))
+ââmin_dist <- 20
+
+ââ# Set keys for efficient join
+ââsetkey(DT, chr, pos)
+
+ââ# Self join using non-equi conditions:
+ââpairs <- DT[DT, 
+ââââallow.cartesian = TRUE,
+ââââon = .(chr, pos >= pos, pos <= pos + min_dist), 
+âââânomatch = 0]
+
+In this join, the i. columns refer to the "outer" DT, and the "x" columns refer to the matched SNPs. This code finds, for each SNP (from the i-side), all SNPs on the same chromosome that are located between its position and position + min_dist. (You might want to adjust the join direction or filter out self-matches as needed.)
+
+If you need to consider SNPs within a window on either side of a given SNP (both upstream and downstream), you could modify the join conditions accordingly or use a combination of two joins.
+
+Another approach (especially if you want to work with intervals) is to use foverlaps. In that case you would treat each SNP as an interval â for example, setting the start and end positions as pos and pos + min_dist â and then perform an overlap join to find SNP pairs that fall into each otherâs windows.
+
+Either way, data.tableâs non-equi join syntax provides a very concise and efficient way to do what you need.
+
+So in summary, data.table supports exactly the operation you need and doing self joins with non-equi conditions is the recommended approach for efficiently finding pairs of SNPs within a specified distance on the same chromosome.
+
+[ME]: 
+#+end_ai
+
+So the non-equi join in data.table is given by:
+#+begin_src
+res <- dat[dat, allow.cartesian = TRUE, on = .(chromosome, pos >= pos_lower, pos <= pos_upper), nomatch = 0]
+res <- res[rsid != i.rsid]
+#+end_src
+
+*** Ideas for an automated solution
+
+What if I use ldetect to get approximate LD blocks?
+
+Rely on some kind of classifier?
+
+Smoothing approach that can model decay of signal?
+
+#+begin_ai
+Are you listening?
+
+[AI]: Yes, I'm listening. How can I help you today?
+
+[ME]: I want to clump GWAS summary statistics to identify discrete signals, but I have no LD information available, only the summary statistics. I don't have the genotype data either. I'm thinking about developing a solution based on the 'decay' of the p-values away from the centre of the signals. Maybe some form of smoothing? Or is there a better classifier?
+
+[AI]: You're on the right track thinking about the âdecayâ of association signals as a possible clue for separating true loci from nearby noise, but there are several challenges and alternative strategies to consider.
+
+1. LD versus physical distance:  
+ââ¢ In typical clumping approaches, you use linkage disequilibrium (LD) from genotype data (or a reference panel) to decide whether two nearby associations are âindependentâ versus simply correlated by LD.  
+ââ¢ Physical distance (or a decay in p-values away from a lead SNP) is only an approximate surrogate for LD. In many regions, LD decays roughly with distance, but this relationship is not uniform genomeâwide. Some regions have extended LD (e.g., the MHC), while others break down faster. So, a decay/smoothing approach might work well in some regions but could misclassify signals in others.
+
+2. Smoothing or peak detection methods:  
+ââ¢ You could consider applying a smoothing algorithm (for example, Gaussian kernel smoothing or local regression) to your âlog(p) values across the genome. This might help highlight peaks and allow you to define a âsignal centreâ from which you can observe decay.  
+ââ¢ Once smoothed, you could use peak detection or changeâpoint analysis to detect boundariesâessentially segments of the genome that âbelongâ to a single signal. However, choosing the window size and kernel parameters will require careful calibration.  
+ââ¢ Simulations can help here: simulate summary statistics with known âsignalsâ and noise to assess how well your smoothing/peak detection method recovers the underlying clumps.
+
+3. Alternative approaches without direct LD information:  
+ââ¢ Even if you don't have your own genotype data, publicly available resources (e.g., 1000 Genomes or the Haplotype Reference Consortium) can sometimes serve as a proxy for LD. Although these wonât match your sample perfectly, they could give you an approximate LD structure that might improve clumping.  
+ââ¢ There are summaryâstatistic fineâmapping tools (such as COJO from GCTA, FINEMAP, or SuSiE) that usually require an LD reference. In many cases, using an LD referenceâeven an imperfect oneâtends to perform better than ignoring LD altogether.
+ââ¢ Alternatively, you might consider spatial statistical approaches like hidden Markov models (HMMs) or changeâpoint detection methods that incorporate the idea that the association signal âdecaysâ or changes as you move away from a causal variant. A Bayesian hierarchical model could also incorporate both the âstrengthâ and âspreadâ of significance across genomic locations.
+
+4. Considerations and potential pitfalls:  
+ââ¢ P-value âdecayâ might be confounded by local genomic features (e.g., gene density, recombination rates, or differential imputation quality) that affect both association statistics and the physical extent of signals.  
+ââ¢ Relying solely on a smoothed decay curve might miss complex signal patterns (like multiple independent causal variants in tight proximity) or may merge signals that are actually distinct.
+ââ¢ Calibration is crucial. Youâll likely need extensive simulation and cross-validation using loci where independent LD-based clumping is available for comparison.
+
+In summary, while smoothing the p-value signal is a creative idea, consider it as one component of your analysis rather than a complete replacement for LD-based clumping. If obtaining a reference LD panel is infeasible, you might combine smoothing/peak detection with methods that account for spatial variation, or explore approximate LD estimates from public data. This multi-pronged strategy will likely yield better identification of discrete signals from your summary statistics.
+
+What do you think about these directions? Do you need more details on any particular method or simulation strategy?
+
+[ME]: 
+#+end_ai
