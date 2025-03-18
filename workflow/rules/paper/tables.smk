@@ -85,8 +85,9 @@ rule ig_coloc_results:
 
 rule ig_and_non_ig_coloc_results:
     input:
-        "results/coloc/igg_and_asthma_results_with_genes.tsv",
-        "results"
+        expand("results/coloc/{isotype}_and_{non_ig}_results_with_genes.tsv",
+               isotype = ["igg", "iga", "igm"],
+               non_ig = ["asthma", "lymphocyte-counts"])
     output:
         "results/paper/tables/ig_and_non_ig_coloc.tsv"
     localrule: True
@@ -97,10 +98,16 @@ rule ig_and_non_ig_coloc_results:
             daf = pd.read_csv(x, sep = '\t')
 
             daf['first_trait'] = daf['first_trait'].map(config.get('pretty_isotypes'))
-            daf['second_trait'] = daf['second_trait'].map(config.get('gwas_datasets').get(daf['second_trait'][0]).get('pretty_phenotype'))
+            daf['second_trait'] = config.get('gwas_datasets').get(daf['second_trait'][0]).get('pretty_phenotype')
 
             daf.rename(columns = {'nsnps': 'No. of SNPs', "first_trait": "Isotype", "second_trait": "Non-Ig trait", "first_snp": "Isotype's lead SNP", "second_snp": "Non-Ig trait's lead SNP", "min_p.first": "Min. locus p-value for isotype", "min_p.second": "Min. locus p-value for non-Ig trait", "genes.first_snp": "Genes for first lead SNP", "genes.second_snp": "Genes for second lead SNP", "max_post": "Max. posterior hypothesis"}, inplace = True)
 
             dafs.append(daf)
 
         pd.concat(dafs).to_csv(output[0], sep = '\t', index = False)
+
+rule ig_mr:
+    input:
+        "results/mr/igm_and_lymphocyte-counts/mr.tsv",
+        "results/mr/iga_and_lymphocyte-counts/mr.tsv",
+        "results/mr/igg_and_lymphocyte-counts/mr.tsv"

@@ -129,7 +129,7 @@ rule add_gnomad_queried_mafs_to_annotated_lead_snps_for_iga_meta:
     output:
         "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_gnomad_maf.tsv"
     resources:
-        gnomad_api_call = 1,
+        gnomad_api_calls = 1,
         runtime = 10
     localrule: True
     conda: env_path("global.yaml")

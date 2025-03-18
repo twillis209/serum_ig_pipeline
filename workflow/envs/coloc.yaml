@@ -5,6 +5,6 @@ channels:
 - twillis209
 dependencies:
 - r-base >= 4.2.3
-- r-data.table >= 1.15
+- r-data.table >= 1.17
 - r-r.utils
 - r-coloc >= 5.2.3

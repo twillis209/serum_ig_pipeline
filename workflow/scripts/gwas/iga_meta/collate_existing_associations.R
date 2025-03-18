@@ -1,7 +1,6 @@
 library(data.table)
 
 studies <- names(snakemake@input)[names(snakemake@input) != '']
-print(studies)
 
 dats <- list()
 

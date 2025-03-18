@@ -5,7 +5,7 @@ channels:
 - twillis209
 dependencies:
 - r-base
-- r-data.table >= 1.15
+- r-data.table >= 1.17
 - r-stringr
 - r-r.utils
 - r-magrittr

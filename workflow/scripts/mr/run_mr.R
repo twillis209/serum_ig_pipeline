@@ -9,7 +9,7 @@ se_x <- sprintf("standard_error.%s", snakemake@wildcards$non_ig)
 
 merged <- fread(snakemake@input$merged, select = c('rsid', "chromosome", "base_pair_location", beta_x, se_x, beta_y, se_y))
 
-lead_snps <- fread(snakemake@input$ig)
+lead_snps <- fread(snakemake@input$instruments)
 
 dat <- merge(lead_snps, merged, by = 'rsid')
 
