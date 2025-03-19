@@ -214,10 +214,7 @@ else:
                 'nearestGeneDistance' : v['variantInfo']['nearestGeneDistance'],
                 'topGene' : top_gene,
                 'topGeneId' : top_gene_id,
-                'mostSevereConsequence' : v['variantInfo']['mostSevereConsequence'],
-                'gnomadFIN' : v['variantInfo']['gnomadFIN'],
-                'gnomadNFE' : v['variantInfo']['gnomadNFE'],
-                #'associatedTraits' : study_string
+                'mostSevereConsequence' : v['variantInfo']['mostSevereConsequence']
             }
             )
 

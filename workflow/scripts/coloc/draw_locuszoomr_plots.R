@@ -6,7 +6,7 @@ library(gridExtra)
 
 theme_set(theme_bw())
 
-dat <- fread(snakemake@input[[1]])
+dat <- fread(snakemake@input$sumstats)
 
 seqname <- dat[, unique(chromosome)]
 min_pos <- dat[, min(base_pair_location)]
@@ -22,15 +22,27 @@ if(!is.null(snakemake@wildcards$first_isotype)) {
   stop("Can't find wildcard in input file path to identify summary statistics' suffix labels.")
 }
 
+dat[, `:=` (p1 = as.numeric(p1), p2 = as.numeric(p2)),
+    env = list(p1 = sprintf("p_value.%s", first_trait_label),
+              p2 = sprintf("p_value.%s", second_trait_label)
+              )
+              ]
+
 dat <- na.omit(dat, c(sprintf('p_value.%s', first_trait_label), sprintf('p_value.%s', second_trait_label)))
 
+dat <- dat[p1 > 0 & p2 > 0,
+           env = list(p1 = sprintf("p_value.%s", first_trait_label),
+                      p2 = sprintf("p_value.%s", first_trait_label)
+                      )
+                      ]
+
 dat[, `:=` (z1 = b1/se1, z2 = b2/se2),
-    env = list(b1 = sprintf("beta.%s", first_trait_label),
-               se1 = sprintf("standard_error.%s", first_trait_label),
-               b2 = sprintf("beta.%s", second_trait_label),
-               se2 = sprintf("standard_error.%s", second_trait_label)
-               )
-    ]
+  env = list(b1 = sprintf("beta.%s", first_trait_label),
+            se1 = sprintf("standard_error.%s", first_trait_label),
+  b2 = sprintf("beta.%s", second_trait_label),
+  se2 = sprintf("standard_error.%s", second_trait_label)
+  )
+]
 
 z_min <- dat[, min(z1, z2)]
 z_max <- dat[, max(z1, z2)]
@@ -55,7 +67,14 @@ pls[[4]] <- ggplot(dat)+
   xlim(c(z_min, z_max))+
   ylim(c(z_min, z_max))
 
-ggsave(arrangeGrob(grobs = pls, layout_matrix = cbind(1:3, 4),
+coloc_res <- fread(snakemake@input$coloc)
+molten <- melt(coloc_res[, .SD, .SDcols = patterns('^PP\\.|nsnps|min_')])
+molten[variable == 'nsnps',  pretty_value := format(value, big.mark = ',')]
+molten[variable != 'nsnps',  pretty_value := signif(value, digits =  2)]
+
+pls[[5]] <- tableGrob(molten[, .(Variable = variable, Value = pretty_value)], theme = ttheme_minimal(), rows = NULL)
+
+ggsave(arrangeGrob(grobs = pls, layout_matrix = cbind(1:3, c(4,4,5)),
                    top = sprintf('%s:%s-%s',
                                  snakemake@params$chrom,
                                  format(min_pos, big.mark = ',', scientific = F),

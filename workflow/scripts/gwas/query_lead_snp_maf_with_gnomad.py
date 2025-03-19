@@ -11,13 +11,13 @@ daf = pd.read_csv(snakemake.input[0], sep = '\t')
 API_URL = "https://gnomad.broadinstitute.org/api"
 
 # Create an HTTP transport
-transport = AIOHTTPTransport(url=API_URL)
+transport = AIOHTTPTransport(url=API_URL, ssl = False)
 
 # Create a GraphQL client
 client = Client(transport=transport, fetch_schema_from_transport=True)
 
 # Semaphore to limit concurrent requests
-semaphore = asyncio.Semaphore(10)  # 10 requests per minute
+semaphore = asyncio.Semaphore(5)  # 10 requests per minute
 
 query_string = """
         query getVariant($rsId: String!) {
@@ -48,7 +48,6 @@ query_string = """
 async def query_variant_for_nfe_af(session, rsid):
     query = gql(query_string)
     async with semaphore:
-        await asyncio.sleep(6)
         try:
             result = await session.execute(query, variable_values = {"rsId": rsid})
             nfe_dict = [x for x in result['variant']['genome']['populations'] if x['id'] in ['nfe']][0]
@@ -72,8 +71,8 @@ af_daf = pd.concat(results)
 
 merged = pd.merge(daf, af_daf[['rsid', 'ref', 'alt', 'af']], on = ['rsid'], how = 'left')
 
-merged.loc[(merged['effect_allele'] == merged['alt']) & (merged['other_allele'] == merged['ref']), 'EAF'] = merged['af']
-merged.loc[(merged['effect_allele'] == merged['ref']) & (merged['other_allele'] == merged['alt']), 'EAF'] = 1.0-merged['af']
+merged.loc[(merged['effect_allele'] == merged['alt']) & (merged['other_allele'] == merged['ref']), 'gnomadNFE'] = merged['af']
+merged.loc[(merged['effect_allele'] == merged['ref']) & (merged['other_allele'] == merged['alt']), 'gnomadNFE'] = 1.0-merged['af']
 
 merged = merged.drop(['ref', 'alt', 'af'], axis = 1)
 

@@ -54,7 +54,8 @@ rule draw_coloc_plots_for_ig_pair:
 
 rule draw_locuszoomr_plot_for_coloc_ig_pair:
     input:
-        "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/sumstats.tsv"
+        sumstats = "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/sumstats.tsv",
+        coloc = "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/coloc.tsv"
     output:
         "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/lz_plots.png"
     localrule: True

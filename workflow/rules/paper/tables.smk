@@ -87,7 +87,8 @@ rule ig_and_non_ig_coloc_results:
     input:
         expand("results/coloc/{isotype}_and_{non_ig}_results_with_genes.tsv",
                isotype = ["igg", "iga", "igm"],
-               non_ig = ["asthma", "lymphocyte-counts"])
+        #       non_ig = ["asthma", "lymphocyte-counts"])
+        non_ig = ["lymphocyte-counts"])
     output:
         "results/paper/tables/ig_and_non_ig_coloc.tsv"
     localrule: True
@@ -108,6 +109,6 @@ rule ig_and_non_ig_coloc_results:
 
 rule ig_mr:
     input:
-        "results/mr/igm_and_lymphocyte-counts/mr.tsv",
-        "results/mr/iga_and_lymphocyte-counts/mr.tsv",
-        "results/mr/igg_and_lymphocyte-counts/mr.tsv"
+        "results/mr/igm_and_lymphocyte-counts/3000kb_lymphocyte-counts_instruments/mr.tsv",
+        "results/mr/iga_and_lymphocyte-counts/3000kb_lymphocyte-counts_instruments/mr.tsv",
+        "results/mr/igg_and_lymphocyte-counts/3000kb_lymphocyte-counts_instruments/mr.tsv"

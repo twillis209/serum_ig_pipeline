@@ -52,4 +52,6 @@ merged <- fread(snakemake@input$merged, select = cols)
 
 lead_with_sumstats <- merge(lead, merged, by = coord_cols, all.x = T)
 
+names(lead_with_sumstats) <- gsub("effect_allele_frequency|AF1|ImpMAF", "af", names(lead_with_sumstats))
+
 fwrite(lead_with_sumstats, file = snakemake@output[[1]], sep = '\t')

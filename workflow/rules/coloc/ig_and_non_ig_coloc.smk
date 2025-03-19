@@ -12,7 +12,9 @@ checkpoint merge_ig_and_non_ig_lead_snps:
                         "igm" : "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps.tsv"
                     }
         ),
-        non_ig = "results/harmonised_gwas/{non_ig}/1000kb_gws_annotated_lead_snps.tsv"
+        non_ig = branch(evaluate("{non_ig} == 'lymphocyte-counts'"),
+                        then = "results/harmonised_gwas/lymphocyte-counts/3000kb_gws_annotated_lead_snps.tsv",
+                        otherwise = "results/harmonised_gwas/{non_ig}/1000kb_gws_annotated_lead_snps.tsv")
     output:
         "results/coloc/{isotype}_and_{non_ig}/merged_lead_snps.tsv"
     params:
@@ -49,6 +51,13 @@ use rule run_coloc_for_all_ig_pairs as run_coloc_for_all_snps_for_ig_and_non_ig_
     output:
         "results/coloc/{isotype}_and_{non_ig}_results.tsv"
 
+rule draw_locuszoom_plots_for_all_snps_for_ig_and_non_ig_pair:
+    input:
+        lambda w: [f"results/coloc/{{isotype}}_and_{{non_ig}}/{isotype_rsid}_and_{non_ig_rsid}/lz_plots.png" for isotype_rsid, non_ig_rsid in get_rsids_from_merged_lead_snps_for_ig_non_ig_pair(w)]
+    output:
+        "results/coloc/{isotype}_and_{non_ig}_lz_plots.done"
+    shell: "touch {output}"
+
 rule add_genes_to_ig_and_non_ig_coloc_pair:
     input:
         ig = branch(evaluate("{isotype}"),
@@ -58,7 +67,10 @@ rule add_genes_to_ig_and_non_ig_coloc_pair:
                         "igm" : "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps.tsv"
                     }
                     ),
-        non_ig = "results/harmonised_gwas/{non_ig}/1000kb_gws_annotated_lead_snps.tsv",
+        # I think 3Mb windows should be ok for asthma and lymphocyte-counts
+        non_ig = branch(evaluate("{non_ig} == 'lymphocyte-counts'"),
+                        then = "results/harmonised_gwas/lymphocyte-counts/3000kb_gws_annotated_lead_snps.tsv",
+                        otherwise = "results/harmonised_gwas/{non_ig}/1000kb_gws_annotated_lead_snps.tsv"),
         coloc = "results/coloc/{isotype}_and_{non_ig}_results.tsv"
     output:
         "results/coloc/{isotype}_and_{non_ig}_results_with_genes.tsv"
@@ -68,6 +80,7 @@ rule add_genes_to_ig_and_non_ig_coloc_pair:
 
 use rule draw_locuszoomr_plot_for_coloc_ig_pair as draw_locuszoomr_plot_for_coloc_ig_and_non_ig_pair with:
     input:
-        "results/coloc/{isotype}_and_{non_ig}/{first_rsid}_and_{second_rsid}/sumstats.tsv"
+        sumstats = "results/coloc/{isotype}_and_{non_ig}/{first_rsid}_and_{second_rsid}/sumstats.tsv",
+        coloc = "results/coloc/{isotype}_and_{non_ig}/{first_rsid}_and_{second_rsid}/coloc.tsv"
     output:
         "results/coloc/{isotype}_and_{non_ig}/{first_rsid}_and_{second_rsid}/lz_plots.png"
