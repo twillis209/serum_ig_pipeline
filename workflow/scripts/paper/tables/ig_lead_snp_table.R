@@ -21,7 +21,7 @@ merged[nearestGene != '' & topGene != '' & nearestGene != topGene, gene := paste
 fwrite(merged[, .(rsID = rsID,
                Chromosome = chromosome,
                Position = base_pair_location,
-               EAF = EAF,
+               MAF = maf.meta,
                `Gene(s)` = gene,
                Novel = Novel,
                Beta = beta,

@@ -17,7 +17,7 @@ transport = AIOHTTPTransport(url=API_URL, ssl = False)
 client = Client(transport=transport, fetch_schema_from_transport=True)
 
 # Semaphore to limit concurrent requests
-semaphore = asyncio.Semaphore(5)  # 10 requests per minute
+semaphore = asyncio.Semaphore(5)  # 5 requests per minute
 
 query_string = """
         query getVariant($rsId: String!) {

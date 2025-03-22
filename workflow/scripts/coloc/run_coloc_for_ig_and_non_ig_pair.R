@@ -2,6 +2,8 @@ library(data.table)
 setDTthreads(snakemake@threads)
 library(coloc)
 
+#save.image('coloc.RData')
+
 beta_a <- sprintf('beta.%s', snakemake@wildcards$isotype)
 beta_b <- sprintf('beta.%s', snakemake@wildcards$non_ig)
 se_a <- sprintf('standard_error.%s', snakemake@wildcards$isotype)
@@ -33,8 +35,8 @@ ig_dataset <- list(snp = dat[, rsid],
 
 if(snakemake@wildcards$non_ig == 'lymphocyte-counts') {
   non_ig_dataset <- list(snp = dat[, rsid],
-                        beta = dat[, beta, env = list(beta = beta_a)],
-                        varbeta = dat[, se^2, env = list(se = se_a)],
+                        beta = dat[, beta, env = list(beta = beta_b)],
+                        varbeta = dat[, se^2, env = list(se = se_b)],
                         type = 'quant',
                         N = snakemake@config$gwas_datasets[[snakemake@wildcards$non_ig]]$samples,
                         sdY = 1

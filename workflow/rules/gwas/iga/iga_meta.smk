@@ -112,17 +112,7 @@ use rule annotate_lead_snps as annotate_iga_meta_lead_snps with:
     output:
         "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps.tsv"
 
-rule add_rsids_to_annotated_lead_snps_for_iga_meta:
-    input:
-        lead = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps.tsv",
-        rsids = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta_rsids.tsv.gz"
-    output:
-        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_rsids.tsv"
-    threads: 6
-    localrule: True
-    conda: env_path("global.yaml")
-    script: script_path("gwas/iga_meta/add_rsids_to_lead_snps.R")
-
+# NB: Taking this out for now due to timing problem with requests and redundancy of gnomad MAF estimate
 rule add_gnomad_queried_mafs_to_annotated_lead_snps_for_iga_meta:
     input:
         "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps.tsv"
@@ -137,10 +127,12 @@ rule add_gnomad_queried_mafs_to_annotated_lead_snps_for_iga_meta:
 
 rule add_study_sumstats_to_annotated_lead_snps_for_iga_meta:
     input:
-        lead = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_gnomad_maf.tsv",
+        lead = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps.tsv",
         merged = "results/iga_meta/merged.tsv.gz"
     output:
         "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_study_sumstats.tsv"
+    params:
+        isotype = 'iga'
     threads: 8
     localrule: True
     conda: env_path("global.yaml")
