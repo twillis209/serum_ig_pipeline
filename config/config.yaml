@@ -67,6 +67,7 @@ imds: ['asthma', 'pbc', 'psc', 'ra', 'sle', 'crohns', 't1d', 'uc', 'ms', 'derm',
 iga_studies: ['epic', 'liu', 'dennis', 'scepanovic', 'pietzner', 'eldjarn']
 igg_studies: ['epic', 'dennis', 'scepanovic', 'pietzner', 'eldjarn']
 igm_studies: ['epic', 'scepanovic', 'pietzner', 'eldjarn']
+studies_with_maf_estimates: ['epic', 'pietzner', 'scepanovic', 'dennis', 'eldjarn']
 gwas_datasets:
   iga-meta:
     samples: 85204

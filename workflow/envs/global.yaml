@@ -21,6 +21,7 @@ dependencies:
 - r-ggcorrplot
 - r-pheatmap
 - r-ggnewscale
+- r-scales
 - r-ldlinkr
 - r-serum-ig-pipeline-code == 0.2.3
 - r-httr

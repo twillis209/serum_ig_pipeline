@@ -212,9 +212,9 @@ use rule compile_igh_gws_hits_across_datasets as compile_igl_gws_hits_across_dat
 
 rule plot_beta_vs_maf_for_all_isotypes:
     input:
-        iga = "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps_with_gnomad_maf.tsv",
-        igg = "results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps_with_gnomad_maf.tsv",
-        igm = "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps_with_gnomad_maf.tsv"
+        iga = "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps_with_study_sumstats.tsv",
+        igg = "results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps_with_study_sumstats.tsv",
+        igm = "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps_with_study_sumstats.tsv"
     output:
         "results/ig/beta_vs_maf.png"
     localrule: True

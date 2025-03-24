@@ -1,6 +1,8 @@
 library(data.table)
 library(ggplot2)
 library(magrittr)
+library(patchwork)
+library(scales)
 
 theme_set(theme_bw()+
           theme(
@@ -21,7 +23,7 @@ igg[, `Data set` := 'IgG']
 iga <- fread(snakemake@input$iga)
 iga[, `Data set` := 'IgA']
 
-cols <- c('rsid', 'beta', 'standard_error', 'gnomadNFE', 'Data set')
+cols <- c('rsid', 'beta', 'standard_error', 'maf.meta', 'Data set')
 
 merged <- rbindlist(list(igm[, ..cols],
                igg[, ..cols],
@@ -29,13 +31,20 @@ merged <- rbindlist(list(igm[, ..cols],
                fill = T
                )
 
-merged[, MAF := ifelse(gnomadNFE > 0.5, 1-gnomadNFE, gnomadNFE)]
-
-pl <- ggplot(data = merged[!is.na(MAF)][MAF > 0])+
-  geom_point(aes(x = MAF, y = abs(beta), col = `Data set`), alpha = 0.4)+
+pl1 <- ggplot(data = merged[!is.na(maf.meta)][maf.meta > 0])+
+  geom_point(aes(x = maf.meta, y = abs(beta), col = `Data set`), alpha = 0.4)+
   xlab('MAF')+
   ylab('|Effect estimate|')+
-  scale_x_log10(limits = c(1e-5, 1), breaks = c(1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1))+
-  coord_fixed()
+  scale_x_continuous(limits = c(1e-2, 0.5), breaks = c(1e-2, 1e-1, 0.2, 0.3, 0.4, 0.5))+
+  ylim(c(0,1.2))
 
-ggsave(pl, file = snakemake@output[[1]], width = 4, height = 1.5)
+
+pl2 <- ggplot(data = merged[!is.na(maf.meta)][maf.meta > 0])+
+  geom_point(aes(x = maf.meta, y = abs(beta), col = `Data set`), alpha = 0.4)+
+  xlab('MAF')+
+  ylab('|Effect estimate|')+
+  scale_x_log10(limits = c(1e-4, 1e-2), breaks = c(1e-4, 1e-3, 1e-2), labels = function(x) format(x, scientific = F))+
+  coord_fixed()+
+  theme(legend.position = 'none')
+
+ggsave(pl2+pl1+plot_layout(axes = 'collect')+plot_annotation(tag_levels = 'A'), file = snakemake@output[[1]], width = 4, height = 1.5)
