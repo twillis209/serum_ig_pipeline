@@ -1,5 +1,5 @@
 library(data.table)
-library(ldlinkr)
+library(LDlinkR)
 
 all_pairs <- fread(snakemake@input$all_pairs)
 
@@ -26,5 +26,23 @@ all_pairs[rbound_genes, genes.second_snp := genes]
 
 all_pairs[, max_post := names(.SD)[max.col(.SD, ties.method = 'first')], .SDcols = patterns('PP.H')]
 all_pairs[, max_post := gsub('PP\\.|\\.abf', '', max_post)]
+
+for(i in seq_len(all_pairs[, .N])) {
+  r2 <- tryCatch({
+  ld <- LDpop(
+    var1 = all_pairs[i, first_snp],
+    var2 = all_pairs[i, second_snp],
+    pop = "EUR",
+    r2d = "r2",
+    token = snakemake@config$LDlink$token,
+    file = FALSE,
+    genome_build = "grch38_high_coverage"
+  )
+  ld[ld$Abbrev == 'EUR', 'R2']
+  },
+  error = function(e) { message(e); NA })
+
+ set(all_pairs, i, "r2", r2)
+}
 
 fwrite(all_pairs, file = snakemake@output[[1]], sep = '\t')

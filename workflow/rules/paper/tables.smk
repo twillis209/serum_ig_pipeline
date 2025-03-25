@@ -69,7 +69,7 @@ rule imd_dataset_table:
 
 rule ig_coloc_results:
     input:
-        "results/coloc/all_ig_pairs_with_genes.tsv"
+        "results/coloc/all_ig_pairs_with_genes_and_r2.tsv"
     output:
         "results/paper/tables/ig_coloc.tsv"
     localrule: True
@@ -85,7 +85,7 @@ rule ig_coloc_results:
 
 rule ig_and_non_ig_coloc_results:
     input:
-        expand("results/coloc/{isotype}_and_{non_ig}_results_with_genes.tsv",
+        expand("results/coloc/{isotype}_and_{non_ig}/3000kb/results_with_genes_and_r2.tsv",
                isotype = ["igg", "iga", "igm"],
                non_ig = ["asthma", "lymphocyte-counts"])
     output:

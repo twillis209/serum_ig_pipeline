@@ -74,6 +74,8 @@ rule add_gene_and_r2_to_all_ig_coloc_pairs:
         igm = "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps.tsv"
     output:
         "results/coloc/all_ig_pairs_with_genes_and_r2.tsv"
+    resources:
+        ldlink_calls = 1
     localrule: True
     conda: env_path("global.yaml")
     script: script_path("coloc/add_genes_and_r2_to_ig_coloc_pairs.R")

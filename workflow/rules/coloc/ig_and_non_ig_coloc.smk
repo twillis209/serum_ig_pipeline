@@ -69,10 +69,12 @@ rule add_genes_to_ig_and_non_ig_coloc_pair:
         non_ig = "results/harmonised_gwas/{non_ig}/{non_ig_window}_gws_annotated_lead_snps.tsv",
         coloc = "results/coloc/{isotype}_and_{non_ig}/{non_ig_window}/results.tsv"
     output:
-        "results/coloc/{isotype}_and_{non_ig}/{non_ig_window}/results_with_genes.tsv"
+        "results/coloc/{isotype}_and_{non_ig}/{non_ig_window}/results_with_genes_and_r2.tsv"
+    resources:
+        ldlink_calls = 1
     localrule: True
     conda: env_path("global.yaml")
-    script: script_path("coloc/add_genes_to_ig_and_non_ig_coloc_pair.R")
+    script: script_path("coloc/add_genes_and_r2_to_ig_and_non_ig_coloc_pair.R")
 
 use rule draw_locuszoomr_plot_for_coloc_ig_pair as draw_locuszoomr_plot_for_coloc_ig_and_non_ig_pair with:
     input:

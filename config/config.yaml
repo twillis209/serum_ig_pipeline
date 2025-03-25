@@ -479,6 +479,7 @@ gwas_datasets:
     samples: 1376071
     pretty_phenotype: "asthma"
     pretty_study: "Zhou et al."
+    lead_snps_to_remove: ["rs7701967"]
   hypothy-finngen:
     # 'strict autoimmune hypothyroidism'
     harmonised: False
