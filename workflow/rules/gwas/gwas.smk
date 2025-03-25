@@ -74,7 +74,7 @@ rule draw_distance_clump_plot:
     input:
         "resources/harmonised_gwas/{trait}.tsv.gz"
     output:
-        "resources/harmonised_gwas/{trait}/{window_size}_{threshold}/{lead_rsid}_chr{chrom}_{start}_{end}.png"
+        "results/harmonised_gwas/{trait}/{window_size}_{threshold}/{lead_rsid}_chr{chrom}_{start}_{end}.png"
     threads: 12
     resources:
         runtime = 10
@@ -84,7 +84,7 @@ rule draw_distance_clump_plot:
 
 rule draw_loci_from_distance_clump:
     input:
-        lambda w: [f"resources/harmonised_gwas/{{trait}}/{{window_size}}_{{threshold}}/{rsid}_chr{chrom}_{int(int(pos)-2e6)}_{int(int(pos)+2e6)}.png" for rsid, chrom, pos in get_rsid_and_coordinates_from_lead_snps(w)]
+        lambda w: [f"results/harmonised_gwas/{{trait}}/{{window_size}}_{{threshold}}/{rsid}_chr{chrom}_{int(int(pos)-2e6)}_{int(int(pos)+2e6)}.png" for rsid, chrom, pos in get_rsid_and_coordinates_from_lead_snps(w)]
     output:
         "results/harmonised_gwas/{trait}/{window_size}_{threshold}/locus_plots.done"
     shell: "touch {output}"
