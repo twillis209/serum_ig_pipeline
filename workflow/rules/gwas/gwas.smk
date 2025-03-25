@@ -1,3 +1,8 @@
+def get_rsid_and_coordinates_from_lead_snps(w):
+    daf = pd.read_csv(checkpoints.distance_clump_gwas.get(**w).output[0], sep = '\t')
+
+    return zip(daf.rsid, daf.chromosome, daf.base_pair_location)
+
 import pandas as pd
 import os
 
@@ -64,6 +69,25 @@ checkpoint distance_clump_gwas:
         runtime = 5
     group: "gwas"
     script: script_path("gwas/distance_clump.R")
+
+rule draw_distance_clump_plot:
+    input:
+        "resources/harmonised_gwas/{trait}.tsv.gz"
+    output:
+        "resources/harmonised_gwas/{trait}/{window_size}_{threshold}/{lead_rsid}_chr{chrom}_{start}_{end}.png"
+    threads: 12
+    resources:
+        runtime = 10
+    group: "gwas"
+    conda: env_path("global.yaml")
+    script: script_path("gwas/locuszoomr/plot_locus.R")
+
+rule draw_loci_from_distance_clump:
+    input:
+        lambda w: [f"resources/harmonised_gwas/{{trait}}/{{window_size}}_{{threshold}}/{rsid}_chr{chrom}_{int(int(pos)-2e6)}_{int(int(pos)+2e6)}.png" for rsid, chrom, pos in get_rsid_and_coordinates_from_lead_snps(w)]
+    output:
+        "results/harmonised_gwas/{trait}/{window_size}_{threshold}/locus_plots.done"
+    shell: "touch {output}"
 
 rule annotate_lead_snps:
     input:

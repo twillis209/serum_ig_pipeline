@@ -91,8 +91,6 @@ rule draw_loci_from_iga_distance_clump:
         lambda w: [f"results/iga_meta/{{epic_inclusion}}/{{liu_inclusion}}/{{scepanovic_inclusion}}/{{dennis_inclusion}}/{{pietzner_inclusion}}/{{gudjonsson_inclusion}}/{{eldjarn_inclusion}}/{{window_size}}_{{threshold}}/{rsid}_chr{chrom}_{int(int(pos)-2e6)}_{int(int(pos)+2e6)}.png" for rsid, chrom, pos in get_rsid_and_coordinates_from_iga_lead_snps(w)]
     output:
         "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}/locus_plots.done"
-    params:
-        flank = 2e6
     shell: "touch {output}"
 
 rule collapse_clumped_iga_lead_snps:
