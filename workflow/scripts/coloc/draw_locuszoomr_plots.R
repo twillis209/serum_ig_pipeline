@@ -47,13 +47,18 @@ dat[, `:=` (z1 = b1/se1, z2 = b2/se2),
 z_min <- dat[, min(z1, z2)]
 z_max <- dat[, max(z1, z2)]
 
+z_cor <- dat[, cor(z1, z2, use = 'pairwise.complete.obs')]
+
 loc_A <- locus(data = dat, chrom = 'chromosome', pos = 'base_pair_location', p = sprintf('p_value.%s', first_trait_label), labs = 'rsid', seqname = seqname, xrange = c(min_pos, max_pos), ens_db = 'EnsDb.Hsapiens.v86')
 loc_B <- locus(data = dat, chrom = 'chromosome', pos = 'base_pair_location', p = sprintf('p_value.%s', second_trait_label), labs = 'rsid', seqname = seqname, xrange = c(min_pos, max_pos), ens_db = 'EnsDb.Hsapiens.v86')
 
 pls <- list()
 
-pls[[1]] <- gg_scatter(loc_A, labels = snakemake@wildcards$first_rsid, showLD = F, min.segment.length = 0, nudge_y = 5)
-pls[[2]] <- gg_scatter(loc_B, labels = snakemake@wildcards$second_rsid, showLD = F, min.segment.length = 0, nudge_y = 5)
+ylim_A <- c(0, max(loc_A$data$logP)+5)
+ylim_B <- c(0, max(loc_B$data$logP)+5)
+
+pls[[1]] <- gg_scatter(loc_A, labels = c(snakemake@wildcards$first_rsid), showLD = F, min.segment.length = 0, nudge_y = 5, ylim = ylim_A)+ggtitle(first_trait_label)
+pls[[2]] <- gg_scatter(loc_B, labels = c(snakemake@wildcards$second_rsid), showLD = F, min.segment.length = 0, nudge_y = 5, ylim = ylim_B)+ggtitle(second_trait_label)
 pls[[3]] <- gg_genetracks(loc_A)
 pls[[4]] <- ggplot(dat)+
   geom_point(aes(x = z1, y = z2))+
@@ -65,7 +70,8 @@ pls[[4]] <- ggplot(dat)+
   geom_hline(yintercept = qnorm(2.5e-8, lower.tail = F), linetype = 'dashed', col = 'blue')+
   coord_fixed(ratio = 1)+
   xlim(c(z_min, z_max))+
-  ylim(c(z_min, z_max))
+  ylim(c(z_min, z_max))+
+  ggtitle(sprintf("Pearson correlation: %.2f", z_cor))
 
 coloc_res <- fread(snakemake@input$coloc)
 molten <- melt(coloc_res[, .SD, .SDcols = patterns('^PP\\.|nsnps|min_')])

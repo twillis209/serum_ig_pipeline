@@ -1,4 +1,5 @@
 library(data.table)
+library(ldlinkr)
 
 all_pairs <- fread(snakemake@input$all_pairs)
 
