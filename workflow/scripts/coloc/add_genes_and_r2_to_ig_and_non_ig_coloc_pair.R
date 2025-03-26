@@ -4,9 +4,6 @@ library(LDlinkR)
 ig <- fread(snakemake@input$ig)
 ig[, genes := paste(unique(sort(c(topGene, nearestGene))), collapse = ', '), by = 1:nrow(ig)]
 
-non_ig <- fread(snakemake@input$non_ig)
-non_ig[, genes := paste(unique(sort(c(topGene, nearestGene))), collapse = ', '), by = 1:nrow(non_ig)]
-
 coloc <- fread(snakemake@input$coloc)
 
 rbound_genes <- rbindlist(list(ig[, .(rsid, genes)],

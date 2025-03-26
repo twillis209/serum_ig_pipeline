@@ -58,6 +58,6 @@ saveRDS(res, file = snakemake@output[['rds']])
 
 res_dat <- data.table(t(res$summary))
 
-res_dat[, `:=` (first_trait = snakemake@wildcards$isotype, second_trait = snakemake@wildcards$non_ig, first_snp = snakemake@wildcards$isotype_rsid, second_snp = snakemake@wildcards$non_ig_rsid, min_p.first = min_p_ig, min_p.second = min_p_non_ig)]
+res_dat[, `:=` (first_trait = snakemake@wildcards$isotype, second_trait = snakemake@wildcards$non_ig, ig_snp = snakemake@wildcards$isotype_rsid, min_p.first = min_p_ig, min_p.second = min_p_non_ig)]
 
 fwrite(res_dat, file = snakemake@output$tsv, sep = '\t')
