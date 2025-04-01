@@ -1,22 +1,24 @@
 * The serum Ig paper <2024-11-02 Sat>
 ** TODO list
 
-- [ ] rerun MR downstream of new lead SNP datasets
-  - [ ] IgA
-  - [ ] IgM
-  - [ ] IgA
-- [ ] need some sort of consensus MAF rule based on best available estimate
-- [ ] redo beta vs maf plot once we have all EAF
+- [ ] prioritise coloc results
+  - [ ] Ig-Ig
+- [ ] drop IGH/K/L hits from lead SNP tables in Google Sheets
+- [ ] is rs1397934 associated with IgA (it's a lead SNP at RHOH for IgM)?
+- [ ] check non-lead SNP missense variants in IGH are in
+- [ ] react to reactome data Chris produced
+- [ ] add novel column to IEI table
+- [ ] run coloc with/out the thinning and compare results
+- [ ] sanity check on covid-igg rg estimates as the signs are wrong
+- [ ] new Manhattan that stacks all three together, labelled A-C
+- [ ] go through DMs on Slack and make sure I didn't miss anything
+- [ ] MR of IMD and lymphocyte counts
+- [ ] fix Dorn dissertation citation
+- [ ] rewrite non-Ig coloc to define in terms of Ig lead SNPs only
+  - [ ] update Google Sheet
 - [-] Z-score plots
   - [X] draw them
   - [ ] inspect them
-- [-] coloc
-  - [ ] talk to Chris about approach, need to make clear I'm not using all of her code and why
-  - [ ] inspect plots
-  - [ ] 17q11-21 locuszoomr plot
-  - [X] Ig
-- [ ] MR needs some consideration:
-  - [ ] heterogeneity and use of penalty
 
 *** TODOs to integrate
 
@@ -30,7 +32,6 @@
 
 - [ ] comparison with 23andme infection summary statistics
 - [ ] do loci influencing volume of ab production also affect antibody repertoires?
-- [ ] local rg estimation with SUPERGNOVA?
 
 ******** Writing
 
@@ -804,15 +805,15 @@ sdY estimates:
 19:    eldjarn-igm 1.0969310
 #+end_quote
 
-| Study      | Transformation                                                        | Other details                                                                      |
-|------------+-----------------------------------------------------------------------+------------------------------------------------------------------------------------|
-| Dennis     | rank-based INT, sdY.est values suggestive of standardised Y           |                                                                                    |
-| Liu        | standard-normalised residuals from regression of log Y on age and sex |                                                                                    |
-| EPIC       | log Y then standardised                                               | age, sex, and 10 PC scores in linear model for GWAS                                |
-| Pietzner   | rank-based INT                                                        | 'corrected for age, sex, the first ten genetic principal components and test site' |
-| Gudjonsson | Box-Cox transformation                                                | age, sex, 5 PCs, and genotyping platform                                           |
-| Eldjarn    | rank-based INT then extracted standard residuals                      | 'adjusted for age, sex, and sample age'                                            |
-| Scepanovic | log10                                                                 | age, sex, 2 PCs                                                                   |
+| Study      | Transformation                                                                                            | Other details                                                                      |
+|------------+-----------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------|
+| Dennis     | rank-based INT, sdY.est values suggestive of standardised Y, sex, age, ancestry accounted for (see below) |                                                                                    |
+| Liu        | standard-normalised residuals from regression of log Y on age and sex                                     |                                                                                    |
+| EPIC       | log Y then standardised                                                                                   | age, sex, and 10 PC scores in linear model for GWAS                                |
+| Pietzner   | rank-based INT                                                                                            | 'corrected for age, sex, the first ten genetic principal components and test site' |
+| Gudjonsson | Box-Cox transformation                                                                                    | age, sex, 5 PCs, and genotyping platform                                           |
+| Eldjarn    | rank-based INT then extracted standard residuals                                                          | 'adjusted for age, sex, and sample age'                                            |
+| Scepanovic | log10                                                                                                     | age, sex, 2 PCs                                                                    |
 
 NB: 'INT' is inverse normal transformation, so on the scale of a standard normal. See Fig1b in the Dennis paper for where I saw this.
 
@@ -822,6 +823,8 @@ I suppose these are all ways of getting response variable values to be approxima
 
 #+begin_quote
 In our primary analysis, we transformed lab values to fit the normal distribution to improve the performance of the linear regression models [21]. We applied the rank-based inverse normal quantile transformation to all labs, which ensured trait normality by replacing the value of each observation with its quantile from the standard normal distribution. The inverse normal quantile transformation thus preserved the rank ordering of observations, but not the values themselves, and model coefficients therefore are uninterpretable on the original scale.
+...
+All h2SNP and GWAS analyses included covariates for sex, cubic splines (knots = 4) of median age across the medical record (to control for non-linear effects of age), and the top 10 principal components of ancestry.
 #+end_quote
 
 **** Liu
@@ -958,6 +961,16 @@ I've tabulated these in the past, but now we have two studies, Gudjonsson and El
 Idea that the study of common-variant architecture of physiological trait might inform understanding of traits in which dysregulation of the same antibody isotypes is implicated. Could cite our IgAD paper here but that seems a bit obnoxious; Kiryluk/Liu paper talked about IgAN.
 
 Idea that immune-mediated diseases and immune-related traits (which?) show evident of widespread pleiotropy, motivates interrogation of the shared genetic architecture which underlies variance in these physiological traits as well as the pathological ones.
+**** Content
+
+- what are antibodies? cover different types
+- get on to genetic variation: physiological and pathological variation in antibody phenotypes
+- have studied variation's impact on antibody repertoire
+- quantity of antibody next: rare variants causing pathological state, more recently have been able to study common variation in the form of GWAS
+
+**** Draft
+
+Antibodies are soluble proteins which form the basis of humoral immunity. Antibodies are the soluble form of immunoglobulins, which also exist in a membrane-bound form as the antigen-binding moiety of B cell receptors.
 
 *** Methods
 
@@ -1078,6 +1091,17 @@ aws s3 cp s3://largescaleplasma-2023/final_somascan_smp/Proteomics_SMP_PC0_2744_
 #+end_quote
 
 ** Heritability estimation
+
+*** Literature estimates <2025-04-01 Tue>
+
+| Study    | IgA         | IgG          | IgM          | Method           | Sample                        |
+|----------+-------------+--------------+--------------+------------------+-------------------------------|
+| Hatagima | 0.41 (0.03) | 0.617 (0.02) | 0.54 (0.023) | Pathway analysis | 552 Brazilians in 91 sibships |
+| Viktorin | 0.31 (0.06) |              |              | GCTA             | 12,000 Swedish twins          |
+| Viktorin | 0.5         |              |              | Twin ACE model   | 12,000 Swedish twins          |
+|          |             |              |              |                  |                               |
+
+Other studies are old and one I looked at was tiny, not sure it's worth the investment of time.
 
 *** BLD-LDAK model <2025-01-28 Tue>
 
@@ -1791,7 +1815,7 @@ Overlap 0.083595 0.002010
 #+end_quote
 ** Effect allele frequencies
 
-Not able to fetch all EAFs from gnomAD r4. Can I use the =effect_allele_frequency= columns from the contributing studies?
+Not able to fetch all EAFs from gnomAD r4. Can I use the =effect_allele_frequency= columns from the contributing studies? In fact, using the study estimates is probably preferable, anyway.
 
 Would need to check that these columns are concordant with the gnomAD reports.
 
@@ -1816,27 +1840,58 @@ Also note how the EPIC frequency looks to be wrongly specified and does not agre
 
 When I do try to coalesce these in the absence of =EAF= from gnomAD, I will need to check that all columns are consistently >/< 0.5.
 
-*** Harmonising the 'sign'
+*** Harmonising the 'sign' and pooling estimates
 
 Need to make sure that I am dealing with the effect allele frequency when considering all of the columns.
 
 E.g. AF1.dennis was > 0.5 for one SNP in the IgA meta-analysis, so close to being the MAF but not quite. Of three datasets for which I had =effect_allele_frequency= estimates, two were >0.5. ImpMAF.eldjarn was <0.5 for all (as per the name).
 
-*** Pooling EAF estimates?
+#+begin_ai
+I have a data.table and I want to create a boolean column based on whether other columns are all < 0.5
 
-Could we weight estimates by sample size and get a pooled estimate from a 'meta-analysis' of MAF estimates? The problem is that we don't get genotype calls for every individual in the sample.
+[AI]: Assuming your data.table is called DT and the columns you want to check are, for example, "a", "b", and "c", you can create a new boolean column that is TRUE when all the specified columns in a row are less than 0.5. Here are two common methods:
 
-**** Datasets
+Method 1: Using rowSums  
+This method counts how many values per row are below 0.5 and compares that count to the total number of columns checked.
 
-***** IgA
+ââDT[, boolcol := rowSums(.SD < 0.5) == length(.SD), .SDcols = c("a", "b", "c")]
 
-We have
+Explanation:
+ââ¢ .SD refers to the Subset of Data for the specified columns.
+ââ¢ .SD < 0.5 creates a logical matrix.
+ââ¢ rowSums(.SD < 0.5) counts the TRUE values per row.
+ââ¢ If the count equals the number of columns (length(.SD)), then all values are below 0.5.
 
-**** Method
+Method 2: Using Reduce with logical AND  
+This approach applies a logical AND across the specified columns.
+
+ââDT[, boolcol := Reduce(`&`, lapply(.SD, function(x) x < 0.5)), .SDcols = c("a", "b", "c")]
+
+Explanation:
+ââ¢ lapply(.SD, function(x) x < 0.5) applies the test to each column.
+ââ¢ Reduce(`&`, â¦) combines the logical vectors by taking the elementâwise AND across them.
+
+Pick the method that best fits your style or needs. Both will add a new column âboolcolâ to your data.table indicating whether all specified columns in each row are less than 0.5.
+
+[ME]: 
+#+end_ai
+
+#+begin_src
+r$> dat[, `:=` (na_sum = rowSums(is.na(.SD)), sup_0_5 = rowSums(.SD > 0.5, na.rm =T), sub_0_5 = rowSums(.SD < 0.5, na.rm = T)), .SDcols = patterns('freq|ImpMAF|AF1')]
+r$> dat[(sub_0_5 == 0 & sup_0_5 > 0) | (sup_0_5 == 0 & sub_0_5 > 0), signif(.SD, 2), .SDcols = patterns('freq|ImpMAF|AF1')]
+r$> dat[!((sub_0_5 == 0 & sup_0_5 > 0) | (sup_0_5 == 0 & sub_0_5 > 0)), signif(.SD, 2), .SDcols = patterns('EAF|freq|ImpMAF|AF1')]
+#+end_src
+
+For IgA, 53 SNPs agree on  match the criteria.
+
+If I want to take the same approach as before:
+- relabel all the various study allele frequency columns into some more uniform format
+- sort the columns
+- matrix multiplication to get weighted sums
+
 
 #+begin_ai
 I have a data.table with columns corresponding to MAF estimates. These columns contain NA values. I want to compute sample size-weighted meta-analytic MAF estimates using these columns.
-
 
 [AI]: Below is one way to do this in R using data.table. The idea is to compute a weighted average for each row where the weights are the sample sizes, so that the metaâanalytic MAF is
 
@@ -2006,23 +2061,142 @@ Explanation
 
 Choose whichever method best fits your coding style or performance needs. Both methods correctly account for NA values by âdropping outâ the sample size associated with any missing MAF estimate.
 
+[ME]: The maf columns have the form 'af.study_name' where study_name differs. If I have a named vector of samples sizes also corresponding to studies, how can I make sure weights and maf estimates are matched up correctly?
+
+[AI]: Below is one way to do it. The main idea is to extract the study name from each MAF column name (assuming they all start with "af.") and then use that to reorder your named sample size vector so that the weights line up with the correct columns. For example, suppose your data.table (dt) looks like this:
+
+ââaf.StudyAââaf.StudyBââaf.StudyC  
+ââ0.10ââââNAââââ0.15  
+ââ0.12ââ0.14ââââ NA  
+ââNAââââ0.13ââââ0.16  
+
+and your sample sizes are stored in a named vector like
+
+ââsample_sizes <- c(StudyA = 100, StudyB = 200, StudyC = 150)
+
+You can match up the weights and MAF estimates by doing the following:
+
+1. Extract the names of the MAF columns.
+2. Remove the prefix (here "af.") to derive the study names.
+3. Subset the sample size vector using these study names so that the ordering in the vector corresponds to the ordering of the columns.
+4. Use that ordered vector when computing the weighted average.
+
+Hereâs an example using data.table:
+
+-------------------------------------------------
+library(data.table)
+
+# Example data.table with allele frequency (af.) columns:
+dt <- data.table(
+  "af.StudyA" = c(0.10, 0.12, NA),
+  "af.StudyB" = c(NA,   0.14, 0.13),
+  "af.StudyC" = c(0.15, NA,   0.16)
+)
+
+# Named vector of sample sizes
+sample_sizes <- c(StudyA = 100, StudyB = 200, StudyC = 150)
+
+# Identify the MAF columns (assuming all such columns start with "af.")
+maf_cols <- grep("^af\\.", names(dt), value = TRUE)
+
+# Get corresponding study names by stripping the prefix
+studies <- sub("^af\\.", "", maf_cols)
+
+# Ensure weights are in the same order as the maf columns:
+weights <- sample_sizes[studies]
+# Print to check ordering:
+print(weights)
+# > StudyA StudyB StudyC 
+# >    100    200    150 
+
+# Now compute weighted meta-analytic AF for each row.
+# The formula: meta_af = (sum(af * weight)) / (sum(weights for non-NA af's))
+dt[, meta_af := {
+  # Turn the subset of MAF estimates into a matrix
+  maf_mat <- as.matrix(.SD)
+  # Create a matrix with the weights replicated by row.
+  weight_mat <- matrix(weights, nrow(maf_mat), length(weights), byrow = TRUE)
+  # For each position, if the maf value is NA, set its effective weight to 0.
+  effective_weights <- ifelse(is.na(maf_mat), 0, weight_mat)
+  # Calculate the weighted numerator, replacing NA with 0.
+  numer <- rowSums(ifelse(is.na(maf_mat), 0, maf_mat) * weight_mat)
+  # Calculate the denominator as the sum of effective weights.
+  denom <- rowSums(effective_weights)
+  # Compute weighted average; return NA if the denominator is 0.
+  ifelse(denom > 0, numer / denom, NA_real_)
+}, .SDcols = maf_cols]
+
+print(dt)
+-------------------------------------------------
+
+Explanation of the Code:
+â¢ The grep() call finds all columns starting with "af." and stores them in maf_cols.
+â¢ The sub() function removes the "af." prefix to extract study names.
+â¢ By subsetting sample_sizes using these study names (weights <- sample_sizes[studies]), you ensure that the order of weights exactly follows the order of the MAF columns.
+â¢ Next, the code turns the relevant columns into a matrix and constructs a corresponding matrix of weights.
+â¢ For each row, NA values in the MAF matrix are given a weight of 0. Then, a weighted sum (numerator) and total weights (denom) are calculated.
+â¢ Finally, if the total effective weight is not zero, the meta-analytic allele frequency is computed as the weighted sum divided by the sum of weights; otherwise, an NA is returned.
+
+This workflow guarantees that the weights used in the calculations correspond exactly to the studies indicated in the column names.
+
 [ME]: 
 #+end_ai
 
-** Paper by the numbers
-*** Sample sizes
-- IgA: 85,204
-- IgG: 58,777
-- IgM: 55,368
-*** No. of associations
-- IgA: 106
-- IgG: 19
-- IgM: 89
-**** Novel associations
-- IgA: 40
-- IgG: 9
-- IgM: 37
-**** TODO Number of known associations prior to this study
+*** Getting the MAF instead
+
+This should be more straightforward. I can map x to 1-x where x > 0.5.
+
+*** Troubleshooting gnomad code
+
+#+begin_ai
+Please explain the following error to me:
+
+Traceback (most recent call last):
+  File "/rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/.snakemake/conda/751f12767b3749334dba0071878176e2_/lib/python3.13/site-packages/anyio/_core/_tasks.py", line 115, in fail_after
+    yield cancel_scope
+  File "/rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/.snakemake/conda/751f12767b3749334dba0071878176e2_/lib/python3.13/site-packages/gql/client.py", line 1538, in _execute                                                                                                                                                                      
+    result = await self.transport.execute(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "/rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/.snakemake/conda/751f12767b3749334dba0071878176e2_/lib/python3.13/site-packages/gql/transport/aiohttp.py", line 332, in execute
+    async with self.session.post(self.url, ssl=self.ssl, **post_args) as resp:
+               ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/.snakemake/conda/751f12767b3749334dba0071878176e2_/lib/python3.13/site-packages/aiohttp/client.py"
+, line 1425, in __aenter__                                                                                                                                                                   
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+  File "/rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/.snakemake/conda/751f12767b3749334dba0071878176e2_/lib/python3.13/site-packages/aiohttp/client.py"
+, line 730, in _request                                                                                                                                                                      
+    await resp.start(conn)
+  File "/rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/.snakemake/conda/751f12767b3749334dba0071878176e2_/lib/python3.13/site-packages/aiohttp/client_reqrep.py", line 1059, in start
+    message, payload = await protocol.read()  # type: ignore[union-attr]
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/.snakemake/conda/751f12767b3749334dba0071878176e2_/lib/python3.13/site-packages/aiohttp/streams.py", line 672, in read
+    await self._waiter
+asyncio.exceptions.CancelledError: Cancelled by cancel scope 14b25930bb70
+
+
+[AI]: This error means that an asynchronous operation was cancelled before it could complete. In your case, a CancelledError was raised from within an async context (using anyioâs cancel scope) when making an HTTP request with aiohttp via the gql client.
+
+Hereâs whatâs happening step by step:
+
+1. The code enters a cancel scope (often via anyioâs fail_after context manager). Cancel scopes are used to enforce timeouts or cancel groups of asynchronous tasks.
+
+2. The gql client calls its transport method to execute a GraphQL request. Under the hood, it uses aiohttpâs async session to make an HTTP POST request.
+
+3. While waiting (in the async context managed by aiohttp), the operation gets cancelled. This cancellation might occur because a timeout expired (if youâre using something like fail_after) or because some other part of your code/program decided to cancel the pending task.
+
+4. As soon as the cancellation is signaled (with a unique scope id like â14b25930bb70â), the asynchronous task is interrupted, and the coroutine awaiting the HTTP response raises asyncio.exceptions.CancelledError. 
+
+In summary, the error indicates that the request was interrupted by the cancel scope because the allotted time for the operation was exceeded or an explicit cancellation was triggered. If this cancellation wasnât expected, you might need to look into your timeout settings or how cancel scopes are being managed in your workflow.
+
+[ME]: 
+#+end_ai
+
+Having read this, I halved the number of requests per minute to ask for 5, rather than 10, and it worked.
+
 ** DONE Slow =distance_clump= <2025-03-10 Mon>
 
 #+begin_org-ai
@@ -2430,6 +2604,33 @@ r$> igg
 15:               (intercept) -1.9e-04   0.00069 -0.0015 0.0012   0.790
 #+end_quote
 
+*** Ig and Covid-19 IgG seronegativity
+
+**** Non-lead SNP instruments?
+
+We have very few instruments, can we get more by substituting GWS SNPs in LD with IgG lead SNPs for the lead SNPs themselves?
+
+On the inner join of =igg= and =covid-igg=:
+#+begin_quote
+r$> dat[`p_value.igg-meta` < 5e-8][ , .N, by = chromosome]
+   chromosome     N
+        <int> <int>
+1:         10    20
+2:         11     1
+3:         14    86
+4:         17   259
+5:         20     1
+#+end_quote
+
+| Chromosome | Discrete signals |
+|------------+------------------|
+|         10 |                1 |
+|         11 |                1 |
+|         14 |                2 |
+|         17 |                3 |
+|         20 |                1 |
+
+There are three signals on chromosome 17, but the p-values for the Covid-19 GWAS are very much null. This is the case elsewhere, too. I don't think this is worth pursuing.
 
 *** Notes on reading
 
@@ -2463,6 +2664,9 @@ In summary, MRâEgger regression is a useful tool in the MR toolkit. It help
 
 [ME]: 
 #+end_ai
+
+** =coloc=
+*** Lymphocyte counts gives too many H4 results
 
 ** DONE Bias in sign of lead SNPs for IgA
 
@@ -2541,6 +2745,18 @@ rs188468174 and rs7544568
 On chromosome 4, two SNPs [[https://ldlink.nih.gov/?var1=rs2101521&var2=rs10517538&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][are within 1.5Mb but are not in LD]]
 
 On chromosome 5, [[https://ldlink.nih.gov/?var1=rs28744551&var2=rs6859219&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][same story again]]
+
+I came back just to see what r2 looked like within the RUNX3 signal ('na' if the SNP's not in the 1kGP panel or one's monomorphic).
+
+| First SNP   | Second SNP  | EUR r2 | CEU r2 | TSI r2 | Link   | Notes                      |
+|-------------+-------------+--------+--------+--------+--------+----------------------------|
+| rs188468174 | rs74593753  | 0.1576 | 0.2449 | 0.4997 | [[https://ldlink.nih.gov/?var1=rs188468174&var2=rs74593753&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][ldlink]] |                            |
+| rs188468174 | rs760351385 | na     | na     | na     |        |                            |
+| rs188468174 | rs546722789 | na     | na     | na     |        |                            |
+| rs188468174 | rs781445232 | na     | na     | na     |        |                            |
+| rs188468174 | rs765348868 | na     | na     | na     |        |                            |
+| rs188468174 | rs200807314 | na     | na     | na     |        |                            |
+| rs188468174 | rs535269494 | na     | na     | na     | [[https://ldlink.nih.gov/?var1=rs188468174&var2=rs535269494&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][ldlink]] | rs535269494 is monomorphic |
 
 *** IgG
 
@@ -2630,8 +2846,19 @@ res <- dat[dat, allow.cartesian = TRUE, on = .(chromosome, pos >= pos_lower, pos
 res <- res[rsid != i.rsid]
 #+end_src
 
+*** Asthma
+
+**** chr9
+
+[[https://ldlink.nih.gov/?var1=rs12379417&var2=rs2111363&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][rs1237947 and rs2111363]] are not in LD.
+
+**** chr17
+
+[[https://ldlink.nih.gov/?var1=rs7209222+&var2=rs12453507+&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][rs12453507 and rs7209222]] are not in LD.
+
 *** Ideas for an automated solution
 
+ 
 What if I use ldetect to get approximate LD blocks?
 
 Rely on some kind of classifier?
@@ -2672,3 +2899,29 @@ What do you think about these directions? Do you need more details on any partic
 
 [ME]: 
 #+end_ai
+
+** Misc.
+
+*** Notes on the humoral immune response by Janeway
+
+Thymus-dependent antigens require antigen-specific T-cell help, in particular lymphoid tissue-resident T follicular helper cells.
+
+Plasmablasts secrete antibody but retain some characteristics of activated B cells and continue to divide. 'Some' eventually die after a few days (what about the rest?)
+
+Plasma cells initially differentiate from unswitched activated B cells and later from those activated B cells which have entered the germinal centre and undergone somatic hypermutation and class switching.
+
+**** Locations
+
+circulating naive B cells move into primary lymphoid follicles drawn by CXCR5 ligand CXCL13 expressed by FDCs (these also secrete BAFF to keep B cells alive).
+
+mention 'secondary lymphoid tissues' as site of B cell activation
+
+**** Process
+
+1. BCR binds antigen (presented by FDC), B cell migrates in follicle to border with T-cell zone (follicular/interfollicular zone)
+2. BCR-antigen internalised, processed, antigen peptides presented on MHCII molecules
+3. naive T cells also activated by antigen-presenting DC in the T-cell zone, migrates to border with B-cell follicle
+3. T cell binds MHCII with TCR, CD40L-CD40 ligation for costimulatory signal, IL-21 secretion
+4. activation of B cells causes them to move to outer follicular/interfollicular zones, some form primary focus in medullary cords
+5. some primary focus B cells differentiate into plasmablasts, these secrete antibody; other cells move back to follicle, where they differentiate into plasma cells
+6. long-lived plasma cells migrate to bone marrow and secrete antibody
