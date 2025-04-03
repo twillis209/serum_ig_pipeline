@@ -2,7 +2,7 @@ library(data.table)
 setDTthreads(snakemake@threads)
 library(coloc)
 
-#save.image('coloc.RData')
+save.image('coloc.RData')
 
 beta_a <- sprintf('beta.%s', snakemake@wildcards$isotype)
 beta_b <- sprintf('beta.%s', snakemake@wildcards$non_ig)

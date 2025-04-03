@@ -1,7 +1,7 @@
 def get_rsids_from_candidate_lead_snps_for_ig_non_ig_pair(w):
     daf = pd.read_csv(checkpoints.tabulate_ig_and_non_ig_coloc_candidates.get(isotype = w.isotype, non_ig = w.non_ig).output[0], sep = '\t')
 
-    return daf["rsid"]
+    return daf[daf['is_candidate'] == True]["rsid"]
 
 checkpoint tabulate_ig_and_non_ig_coloc_candidates:
     input:
