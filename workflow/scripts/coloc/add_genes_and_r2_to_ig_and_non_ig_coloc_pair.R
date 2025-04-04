@@ -6,25 +6,17 @@ ig[, genes := paste(unique(sort(c(topGene, nearestGene))), collapse = ', '), by 
 
 coloc <- fread(snakemake@input$coloc)
 
-rbound_genes <- rbindlist(list(ig[, .(rsid, genes)],
-                               non_ig[, .(rsid, genes)]))
+setkey(ig, rsid)
 
-rbound_genes <- rbound_genes[, .(genes = paste(unique(unlist(strsplit(genes, ", "))), collapse = ", ")), by = rsid][genes != '']
-
-setkey(rbound_genes, rsid)
-
-setkey(coloc, first_snp)
-coloc[rbound_genes, genes.first_snp := genes]
-
-setkey(coloc, second_snp)
-coloc[rbound_genes, genes.second_snp := genes]
+setkey(coloc, ig_snp)
+coloc[ig, genes := genes]
 
 coloc[, max_post := names(.SD)[max.col(.SD, ties.method = 'first')], .SDcols = patterns('PP.H')]
 
 for(i in seq_len(coloc[, .N])) {
   r2 <- tryCatch({
   ld <- LDpop(
-    var1 = coloc[i, first_snp],
+    var1 = coloc[i, ig_snp],
     var2 = coloc[i, second_snp],
     pop = "EUR",
     r2d = "r2",

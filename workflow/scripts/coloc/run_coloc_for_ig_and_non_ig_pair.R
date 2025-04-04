@@ -2,8 +2,6 @@ library(data.table)
 setDTthreads(snakemake@threads)
 library(coloc)
 
-save.image('coloc.RData')
-
 beta_a <- sprintf('beta.%s', snakemake@wildcards$isotype)
 beta_b <- sprintf('beta.%s', snakemake@wildcards$non_ig)
 se_a <- sprintf('standard_error.%s', snakemake@wildcards$isotype)
@@ -24,6 +22,7 @@ dat <- na.omit(dat, c(beta_a, beta_b, se_a, se_b))
 
 min_p_ig <- dat[, min(p), env = list(p = sprintf("p_value.%s", snakemake@wildcards$isotype))]
 min_p_non_ig <- dat[, min(p), env = list(p = sprintf("p_value.%s", snakemake@wildcards$non_ig))]
+min_p_rsid_non_ig <- dat[which.min(p), rsid, env = list(p = sprintf("p_value.%s", snakemake@wildcards$non_ig))]
 
 ig_dataset <- list(snp = dat[, rsid],
                       beta = dat[, beta, env = list(beta = beta_a)],
@@ -58,6 +57,6 @@ saveRDS(res, file = snakemake@output[['rds']])
 
 res_dat <- data.table(t(res$summary))
 
-res_dat[, `:=` (first_trait = snakemake@wildcards$isotype, second_trait = snakemake@wildcards$non_ig, ig_snp = snakemake@wildcards$isotype_rsid, min_p.first = min_p_ig, min_p.second = min_p_non_ig)]
+res_dat[, `:=` (first_trait = snakemake@wildcards$isotype, second_trait = snakemake@wildcards$non_ig, ig_snp = snakemake@wildcards$isotype_rsid, non_ig_snp = min_p_rsid_non_ig, min_p.first = min_p_ig, min_p.second = min_p_non_ig)]
 
 fwrite(res_dat, file = snakemake@output$tsv, sep = '\t')
