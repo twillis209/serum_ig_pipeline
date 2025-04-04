@@ -17,7 +17,7 @@ for(i in seq_len(coloc[, .N])) {
   r2 <- tryCatch({
   ld <- LDpop(
     var1 = coloc[i, ig_snp],
-    var2 = coloc[i, second_snp],
+    var2 = coloc[i, non_ig_snp],
     pop = "EUR",
     r2d = "r2",
     token = snakemake@config$LDlink$token,

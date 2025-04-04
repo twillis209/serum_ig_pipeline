@@ -11,7 +11,7 @@ default-resources:
   mem_mb: threads * 3420
   slurm_account: "mrc-bsu-sl2-cpu"
   slurm_partition: cclake
-#  tmpdir: "'/home/tw395/tmp'"
+  tmpdir: "'/home/tw395/tmp'"
 software-deployment-method: "apptainer"
 software-deployment-method: "conda"
 scheduler: greedy

@@ -29,7 +29,6 @@ for(i in seq_len(nrow(ig))) {
     non_ig_min_p <- non_ig_neighbours[, min(p.non_ig, na.rm = T),
                       env = list(p.non_ig = sprintf("p_value.%s", non_ig))]
     set(ig, i, 'is_candidate', TRUE)
-    set(ig, i, 'non_ig_lead_rsid', non_ig_lead_rsid)
     set(ig, i, 'non_ig_min_p', non_ig_min_p)
     }
   }
