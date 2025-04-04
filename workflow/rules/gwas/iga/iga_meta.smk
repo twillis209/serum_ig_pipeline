@@ -136,9 +136,19 @@ rule add_study_sumstats_to_annotated_lead_snps_for_iga_meta:
     conda: env_path("global.yaml")
     script: script_path("gwas/iga_meta/add_study_sumstats_to_annotated_lead_snps.R")
 
+rule add_novelty_flag_to_iga_lead_snps:
+    input:
+        lead = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_study_sumstats.tsv",
+        novel = "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/candidate_novel_associations.tsv",
+    output:
+        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_novelty_flag.tsv"
+    localrule: True
+    conda: env_path("global.yaml")
+    script: script_path("gwas/iga_meta/add_novelty_flag_to_annotated_lead_snps.R")
+
 rule add_ieis_to_annotated_lead_snps_for_iga_meta:
     input:
-        lead = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps.tsv",
+        lead = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_novelty_flag.tsv",
         ieis = "results/iei/ieis_by_gene.tsv"
     output:
         "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_ieis.tsv"

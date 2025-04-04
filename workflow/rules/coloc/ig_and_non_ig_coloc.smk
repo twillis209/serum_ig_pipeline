@@ -69,7 +69,13 @@ rule add_genes_and_r2_to_ig_and_non_ig_coloc_pair:
 
 use rule draw_locuszoomr_plot_for_coloc_ig_pair as draw_locuszoomr_plot_for_coloc_ig_and_non_ig_pair with:
     input:
-        sumstats = "results/coloc/{isotype}_and_{non_ig}/{first_rsid}/sumstats.tsv",
-        coloc = "results/coloc/{isotype}_and_{non_ig}/{first_rsid}/coloc.tsv"
+        sumstats = "results/coloc/{isotype}_and_{non_ig}/{isotype_rsid}/sumstats.tsv",
+        coloc = "results/coloc/{isotype}_and_{non_ig}/{isotype_rsid}/coloc.tsv"
     output:
-        "results/coloc/{isotype}_and_{non_ig}/{first_rsid}/lz_plots.png"
+        "results/coloc/{isotype}_and_{non_ig}/{isotype_rsid}/lz_plots.png"
+
+rule ig_and_non_ig_coloc_locuszoomr_plots:
+    input:
+        expand("results/coloc/{isotype}_and_{non_ig}/lz_plots.done",
+               isotype = ["igg", "iga", "igm"],
+               non_ig = ["asthma", "lymphocyte-counts"])
