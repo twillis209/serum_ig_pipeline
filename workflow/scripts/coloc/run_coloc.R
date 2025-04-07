@@ -15,10 +15,12 @@ dat <- unique(dat, by = 'rsid')
 
 dat <- na.omit(dat, c(beta_a, beta_b, se_a, se_b))
 
-dat[, n_frac_a := as.integer(n_a)/as.integer(snakemake@params$first_isotype_max_n), env = list(n_a = n_a)]
-dat[, n_frac_b := as.integer(n_b)/as.integer(snakemake@params$second_isotype_max_n), env = list(n_b = n_b)]
+if(snakemake@wildcards$trim == 'trimmed') {
+  dat[, n_frac_a := as.integer(n_a)/as.integer(snakemake@params$first_isotype_max_n), env = list(n_a = n_a)]
+  dat[, n_frac_b := as.integer(n_b)/as.integer(snakemake@params$second_isotype_max_n), env = list(n_b = n_b)]
 
-dat <- dat[abs(n_frac_a - n_frac_b) < 0.1]
+  dat <- dat[abs(n_frac_a - n_frac_b) < 0.1]
+}
 
 min_p_first_isotype <- dat[, min(p), env = list(p = sprintf("p_value.%s", snakemake@wildcards$first_isotype))]
 min_p_second_isotype <- dat[, min(p), env = list(p = sprintf("p_value.%s", snakemake@wildcards$second_isotype))]
@@ -45,6 +47,6 @@ saveRDS(res, file = snakemake@output[['rds']])
 
 res_dat <- data.table(t(res$summary))
 
-res_dat[, `:=` (first_trait = snakemake@wildcards$first_isotype, second_trait = snakemake@wildcards$second_isotype, first_snp = snakemake@wildcards$first_rsid, second_snp = snakemake@wildcards$second_rsid, min_p.first = min_p_first_isotype, min_p.second = min_p_second_isotype)]
+res_dat[, `:=` (first_trait = snakemake@wildcards$first_isotype, second_trait = snakemake@wildcards$second_isotype, trimmed = snakemake@wildcards$trim == 'trimmed', first_snp = snakemake@wildcards$first_rsid, second_snp = snakemake@wildcards$second_rsid, min_p.first = min_p_first_isotype, min_p.second = min_p_second_isotype)]
 
 fwrite(res_dat, file = snakemake@output$tsv, sep = '\t')

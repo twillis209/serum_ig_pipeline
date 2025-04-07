@@ -15,20 +15,33 @@ max_pos <- dat[, max(base_pair_location)]
 if(!is.null(snakemake@wildcards$first_isotype)) {
   first_trait_label <- snakemake@wildcards$first_isotype
   second_trait_label <- snakemake@wildcards$second_isotype
+  n_a <- sprintf('sample_size.%s', snakemake@wildcards$first_isotype)
+  n_b <- sprintf('sample_size.%s', snakemake@wildcards$second_isotype)
 } else if(!is.null(snakemake@wildcards$non_ig)) {
   first_trait_label <- snakemake@wildcards$isotype
   second_trait_label <- snakemake@wildcards$non_ig
+  n_a <- sprintf('sample_size.%s', snakemake@wildcards$isotype)
+  n_b <- sprintf('sample_size.%s', snakemake@wildcards$non_ig)
 } else {
   stop("Can't find wildcard in input file path to identify summary statistics' suffix labels.")
 }
 
 dat[, `:=` (p1 = as.numeric(p1), p2 = as.numeric(p2)),
     env = list(p1 = sprintf("p_value.%s", first_trait_label),
-              p2 = sprintf("p_value.%s", second_trait_label)
-              )
-              ]
+               p2 = sprintf("p_value.%s", second_trait_label)
+               )
+    ]
 
 dat <- na.omit(dat, c(sprintf('p_value.%s', first_trait_label), sprintf('p_value.%s', second_trait_label)))
+
+if(!is.null(snakemake@wildcards$first_isotype)) {
+  if(snakemake@wildcards$trim == 'trimmed') {
+    dat[, n_frac_a := as.integer(n_a)/as.integer(snakemake@params$first_isotype_max_n), env = list(n_a = n_a)]
+    dat[, n_frac_b := as.integer(n_b)/as.integer(snakemake@params$second_isotype_max_n), env = list(n_b = n_b)]
+
+    dat <- dat[abs(n_frac_a - n_frac_b) < 0.1]
+  }
+}
 
 dat <- dat[p1 > 0 & p2 > 0,
            env = list(p1 = sprintf("p_value.%s", first_trait_label),

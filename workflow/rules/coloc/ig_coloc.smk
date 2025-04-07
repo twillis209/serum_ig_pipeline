@@ -35,8 +35,8 @@ rule run_coloc_for_ig_pair:
     input:
         "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/sumstats.tsv"
     output:
-        rds = "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/coloc.rds",
-        tsv = "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/coloc.tsv"
+        rds = "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/{trim}/coloc.rds",
+        tsv = "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/{trim}/coloc.tsv"
     params:
         first_isotype_max_n = lambda w: config.get('gwas_datasets').get(w.first_isotype),
         second_isotype_max_n = lambda w: config.get('gwas_datasets').get(w.second_isotype)
@@ -46,18 +46,21 @@ rule run_coloc_for_ig_pair:
 rule draw_locuszoomr_plot_for_coloc_ig_pair:
     input:
         sumstats = "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/sumstats.tsv",
-        coloc = "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/coloc.tsv"
+        coloc = "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/{trim}/coloc.tsv"
     output:
-        "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/lz_plots.png"
+        "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/{trim}/lz_plots.png"
+    params:
+        first_isotype_max_n = lambda w: config.get('gwas_datasets').get(w.first_isotype),
+        second_isotype_max_n = lambda w: config.get('gwas_datasets').get(w.second_isotype)
     localrule: True
     conda: env_path("global.yaml")
     script: script_path("coloc/draw_locuszoomr_plots.R")
 
 rule run_coloc_for_all_ig_pairs:
     input:
-        iga_igg = lambda w: [f"results/coloc/iga_and_igg/{first_rsid}_and_{second_rsid}/coloc.tsv" for first_rsid, second_rsid in get_rsids_from_merged_lead_snps(w, isotype_a = 'iga', isotype_b = 'igg')],
-        igg_igm = lambda w: [f"results/coloc/igg_and_igm/{first_rsid}_and_{second_rsid}/coloc.tsv" for first_rsid, second_rsid in get_rsids_from_merged_lead_snps(w, isotype_a = 'igg', isotype_b = 'igm')],
-        iga_igm = lambda w: [f"results/coloc/iga_and_igm/{first_rsid}_and_{second_rsid}/coloc.tsv" for first_rsid, second_rsid in get_rsids_from_merged_lead_snps(w, isotype_a = 'iga', isotype_b = 'igm')]
+        iga_igg = lambda w: [f"results/coloc/iga_and_igg/{first_rsid}_and_{second_rsid}/{trim}/coloc.tsv" for first_rsid, second_rsid in get_rsids_from_merged_lead_snps(w, isotype_a = 'iga', isotype_b = 'igg') for trim in ['trimmed', 'untrimmed']],
+        igg_igm = lambda w: [f"results/coloc/igg_and_igm/{first_rsid}_and_{second_rsid}/{trim}/coloc.tsv" for first_rsid, second_rsid in get_rsids_from_merged_lead_snps(w, isotype_a = 'igg', isotype_b = 'igm') for trim in ['trimmed', 'untrimmed']],
+        iga_igm = lambda w: [f"results/coloc/iga_and_igm/{first_rsid}_and_{second_rsid}/{trim}/coloc.tsv" for first_rsid, second_rsid in get_rsids_from_merged_lead_snps(w, isotype_a = 'iga', isotype_b = 'igm') for trim in ['trimmed', 'untrimmed']]
     output:
         "results/coloc/all_ig_pairs.tsv"
     localrule: True
@@ -82,6 +85,6 @@ rule add_gene_and_r2_to_all_ig_coloc_pairs:
 
 rule draw_locuszoomr_plots_for_all_ig_pairs:
     input:
-        iga_igg = lambda w: [f"results/coloc/iga_and_igg/{first_rsid}_and_{second_rsid}/lz_plots.png" for first_rsid, second_rsid in get_rsids_from_merged_lead_snps(w, isotype_a = 'iga', isotype_b = 'igg')],
-        igg_igm = lambda w: [f"results/coloc/igg_and_igm/{first_rsid}_and_{second_rsid}/lz_plots.png" for first_rsid, second_rsid in get_rsids_from_merged_lead_snps(w, isotype_a = 'igg', isotype_b = 'igm')],
-        iga_igm = lambda w: [f"results/coloc/iga_and_igm/{first_rsid}_and_{second_rsid}/lz_plots.png" for first_rsid, second_rsid in get_rsids_from_merged_lead_snps(w, isotype_a = 'iga', isotype_b = 'igm')]
+        iga_igg = lambda w: [f"results/coloc/iga_and_igg/{first_rsid}_and_{second_rsid}/{trim}/lz_plots.png" for first_rsid, second_rsid in get_rsids_from_merged_lead_snps(w, isotype_a = 'iga', isotype_b = 'igg') for trim in ['trimmed', 'untrimmed']],
+        igg_igm = lambda w: [f"results/coloc/igg_and_igm/{first_rsid}_and_{second_rsid}/{trim}/lz_plots.png" for first_rsid, second_rsid in get_rsids_from_merged_lead_snps(w, isotype_a = 'igg', isotype_b = 'igm') for trim in ['trimmed', 'untrimmed']],
+        iga_igm = lambda w: [f"results/coloc/iga_and_igm/{first_rsid}_and_{second_rsid}/{trim}/lz_plots.png" for first_rsid, second_rsid in get_rsids_from_merged_lead_snps(w, isotype_a = 'iga', isotype_b = 'igm') for trim in ['trimmed', 'untrimmed']]
