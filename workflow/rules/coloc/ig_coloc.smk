@@ -88,3 +88,12 @@ rule draw_locuszoomr_plots_for_all_ig_pairs:
         iga_igg = lambda w: [f"results/coloc/iga_and_igg/{first_rsid}_and_{second_rsid}/{trim}/lz_plots.png" for first_rsid, second_rsid in get_rsids_from_merged_lead_snps(w, isotype_a = 'iga', isotype_b = 'igg') for trim in ['trimmed', 'untrimmed']],
         igg_igm = lambda w: [f"results/coloc/igg_and_igm/{first_rsid}_and_{second_rsid}/{trim}/lz_plots.png" for first_rsid, second_rsid in get_rsids_from_merged_lead_snps(w, isotype_a = 'igg', isotype_b = 'igm') for trim in ['trimmed', 'untrimmed']],
         iga_igm = lambda w: [f"results/coloc/iga_and_igm/{first_rsid}_and_{second_rsid}/{trim}/lz_plots.png" for first_rsid, second_rsid in get_rsids_from_merged_lead_snps(w, isotype_a = 'iga', isotype_b = 'igm') for trim in ['trimmed', 'untrimmed']]
+
+rule draw_raw_vs_trimmed_coloc_pp_for_ig_pairs:
+    input:
+        "results/coloc/all_ig_pairs_with_genes_and_r2.tsv"
+    output:
+        h4 = "results/coloc/raw_vs_trimmed_coloc_pp_h4_ig_pairs.png"
+    localrule: True
+    conda: env_path("global.yaml")
+    script: script_path("coloc/plot_raw_vs_trimmed_coloc_pp.R")

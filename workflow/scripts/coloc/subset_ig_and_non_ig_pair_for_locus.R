@@ -1,8 +1,6 @@
 library(data.table)
 setDTthreads(snakemake@threads)
 
-save.image('subset.RData')
-
 iso <- snakemake@wildcards$isotype
 
 merged <- fread(snakemake@input$merged)

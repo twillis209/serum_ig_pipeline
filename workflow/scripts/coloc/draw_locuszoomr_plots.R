@@ -14,12 +14,16 @@ max_pos <- dat[, max(base_pair_location)]
 
 if(!is.null(snakemake@wildcards$first_isotype)) {
   first_trait_label <- snakemake@wildcards$first_isotype
+  first_trait_title <- snakemake@config[['pretty_isotypes']][[first_trait_label]]
   second_trait_label <- snakemake@wildcards$second_isotype
+  second_trait_title <- snakemake@config[['pretty_isotypes']][[second_trait_label]]
   n_a <- sprintf('sample_size.%s', snakemake@wildcards$first_isotype)
   n_b <- sprintf('sample_size.%s', snakemake@wildcards$second_isotype)
 } else if(!is.null(snakemake@wildcards$non_ig)) {
   first_trait_label <- snakemake@wildcards$isotype
+  first_trait_title <- snakemake@config[['pretty_isotypes']][[first_trait_label]]
   second_trait_label <- snakemake@wildcards$non_ig
+  second_trait_title <- snakemake@config[['gwas_datasets']][[second_trait_label]][['pretty_study']]
   n_a <- sprintf('sample_size.%s', snakemake@wildcards$isotype)
   n_b <- sprintf('sample_size.%s', snakemake@wildcards$non_ig)
 } else {
@@ -70,13 +74,13 @@ pls <- list()
 ylim_A <- c(0, max(loc_A$data$logP)+5)
 ylim_B <- c(0, max(loc_B$data$logP)+5)
 
-pls[[1]] <- gg_scatter(loc_A, labels = c(snakemake@wildcards$first_rsid), showLD = F, min.segment.length = 0, nudge_y = 5, ylim = ylim_A)+ggtitle(first_trait_label)
-pls[[2]] <- gg_scatter(loc_B, labels = c(snakemake@wildcards$second_rsid), showLD = F, min.segment.length = 0, nudge_y = 5, ylim = ylim_B)+ggtitle(second_trait_label)
+pls[[1]] <- gg_scatter(loc_A, labels = c(snakemake@wildcards$first_rsid), showLD = F, min.segment.length = 0, nudge_y = 5, ylim = ylim_A)+ggtitle(first_trait_title)
+pls[[2]] <- gg_scatter(loc_B, labels = c(snakemake@wildcards$second_rsid), showLD = F, min.segment.length = 0, nudge_y = 5, ylim = ylim_B)+ggtitle(second_trait_title)
 pls[[3]] <- gg_genetracks(loc_A)
 pls[[4]] <- ggplot(dat)+
   geom_point(aes(x = z1, y = z2))+
-  xlab(first_trait_label)+
-  ylab(second_trait_label)+
+  xlab(sprintf("%s Z-score", first_trait_title))+
+  ylab(sprintf("%s Z-score", second_trait_title))+
   geom_vline(xintercept = qnorm(2.5e-8), linetype = 'dashed', col = 'blue')+
   geom_vline(xintercept = qnorm(2.5e-8, lower.tail = F), linetype = 'dashed', col = 'blue')+
   geom_hline(yintercept = qnorm(2.5e-8), linetype = 'dashed', col = 'blue')+
@@ -88,15 +92,13 @@ pls[[4]] <- ggplot(dat)+
 
 coloc_res <- fread(snakemake@input$coloc)
 molten <- melt(coloc_res[, .SD, .SDcols = patterns('^PP\\.|nsnps|min_')])
-molten[variable == 'nsnps',  pretty_value := format(value, big.mark = ',')]
+molten[, pretty_value := '']
 molten[variable != 'nsnps',  pretty_value := signif(value, digits =  2)]
+molten[variable == 'nsnps',  `:=` (pretty_value = format(value, big.mark = ','), variable = 'No. of SNPs')]
+molten[variable == 'min_p.first',  variable := 'First trait min(p)']
+molten[variable == 'min_p.second',  variable := 'Second trait min(p)']
 
 pls[[5]] <- tableGrob(molten[, .(Variable = variable, Value = pretty_value)], theme = ttheme_minimal(), rows = NULL)
 
-ggsave(arrangeGrob(grobs = pls, layout_matrix = cbind(1:3, c(4,4,5)),
-                   top = sprintf('%s:%s-%s',
-                                 snakemake@params$chrom,
-                                 format(min_pos, big.mark = ',', scientific = F),
-                                 format(max_pos, big.mark = ',', scientific = F)
-                                 )
-                   ), file = snakemake@output[[1]], width = 12, height = 9, unit = 'in')
+ggsave(grid.arrange(grobs = pls, layout_matrix = cbind(1:3, c(4,4,5))),
+       file = snakemake@output[[1]], width = 12, height = 9, unit = 'in')

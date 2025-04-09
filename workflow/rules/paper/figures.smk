@@ -19,11 +19,29 @@ rule draw_stacked_ig_manhattans:
 
 rule ig_ig_coloc_plots:
     input:
-        "results/coloc/iga_and_igm/rs188468174_and_rs188468174/lz_plots.png",
-        "results/coloc/iga_and_igm/rs6570530_and_rs7758383/lz_plots.png",
-        "results/coloc/iga_and_igm/rs35969813_and_rs35629860/lz_plots.png",
-        "results/coloc/iga_and_igm/rs2872516_and_rs4795397/lz_plots.png",
-        "results/coloc/iga_and_igm/rs6885567_and_rs6879652/lz_plots.png",
-        "results/coloc/iga_and_igm/rs10517538_and_rs1397934/lz_plots.png",
-        "results/coloc/iga_and_igg/rs3803800_and_rs758641530/lz_plots.png"
+        "results/coloc/iga_and_igm/rs188468174_and_rs188468174/trimmed/lz_plots.png",
+        "results/coloc/iga_and_igm/rs6570530_and_rs7758383/trimmed/lz_plots.png",
+        "results/coloc/iga_and_igm/rs35969813_and_rs35629860/trimmed/lz_plots.png",
+        "results/coloc/iga_and_igm/rs2872516_and_rs4795397/trimmed/lz_plots.png",
+        "results/coloc/iga_and_igm/rs6885567_and_rs6879652/trimmed/lz_plots.png",
+        "results/coloc/iga_and_igm/rs10517538_and_rs1397934/trimmed/lz_plots.png",
+        "results/coloc/iga_and_igg/rs3803800_and_rs758641530/trimmed/lz_plots.png",
+        "results/coloc/iga_and_igg/rs3803800_and_rs758641530/untrimmed/lz_plots.png",
+        "results/coloc/raw_vs_trimmed_coloc_pp_h4_ig_pairs.png"
+    output:
+        "export/coloc/iga_and_igm/rs188468174_and_rs188468174/trimmed/lz_plots.png",
+        "export/coloc/iga_and_igm/rs6570530_and_rs7758383/trimmed/lz_plots.png",
+        "export/coloc/iga_and_igm/rs35969813_and_rs35629860/trimmed/lz_plots.png",
+        "export/coloc/iga_and_igm/rs2872516_and_rs4795397/trimmed/lz_plots.png",
+        "export/coloc/iga_and_igm/rs6885567_and_rs6879652/trimmed/lz_plots.png",
+        "export/coloc/iga_and_igm/rs10517538_and_rs1397934/trimmed/lz_plots.png",
+        "export/coloc/iga_and_igg/rs3803800_and_rs758641530/trimmed/lz_plots.png",
+        "export/coloc/iga_and_igg/rs3803800_and_rs758641530/untrimmed/lz_plots.png",
+        "export/coloc/raw_vs_trimmed_coloc_pp_h4_ig_pairs.png"
+    localrule: True
+    run:
+        for i,x in enumerate(input):
+            y = output[i]
+            shell(f"cp {x} {y}")
+
 
