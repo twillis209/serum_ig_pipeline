@@ -78,7 +78,9 @@ rule ig_coloc_results:
         daf['first_trait'] = daf['first_trait'].map(config.get('pretty_isotypes'))
         daf['second_trait'] = daf['second_trait'].map(config.get('pretty_isotypes'))
 
-        daf.rename(columns = {'nsnps': 'No. of SNPs', "first_trait": "First isotype", "second_trait": "Second isotype", "first_snp": "First isotype's lead SNP", "second_snp": "Second isotype's lead SNP", "min_p.first": "Min. locus p-value for first isotype", "min_p.second": "Min. locus p-value for second isotype", "genes.first_snp": "Genes for first lead SNP", "genes.second_snp": "Genes for second lead SNP", "max_post": "Max. posterior hypothesis"}, inplace = True)
+        daf.rename(columns = {'nsnps': 'No. of SNPs', "first_trait": "First isotype", "second_trait": "Second isotype", "first_snp": "First isotype's lead SNP", "second_snp": "Second isotype's lead SNP", "trimmed": "Filtered", "min_p.first": "Min. locus p-value for first isotype", "min_p.second": "Min. locus p-value for second isotype", "genes.first_snp": "Genes for first lead SNP", "genes.second_snp": "Genes for second lead SNP", "max_post": "Max. posterior hypothesis"}, inplace = True)
+
+        daf['Posterior odds of H4'] = daf['PP.H4.abf']/(1. - daf['PP.H4.abf'])
 
         daf.to_csv(output[0], sep = '\t', index = False)
 
@@ -99,11 +101,64 @@ rule ig_and_non_ig_coloc_results:
             daf['first_trait'] = daf['first_trait'].map(config.get('pretty_isotypes'))
             daf['second_trait'] = config.get('gwas_datasets').get(daf['second_trait'][0]).get('pretty_phenotype')
 
-            daf.rename(columns = {'nsnps': 'No. of SNPs', "first_trait": "Isotype", "second_trait": "Non-Ig trait", "first_snp": "Isotype's lead SNP", "second_snp": "Non-Ig trait's lead SNP", "min_p.first": "Min. locus p-value for isotype", "min_p.second": "Min. locus p-value for non-Ig trait", "genes.first_snp": "Genes for first lead SNP", "genes.second_snp": "Genes for second lead SNP", "max_post": "Max. posterior hypothesis"}, inplace = True)
+            daf.rename(columns = {'nsnps': 'No. of SNPs', "first_trait": "Isotype", "second_trait": "Non-Ig trait", "ig_snp": "Isotype's lead SNP", "non_ig_snp": "Non-Ig trait's lead SNP", "min_p.first": "Min. locus p-value for isotype", "min_p.second": "Min. locus p-value for non-Ig trait", "genes.first_snp": "Genes for first lead SNP", "genes.second_snp": "Genes for second lead SNP", "max_post": "Max. posterior hypothesis"}, inplace = True)
 
             dafs.append(daf)
 
-        pd.concat(dafs).to_csv(output[0], sep = '\t', index = False)
+        daf = pd.concat(dafs)
+
+        daf['Posterior odds of H4'] = daf['PP.H4.abf']/(1. - daf['PP.H4.abf'])
+
+        daf.to_csv(output[0], sep = '\t', index = False)
+
+rule ig_ig_coloc_hits:
+    input:
+        "results/paper/tables/ig_coloc.tsv"
+    output:
+        "results/paper/tables/ig_coloc_hits.tsv"
+    localrule: True
+    run:
+        daf = pd.read_csv(input[0], sep = '\t')
+
+        daf[daf['First isotype'] == 'IgA']
+
+        rsid_daf = pd.DataFrame(config['coloc']['iga_and_igm']['hits'])
+        rsid_daf['First isotype'] = 'IgA'
+        rsid_daf['Second isotype'] = 'IgM'
+
+        merged = pd.merge(daf, rsid_daf, left_on = ["First isotype", "Second isotype", "First isotype's lead SNP", "Second isotype's lead SNP"], right_on = ["First isotype", "Second isotype", 'iga', 'igm'], how = 'inner')
+
+        merged.drop(columns = ['iga', 'igm']).to_csv(output[0], sep = '\t', index = False)
+
+rule ig_lymphocyte_counts_hits:
+    input:
+        "results/paper/tables/ig_and_non_ig_coloc.tsv"
+    output:
+        "results/paper/tables/ig_and_non_ig_coloc_hits.tsv"
+    localrule: True
+    run:
+        daf = pd.read_csv(input[0], sep = '\t')
+
+        daf = daf[daf['Non-Ig trait'] == 'lymphocyte count']
+
+        iga_daf = pd.DataFrame(config['coloc']['iga_and_lymphocyte-counts']['hits'])
+        iga_daf.rename(columns = {'iga': 'Isotype\'s lead SNP', 'lymphocyte-counts': 'Non-Ig trait\'s lead SNP'}, inplace = True)
+        iga_daf['Isotype'] = 'IgA'
+        iga_daf['Non-Ig trait'] = 'lymphocyte count'
+        igg_daf = pd.DataFrame(config['coloc']['igg_and_lymphocyte-counts']['hits'])
+        igg_daf.rename(columns = {'igg': 'Isotype\'s lead SNP', 'lymphocyte-counts': 'Non-Ig trait\'s lead SNP'}, inplace = True)
+        igg_daf['Isotype'] = 'IgG'
+        igg_daf['Non-Ig trait'] = 'lymphocyte count'
+        igm_daf = pd.DataFrame(config['coloc']['igm_and_lymphocyte-counts']['hits'])
+        igm_daf.rename(columns = {'igm': 'Isotype\'s lead SNP', 'lymphocyte-counts': 'Non-Ig trait\'s lead SNP'}, inplace = True)
+        igm_daf['Isotype'] = 'IgM'
+        igm_daf['Non-Ig trait'] = 'lymphocyte count'
+
+        rsid_daf = pd.concat([iga_daf, igg_daf, igm_daf])
+
+        merged = pd.merge(daf, rsid_daf, on = ['Isotype', 'Non-Ig trait', 'Isotype\'s lead SNP', 'Non-Ig trait\'s lead SNP'], how = 'inner')
+
+        merged.to_csv(output[0], sep = '\t', index = False)
 
 rule ig_mr:
     input:

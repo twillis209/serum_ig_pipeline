@@ -73,6 +73,7 @@ use rule draw_locuszoomr_plot_for_coloc_ig_pair as draw_locuszoomr_plot_for_colo
         coloc = "results/coloc/{isotype}_and_{non_ig}/{isotype_rsid}/coloc.tsv"
     output:
         "results/coloc/{isotype}_and_{non_ig}/{isotype_rsid}/lz_plots.png"
+    params:
 
 rule ig_and_non_ig_coloc_locuszoomr_plots:
     input:

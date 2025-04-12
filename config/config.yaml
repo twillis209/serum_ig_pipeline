@@ -735,3 +735,60 @@ loci:
     chrom: 22
     start: 22026076
     stop: 22922913
+coloc:
+  igg_and_igm:
+    hits: []
+  iga_and_igg:
+    hits: []
+  iga_and_igm:
+    hits:
+    - iga: "rs10517538"
+      igm: "rs1397934"
+    - iga: "rs188468174"
+      igm: "rs188468174"
+    - iga: "rs35969813"
+      igm: "rs35629860"
+    - iga: "rs2872516"
+      igm: "rs4795397"
+    - iga: "rs6885567"
+      igm: "rs6879652"
+    - iga: "rs6570530"
+      igm: "rs7758383"
+  iga_and_lymphocyte-counts:
+    hits:
+    - iga: "rs3757387"
+      lymphocyte-counts: "rs3778754"
+    - iga: "rs1003342"
+      lymphocyte-counts: "rs714027"
+    - iga: "rs2256609"
+      lymphocyte-counts: "rs5998509"
+    - iga: "rs2286564"
+      lymphocyte-counts: "rs11657448"
+    - iga: "rs6570530"
+      lymphocyte-counts: "rs62428835"
+    - iga: "rs2872516"
+      lymphocyte-counts: "rs4795397"
+    - iga: "rs3810277"
+      lymphocyte-counts: "rs3810276"
+    - iga: "rs148076268"
+      lymphocyte-counts: "rs139974673"
+    - iga: "rs3743"
+      lymphocyte-counts: "rs8074930"
+  igg_and_lymphocyte-counts:
+    hits:
+    - igg: "rs1260326"
+      lymphocyte-counts: "rs1260326"
+  igm_and_lymphocyte-counts:
+    hits:
+    - igm: "rs2476601"
+      lymphocyte-counts: "rs2476601"
+    - igm: "rs6891054"
+      lymphocyte-counts: "rs6882861"
+    - igm: "rs4795397"
+      lymphocyte-counts: "rs4795397"
+    - igm: "rs735665"
+      lymphocyte-counts: "rs36020612"
+    - igm: "rs9293515"
+      lymphocyte-counts: "rs247557"
+    - igm: "rs28671336"
+      lymphocyte-counts: "rs9835571"

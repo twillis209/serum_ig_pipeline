@@ -24,5 +24,8 @@ cast_outlier_dat[, label := paste(first_snp, second_snp, sep = '-')]
 
 ggsave(ggplot(cast_dat)+
        geom_point(aes(x = PP.H4.abf.raw, y = PP.H4.abf.trim))+
-       geom_label_repel(data = cast_outlier_dat, aes(label = label, x = PP.H4.abf.raw, y = PP.H4.abf.trim), color = 'blue', nudge_x = 0.1),
+       geom_label_repel(data = cast_outlier_dat, aes(label = label, x = PP.H4.abf.raw, y = PP.H4.abf.trim), color = 'blue', nudge_x = 0.1)+
+       geom_abline(slope = 1, intercept = 0, linetype = 'dashed')+
+       xlab('PP.H4.abf (raw)')+
+       ylab('PP.H4.abf (filtered)'),
        file = snakemake@output[['h4']])

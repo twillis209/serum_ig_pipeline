@@ -13,3 +13,4 @@ submit_test_nf.sh
 gwas_ssf_experiments
 *.RData
 *.txt.gz
+export
