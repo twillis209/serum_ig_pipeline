@@ -1,21 +1,14 @@
 * The serum Ig paper <2024-11-02 Sat>
 ** TODO list
 
-- [ ] prioritise coloc results
-  - [ ] Ig-Ig
-- [ ] drop IGH/K/L hits from lead SNP tables in Google Sheets
-- [ ] is rs1397934 associated with IgA (it's a lead SNP at RHOH for IgM)?
-- [ ] check non-lead SNP missense variants in IGH are in
+- [-] write up lymphocyte count hits
 - [ ] react to reactome data Chris produced
-- [ ] add novel column to IEI table
-- [ ] run coloc with/out the thinning and compare results
+- [ ] add coloc plots for the analyses mentioned in the paper
 - [ ] sanity check on covid-igg rg estimates as the signs are wrong
-- [ ] new Manhattan that stacks all three together, labelled A-C
 - [ ] go through DMs on Slack and make sure I didn't miss anything
 - [ ] MR of IMD and lymphocyte counts
 - [ ] fix Dorn dissertation citation
-- [ ] rewrite non-Ig coloc to define in terms of Ig lead SNPs only
-  - [ ] update Google Sheet
+- [ ] experiment with genes on Manhattan
 - [-] Z-score plots
   - [X] draw them
   - [ ] inspect them
@@ -979,6 +972,31 @@ Re: sdY estimation, I used a prune of the 1kGP panel of SNPs with MAF > 0.005 in
 *** Discussion
 
 Heterogeneity among component study methods
+
+*** Snipped text
+
+#+begin_quote
+An IgM-associated SNP, rs12531349, is an intronic CARD11 variant and eQTL for this gene (Võsa et al., 2021), in which loss- and gain-of-function mutations can cause three distinct inborn errors of immunity, including a hyper IgE syndrome (Ma et al., 2017), a combined immunodeficiency (Greil et al., 2013), and an antibody deficiency (Brohl et al., 2015; Snow et al., 2012). rs2667978, also associated with IgM, is an intronic variant in LYN and an sQTL for the same gene. The LYN tyrosine kinase mediates both positive and negative signalling in the BCR pathway (Lamagna et al., 2014) and gain-of-function mutations in LYN cause an autosomal dominant autoinflammatory disorder (Louvrier et al., 2023). The IgM-associated SNP rs12554596 is an intronic variant in PAX5, which encodes a transcription factor and ‘master regulator’ of B cell development (Medvedovic et al., 2011). A single case of PAX5 deficiency is known, featuring B-cell lymphopaenia and hypogammaglobulinaemia (Kaiser et al., 2022). The IgM-associated variant rs11215032 is an sQTL for REXO2 in which a dominant negative mutation has been reported to cause an interferenopathy in one patient (Idiiatullina et al., 2024).  rs34033173, associated with IgM, is an intronic variant in, and eQTL for, CIITA, encoding the MHC class II transactivator. This protein is the master regulator of MHC class II expression and mutations in CIITA cause an autosomal recessive combined immunodeficiency, MHC class II deficiency 1 (Steimle et al., 1993). rs7194131 is an IgM-associated SNP in an intron of PLCG2, encoding the phospholipase C γ2 which is essential for memory and germinal centre B cell formation (Hikida et al., 2009). Mutations in PLCG2 cause two distinct autoinflammatory syndromes, familial cold autoinflammatory syndrome 3 (Gandhi et al., 2009) and autoinflammation, antibody deficiency, and immune dysregulation (‘APLAID’), of which the latter features hypogammaglobulinaemia (Neves et al., 2018). rs305080 is an intronic variant in IRF8 associated with IgM. IRF8 deficiency encompasses both autosomal dominant and recessive disorders which feature susceptibility to infection by mycobacteria (Mace et al., 2017).
+
+In two cases, variants associated with IgA and IgM appeared to represent distinct causal variants (low LD and coloc favouring the distinct causal variant hypothesis) but both variants were linked to the same gene. rs290243, another IgM-associated SNP, and rs4744011, an IgA-associated SNP, are both eQTLs for SYK in NK cells and monocytes respectively. SYK encodes a non-receptor tyrosine kinase which participates in BCR signalling (Ackermann et al., 2015) and in which gain-of-function mutations cause an autoinflammatory disorder (L. Wang et al., 2021). rs290243 and rs4744011 are not in LD (r2=0.181) and coloc indicated they represent distinct causal variants for IgA and IgM (Supplementary Table X). rs6589225 is an IgM-associated intronic variant in, and eQTL for, POU2AF1, a gene in which a loss-of-function mutation has been observed to cause an autosomal recessive, CVID-like antibody deficiency, BOB1 deficiency, in one patient (Kury et al., 2021). We also mapped a previously reported IgA-associated SNP, rs4938518, to the same gene, but these variants were not in LD (r2 = 0.28). 
+
+The majority of associations were isotype specific. [ everything else that was novel to follow ]
+
+
+Need some lead-in text introducing the novel hits, could group by theme, maybe across isotypes, e.g. B cell-related hits etc.
+
+We could relate many novel IgA associations to B-cell biology and B cell-related malignancies. rs13388394 is a missense variant in RASGRP3, which encodes a guanine nucleotide exchange factor and RAS activator. Its murine orthologue RasGRP3 contributes to B-cell receptor-induced Ras activation and the deletion of Rasgrp3 leads to deficient production of certain IgG subclasses  (Coughlin et al., 2005). rs62193147 is an intronic variant in SP140 and an eQTL in B cells (Fairfax et al., 2012; Momozawa et al., 2018) for the same gene, which is highly expressed in B cells and whose product SP140, a ‘chromatin regulator’, may maintain B cell identity through transcriptional silencing of inappropriate genes such as HOX (Fraschilla & Jeffrey, 2020; Karaky et al., 2018). Loss-of-function mutations in SP140 contribute to the risk of chronic lymphocytic leukaemia, a B cell-related cancer (Fraschilla & Jeffrey, 2020). rs55901664 is an intronic variant in TBL1XR1, in which somatic mutations cause impaired plasma cell differentiation and a bias towards the production of immature memory B cells in aggressive B cell lymphomas (Venturutti et al., 2020). Another intronic variant, rs17505102, is an eQTL for the TP53 paralogue TP63, known to participate in somatic gene fusion events with TBL1XR1 in a small minority of diffuse large B-cell lymphomas (Scott et al., 2012). rs2101521 is located in an intron of TLR1, encoding the Toll-like receptor TLR1 which is expressed in activated and memory B cells and whose ligation with bacterial lipoproteins permits modulation of the adaptive immune response  (Browne, 2012). rs1585213 is an intronic variant and eQTL in NFKB1 (Võsa et al., 2021), which encodes NF-κB, a critical immune regulator downstream of TLR and B-cell receptor (BCR) signalling and integral to development of the humoral response (Guldenpfennig et al., 2023). Loss-of-function mutations in NFKB1 have been identified as the most common cause of common variable immunodeficiency (Tuijnenburg et al., 2018), an antibody deficiency characterised by IgG deficiency alongside IgA and/or IgM deficiency; IgA is absent in a majority of patients (Bonilla et al., 2016). Similar to this NKFB1-related variant, rs6890853 is an e-, s-, and pQTL for IL7R/IL7Rɑ, whose expression and signalling is important in the early stage of B-cell progenitor development. Loss-of-function mutations in IL7R cause the B cell-positive severe combined immunodeficiency IL7R deficiency (Kaiser et al., 2023). rs10440635 is an eQTL for PTGER4, the gene encoding the EP4 prostaglandin receptor. Prostaglandin E2 suppresses B cell proliferation through its action at this receptor and antagonises BCR signalling (Murn et al., 2008). 
+
+rs113495277 is a missense variant in TRAF1. TNF receptor associated factor 1 (TRAF1) forms multimeric complexes with TRAF2 which bind to the cytoplasmic domain of CD40, the cell-surface receptor for the costimulatory ligand CD40L, upon ligation and activate the canonical NF-κB signalling pathway (Elgueta et al., 2009; Fotin-Mleczek et al., 2004). rs1058935 is a synonymous variant in IFITM2 and e- and sQTL for IFITM1, IFITM2, and IFITM3, all of which encode interferon-induced transmembrane proteins. In addition to their role in antiviral intrinsic immunity, the proteins encoded by these genes participate in signal transduction in B cells through their interaction with the B-cell CD19/CD21/CD81 co-receptor complex (Friedlová et al., 2022). rs1681630 is an eQTL for PTPRJ, encoding the CD148 protein tyrosine phosphatase which promotes BCR signalling in B1 B cells (Skrzypczynska et al., 2016). Two newly associated variants, rs1008866 and rs539846, are eQTLs for the BCL2 family genes BCL2L14 and BMF, respectively (Võsa et al., 2021); Bmf contributes to apoptosis in murine B cells alongside Bim in the absence of survival signals (Woess et al., 2015). rs2286564 lies upstream of CD79B and is an eQTL for this gene (among others) in blood (Võsa et al., 2021) and B cells (Fairfax et al., 2012). CD79B dimerises with CD79A to form the CD79 signal transduction moiety of the BCR and mutations in CD79B cause the antibody deficiency agammaglobulinaemia 6 (Dobbs et al., 2007; Ferrari et al., 2007). rs7245642 is an intronic variant in ZBTB7A and an eQTL for the same gene, which encodes the transcription factor lymphoma/leukaemia-related factor (LRF). Lrf appears to be necessary for commitment of lymphoid progenitors to the B-cell lineage and the maintenance and function of germinal centre B cells (C. Zhu et al., 2018). rs3177243 is a missense variant in DERL3, a gene recently associated with B cell activation and differentiation, and the unfolded protein response (Lin et al., 2022). Its association with the latter may explain its expression in plasma cells given the burden of secretory protein synthesis on them; rs3177243 is also associated with an IgG N-glycan phenotype (Landini et al., 2022) and non-albumin serum protein levels (Sinnott-Armstrong et al., 2021). rs3810277 is an eQTL for SPIB (Võsa et al., 2021), a gene whose murine orthologue SpiB contributes to the maintenance of memory B cells. rs2256609 is an intronic variant in UBE2L3 and an eQTL for the same gene in blood (Võsa et al., 2021) and B cells (Fairfax et al., 2012). It is in LD with rs140490 (r2 = 0.93), a UBE2L3 promoter variant associated with systemic lupus erythematosus (SLE); this association is thought to be driven by an increase in UBE2L3 expression which in turn increases NF-kB activation and thereby plasmablast proliferation (Lewis et al., 2015).
+
+Novel IgG associations
+
+rs9864859 is an intronic variant in ABHD6 and an eQTL for PXK, which encode the PXK serine/threonine kinase. rs9864859 is in LD with rs6445972 (r2 = 0.92), a SNP associated with SLE whose risk allele reduces BCR internalisation in a PXK-dependent manner not explained by a change in expression (Vaughn et al., 2014). rs7918084 is an eQTL for HHEX, which encodes a transcription factor whose murine orthologue Hhex promotes the development of memory B cells (Laidlaw et al., 2020). rs184552867 is an intronic variant in PRDM11 which has been identified as a tumour suppressor gene in B cells which may be downregulated in DLBCL (Asmar et al., 2010). 
+
+Novel IgM associations
+
+rs12026735 is an eQTL for LAPTM5, a gene whose murine orthologue contributes to the maintenance of B cell tolerance through mediation of immature B cell apoptosis (Y. Wang et al., 2022). rs115979345 is an intronic variant in, and eQTL for, FARP2; SNPs mapped to this gene are associated with monoclonal B-cell lymphocytosis (Crowther-Swanepoel et al., 2010). rs36027301 is a missense variant in TCIRG1, which encodes both an isoform of a V-type ATPase subunit and the TIRC7 membrane protein through alternative splicing. TIRC7 is an immune checkpoint inhibitor expressed by T and B cells which restrains lymphocyte activation and proliferation (Krause et al., 2021). rs6495122 is an eQTL for CSK in B cells, a gene encoding the Src family tyrosine kinase CSK which participates in T- and B-cell receptor signalling (S. Zhu et al., 2023). rs7236090 is an intronic variant in BCL2, named for its dysfunction in B-cell lymphoma. rs10419696 is an eQTL for KLF2 which encodes the transcription factor Krüppel-like factor 2, implicated in many aspects of B-cell biology (Wittner & Schuh, 2023). rs11666267 is a missense variant in NIBAN3, encoding B cell novel protein 1, a regulator of BCR signalling (Hong et al., 2019). rs10412811 is an eQTL for a number of genes in blood and B cells; of these, CD37 is noteworthy as it encodes the CD37 tetraspanin, essential for B cell survival in mice (van Spriel et al., 2012). rs192881351 is an intronic variant in GRIK1, which encodes the GluK1 kainate receptor subunit; glutamate stimulation has been shown to enhance B cell activation and antibody secretion (Sturgill et al., 2011).
+#+end_quote
 
 ** Miscellaneous data set-specific issues
 *** To SMP or not SMP?
@@ -2667,6 +2685,139 @@ In summary, MRâEgger regression is a useful tool in the MR toolkit. It help
 
 ** =coloc=
 *** Lymphocyte counts gives too many H4 results
+*** Troubleshooting new Ig-non Ig approach
+
+#+begin_src 
+Error in coloc.abf(ig_dataset, non_ig_dataset) : 
+  dataset1 and dataset2 should contain the same snps in the same order, or should contain snp names through which the common snps can be identified
+In addition: Warning messages:
+1: In min(p) : no non-missing arguments to min; returning Inf
+2: In min(p) : no non-missing arguments to min; returning Inf
+3: In check_dataset(d = dataset1, 1) : minimum p value is: Inf
+If this is what you expected, this is not a problem.
+If this is not as small as you expected, please check you supplied var(beta) and not sd(beta) for the varbeta argument. If that's not the explanation, please check the 02_data vignette.
+4: In min(p) : no non-missing arguments to min; returning Inf
+5: In min(p) : no non-missing arguments to min; returning Inf
+6: In check_dataset(d = dataset2, 2) : minimum p value is: Inf
+If this is what you expected, this is not a problem.
+If this is not as small as you expected, please check you supplied var(beta) and not sd(beta) for the varbeta argument. If that's not the explanation, please check the 02_data vignette.
+#+end_src
+
+Not reading the =dat= in properly, start with that first.
+
+#+begin_src
+  "results/coloc/iga_and_lymphocyte-counts/rs149340486/sumstats.tsv"
+#+end_src
+
+No SNPs in the subset. Ah, no chromosome X/23 in one of the data sets.
+
+Set some flag in the config to handle this.
+
+Found another error whereby the lymphocyte counts p-values were being read as =char=, messed up the if statements big time. Found this because I was checking for the smallest p-value in the non-Ig trait.
+
+*** RHOH signal for IgA and IgM
+
+Is the IgM lead SNP also associated with IgA?
+
+#+begin_quote
+> dat[rsid == 'rs1397934']
+
+   chromosome base_pair_location other_allele effect_allele      rsid
+        <int>              <int>       <char>        <char>    <char>
+1:          4           40185976            A             G rs1397934
+         beta standard_error      p_value sample_size
+        <num>          <num>        <num>       <int>
+1: 0.03702114    0.005511858 1.859684e-11       77527
+#+end_quote
+
+*** Notes on coloc issues
+
+**** Slack discussion on <2025-03-26 Wed>
+
+IgA/IgG around TNFSF13 (rs3803800 and rs758641530): trimmed analysis (with abs difference between fracs limited to 0.1) says signals colocalise (H4), but untrimmed plots show distinct signals.
+
+The rs3803800-rs758641530 is the only example where H4 goes to H3 without trimming. More or less y = x for PP.H4 for trimmed and untrimmed, though.
+
+Need to run both trimmed and untrimmed versions and check disparities manually.
+
+No clear criteria for trimming, so need to manually inspect them.
+
+*** Ig-lymphocyte counts <2025-04-10 Thu>
+
+#+begin_src
+r$> dat[`Non-Ig trait` == 'lymphocyte count'][`Max. posterior hypothesis` == 'PP.H4.abf'][orde
+    r(Isotype, -PP.H4.abf)][, .(Isotype, ig_snp, non_ig_snp, PP.H4.abf, r2, genes, `Posterior 
+    odds of H4`)]
+    Isotype      ig_snp  non_ig_snp PP.H4.abf     r2           genes Posterior odds of H4
+     <char>      <char>      <char>     <num>  <num>          <char>                <num>
+ 1:     IgA   rs3757387   rs3778754 0.9938716 0.9229            IRF5           162.174051
+ 2:     IgA   rs1003342    rs714027 0.9825463 1.0000      ASCC2, LIF            56.294494
+ 3:     IgA   rs2256609   rs5998509 0.9495259 0.9801 RIMBP3C, UBE2L3            18.812161
+ 4:     IgA   rs2286564  rs11657448 0.9297808 0.3868    CD79B, FTSJ3            13.241128
+ 5:     IgA   rs6570530  rs62428835 0.9280593 0.0180          HIVEP2            12.900344
+ 6:     IgA   rs2872516   rs4795397 0.9237226 0.8327           GSDMB            12.110045
+ 7:     IgA   rs3810277   rs3810276 0.7120045 0.1807    MYBPC2, SPIB             2.472277
+ 8:     IgA rs148076268 rs139974673 0.7043296 0.7000     ADAL, FRMD5             2.382144
+ 9:     IgA      rs3743   rs8074930 0.6872742 0.2960   CBX4, TBC1D16             2.197689
+10:     IgG   rs1260326   rs1260326 0.9960134 1.0000            GCKR           249.840122
+11:     IgM   rs2476601   rs2476601 0.9995209 1.0000  DCLRE1B, RSBN1          2086.360334
+12:     IgM   rs6891054   rs6882861 0.9878811 0.9712          ZNF608            81.515954
+13:     IgM   rs4795397   rs4795397 0.9860295 1.0000    GSDMB, ZPBP2            70.579508
+14:     IgM    rs735665  rs36020612 0.9819009 0.9572         GRAMD1B            54.251515
+15:     IgM   rs9293515    rs247557 0.9268573 0.5782         , MEF2C            12.671906
+16:     IgM  rs28671336   rs9835571 0.8476447 0.9090         SLC35G2             5.563604
+17:     IgM   rs6495122      rs6938 0.5183077 0.4858     CPLX3, ULK3             1.076014
+18:     IgM    rs290243    rs296683 0.5138288 0.0035             SYK             1.056888
+
+#+end_src
+
+**** Reviewing plots
+
+| Isotype | Ig SNP      | Pearson correlation | Notes                                                                                             |
+|---------+-------------+---------------------+---------------------------------------------------------------------------------------------------|
+| IgM     | rs2476601   |                0.72 | Definitely                                                                                        |
+| IgM     | rs6891054   |               -0.33 | Definitely                                                                                        |
+| IgM     | rs4795397   |                0.76 | Definitely                                                                                        |
+| IgM     | rs735665    |                0.38 | Definitely                                                                                        |
+| IgM     | rs9293515   |                0.36 | Marginal signal's not so strong but H4 looks good and visual concordance                          |
+| IgM     | rs28671336  |               -0.81 | Definitely                                                                                        |
+| IgM     | rs6495122   |                0.62 | Visual concordance looks very good, PP.H4.abf not so great, H3/H4 close                           |
+| IgM     | rs290243    |               -0.15 | SNPs are in LE, signal's just GWS in Chen, I'm not really convinced, H3/H4 close                  |
+| IgG     | rs1260325   |               -0.67 | Definitely                                                                                        |
+| IgA     | rs3757387   |               -0.34 | Definitely                                                                                        |
+| IgA     | rs1003342   |                -0.8 | Definitely                                                                                        |
+| IgA     | rs2256609   |               -0.58 | Definitely                                                                                        |
+| IgA     | rs2286564   |                 0.4 | Definitely                                                                                        |
+| IgA     | rs6570530   |                0.19 | Marginal signals in both aren't really strong, signals do look concordant but not at the lead SNP |
+| IgA     | rs2872516   |                0.52 | Definitely                                                                                        |
+| IgA     | rs3810277   |               -0.11 | Visual concordance                                                                                |
+| IgA     | rs148076268 |               -0.66 | Hmm, not sure. A soft yes, 7/3 posterior odds                                                     |
+| IgA     | rs3743      |                0.07 | Signals are both just over GWS, H4 is 0.69, soft yes.                                             |
+
+**** Selected loci
+
+| Isotype | Ig SNP     | Pearson correlation | Notes                                                                                             |
+|---------+------------+---------------------+---------------------------------------------------------------------------------------------------|
+| IgM     | rs2476601  |                0.72 | Definitely                                                                                        |
+| IgM     | rs6891054  |               -0.33 | Definitely                                                                                        |
+| IgM     | rs4795397  |                0.76 | Definitely                                                                                        |
+| IgM     | rs735665   |                0.38 | Definitely                                                                                        |
+| IgM     | rs9293515  |                0.36 | Marginal signal's not so strong but H4 looks good and visual concordance                          |
+| IgM     | rs28671336 |               -0.81 | Definitely                                                                                        |
+| IgG     | rs1260325  |               -0.67 | Definitely                                                                                        |
+| IgA     | rs3757387  |               -0.34 | Definitely                                                                                        |
+| IgA     | rs1003342  |                -0.8 | Definitely                                                                                        |
+| IgA     | rs2256609  |               -0.58 | Definitely                                                                                        |
+| IgA     | rs2286564  |                 0.4 | Definitely                                                                                        |
+| IgA     | rs6570530  |                0.19 | Marginal signals in both aren't really strong, signals do look concordant but not at the lead SNP |
+| IgA     | rs2872516  |                0.52 | Definitely                                                                                        |
+| IgA     | rs3810277  |               -0.11 | Visual concordance                                                                                |
+| IgA     | rs148076268 |               -0.66 | Hmm, not sure. A soft yes, 7/3 posterior odds                                                     |
+| IgA     | rs3743      |                0.07 | Signals are both just over GWS, H4 is 0.69, soft yes.                                             |
+
+**** Hit write-up
+
+rs1003342 was mapped to LIF and ASCC2, but is apparently an intronic variant in HORMAD2. [[https://pmc.ncbi.nlm.nih.gov/articles/PMC7265702/#sec1_3][LIF increases Gd-IgA1 secretion by IgA1-secreting cell lines]] and this is relevant in IgAN.
 
 ** DONE Bias in sign of lead SNPs for IgA
 
