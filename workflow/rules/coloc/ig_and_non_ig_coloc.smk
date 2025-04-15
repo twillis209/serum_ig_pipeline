@@ -30,6 +30,9 @@ rule subset_ig_and_non_ig_pair_for_coloc:
     params:
         flank = 500000
     threads: 8
+    resources:
+        runtime = 10
+    group: "coloc"
     conda: env_path("global.yaml")
     script: script_path("coloc/subset_ig_and_non_ig_pair_for_locus.R")
 
@@ -39,6 +42,9 @@ rule run_coloc_for_ig_and_non_ig_pair:
     output:
         rds = "results/coloc/{isotype}_and_{non_ig}/{isotype_rsid}/coloc.rds",
         tsv = "results/coloc/{isotype}_and_{non_ig}/{isotype_rsid}/coloc.tsv"
+    resources:
+        runtime = 10
+    group: "coloc"
     conda: env_path("coloc.yaml")
     script: script_path("coloc/run_coloc_for_ig_and_non_ig_pair.R")
 
@@ -53,6 +59,7 @@ rule draw_locuszoom_plots_for_all_snps_for_ig_and_non_ig_pair:
         lambda w: [f"results/coloc/{{isotype}}_and_{{non_ig}}/{isotype_rsid}/lz_plots.png" for isotype_rsid in get_rsids_from_candidate_lead_snps_for_ig_non_ig_pair(w)]
     output:
         "results/coloc/{isotype}_and_{non_ig}/lz_plots.done"
+    localrule: True
     shell: "touch {output}"
 
 rule add_genes_and_r2_to_ig_and_non_ig_coloc_pair:
@@ -79,4 +86,4 @@ rule ig_and_non_ig_coloc_locuszoomr_plots:
     input:
         expand("results/coloc/{isotype}_and_{non_ig}/lz_plots.done",
                isotype = ["igg", "iga", "igm"],
-               non_ig = ["asthma", "lymphocyte-counts"])
+               non_ig = config['imds'])

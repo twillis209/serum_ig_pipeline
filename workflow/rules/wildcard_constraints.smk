@@ -31,4 +31,4 @@ wildcard_constraints:
     isotype = "iga|igg|igm",
     first_isotype = "iga|igg|igm",
     second_isotype = "iga|igg|igm",
-    non_ig = "asthma|lymphocyte-counts|covid-igg"
+    non_ig = "|".join(config["imds"])
