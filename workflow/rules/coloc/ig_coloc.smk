@@ -65,9 +65,12 @@ rule run_coloc_for_all_ig_pairs:
         "results/coloc/all_ig_pairs.tsv"
     localrule: True
     run:
-        dafs = [pd.read_csv(x, sep = '\t') for x in input]
+        if(len(input) == 0):
+            daf = pd.DataFrame(columns = ["nsnps", "PP.H0.abf", "PP.H1.abf", "PP.H2.abf", "PP.H3.abf", "PP.H4.abf", "first_trait", "second_trait", "ig_snp", "non_ig_snp", "min_p.first", "min_p.second"])
+        else:
+            daf = pd.concat([pd.read_csv(x, sep = '\t') for x in input])
 
-        pd.concat(dafs).to_csv(output[0], sep = '\t', index = False)
+        daf.to_csv(output[0], sep = '\t', index = False)
 
 rule add_gene_and_r2_to_all_ig_coloc_pairs:
     input:

@@ -56,7 +56,7 @@ use rule run_coloc_for_all_ig_pairs as run_coloc_for_all_snps_for_ig_and_non_ig_
 
 rule draw_locuszoom_plots_for_all_snps_for_ig_and_non_ig_pair:
     input:
-        lambda w: [f"results/coloc/{{isotype}}_and_{{non_ig}}/{isotype_rsid}/lz_plots.png" for isotype_rsid in get_rsids_from_candidate_lead_snps_for_ig_non_ig_pair(w)]
+        lambda w: [f"results/coloc/{{isotype}}_and_{{non_ig}}/{isotype_rsid}/lz_plots.png" for isotype_rsid in get_rsids_from_candidate_lead_snps_for_ig_non_ig_pair(w)] or []
     output:
         "results/coloc/{isotype}_and_{non_ig}/lz_plots.done"
     localrule: True
@@ -82,8 +82,9 @@ use rule draw_locuszoomr_plot_for_coloc_ig_pair as draw_locuszoomr_plot_for_colo
         "results/coloc/{isotype}_and_{non_ig}/{isotype_rsid}/lz_plots.png"
     params:
 
-rule ig_and_non_ig_coloc_locuszoomr_plots:
+rule ig_and_non_ig_coloc_tables_and_locuszoomr_plots:
     input:
-        expand("results/coloc/{isotype}_and_{non_ig}/lz_plots.done",
+        expand("results/coloc/{isotype}_and_{non_ig}/{filetype}",
                isotype = ["igg", "iga", "igm"],
-               non_ig = config['imds'])
+               non_ig = config['imds'],
+               filetype = ["lz_plots.done", "results_with_genes_and_r2.tsv"])
