@@ -94,6 +94,8 @@ rule annotate_lead_snps:
         "results/harmonised_gwas/{trait}/{window_size}_{threshold}_lead_snps.tsv"
     output:
         "results/harmonised_gwas/{trait}/{window_size}_{threshold}_annotated_lead_snps.tsv"
+    params:
+        no_of_top_genes = 3
     resources:
         runtime = 30
     group: "gwas"
