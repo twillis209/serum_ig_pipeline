@@ -4,6 +4,8 @@ library(coloc)
 
 beta_a <- sprintf('beta.%s', snakemake@wildcards$isotype)
 beta_b <- sprintf('beta.%s', snakemake@wildcards$non_ig)
+z_a <- sprintf('z.%s', snakemake@wildcards$isotype)
+z_b <- sprintf('z.%s', snakemake@wildcards$non_ig)
 se_a <- sprintf('standard_error.%s', snakemake@wildcards$isotype)
 se_b <- sprintf('standard_error.%s', snakemake@wildcards$non_ig)
 n_a <- sprintf('sample_size.%s', snakemake@wildcards$isotype)
@@ -14,11 +16,6 @@ dat <- fread(snakemake@input[[1]])
 dat <- unique(dat, by = 'rsid')
 
 dat <- na.omit(dat, c(beta_a, beta_b, se_a, se_b))
-
-#dat[, n_frac_a := as.integer(n_a)/as.integer(snakemake@params$first_isotype_max_n), env = list(n_a = n_a)]
-#dat[, n_frac_b := as.integer(n_b)/as.integer(snakemake@params$second_isotype_max_n), env = list(n_b = n_b)]
-
-#dat <- dat[abs(n_frac_a - n_frac_b) < 0.1]
 
 min_p_ig <- dat[, min(p), env = list(p = sprintf("p_value.%s", snakemake@wildcards$isotype))]
 min_p_non_ig <- dat[, min(p), env = list(p = sprintf("p_value.%s", snakemake@wildcards$non_ig))]
@@ -53,10 +50,16 @@ if(snakemake@wildcards$non_ig == 'lymphocyte-counts') {
 
 res <- coloc.abf(ig_dataset, non_ig_dataset)
 
+dat[, `:=` (z_a = beta_a/se_a, z_b = beta_b/se_b), env = list(z_a = z_a, beta_a = beta_a, se_a = se_a, z_b = z_b, beta_b = beta_b, se_b = se_b)]
+
+z_cor <- dat[, cor(z_a, z_b, use = "pairwise.complete.obs", method = "pearson"),
+             env = list(z_a = z_a, z_b = z_b)]
+
 saveRDS(res, file = snakemake@output[['rds']])
+
 
 res_dat <- data.table(t(res$summary))
 
-res_dat[, `:=` (first_trait = snakemake@wildcards$isotype, second_trait = snakemake@wildcards$non_ig, ig_snp = snakemake@wildcards$isotype_rsid, non_ig_snp = min_p_rsid_non_ig, min_p.first = min_p_ig, min_p.second = min_p_non_ig)]
+res_dat[, `:=` (first_trait = snakemake@wildcards$isotype, second_trait = snakemake@wildcards$non_ig, ig_snp = snakemake@wildcards$isotype_rsid, non_ig_snp = min_p_rsid_non_ig, min_p.first = min_p_ig, min_p.second = min_p_non_ig, pearson.cor = z_cor)]
 
 fwrite(res_dat, file = snakemake@output$tsv, sep = '\t')
