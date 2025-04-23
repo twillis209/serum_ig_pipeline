@@ -66,7 +66,7 @@ rule run_coloc_for_all_ig_pairs:
     localrule: True
     run:
         if(len(input) == 0):
-            daf = pd.DataFrame(columns = ["nsnps", "PP.H0.abf", "PP.H1.abf", "PP.H2.abf", "PP.H3.abf", "PP.H4.abf", "first_trait", "second_trait", "ig_snp", "non_ig_snp", "min_p.first", "min_p.second"])
+            daf = pd.DataFrame(columns = ["nsnps", "PP.H0.abf", "PP.H1.abf", "PP.H2.abf", "PP.H3.abf", "PP.H4.abf", "first_trait", "second_trait", "ig_snp", "non_ig_snp", "min_p.first", "min_p.second", "pearson.cor"])
         else:
             daf = pd.concat([pd.read_csv(x, sep = '\t') for x in input])
 

@@ -19,15 +19,15 @@ if('liu' %in% studies) {
 }
 
 if('willis' %in% studies) {
-  willis <- fread(snakemake@input$willis, select = c('CHR38', 'BP38', 'REF', 'ALT', 'rsID', 'topGene', 'P.meta'))
-  willis <- willis[, .(chromosome = CHR38, base_pair_location = BP38, effect_allele = ALT, other_allele = REF, rsid = rsID, Genes = topGene, p_value = P.meta)]
+  willis <- fread(snakemake@input$willis, select = c('CHR38', 'BP38', 'REF', 'ALT', 'rsID', 'top_genes', 'P.meta'))
+  willis <- willis[, .(chromosome = CHR38, base_pair_location = BP38, effect_allele = ALT, other_allele = REF, rsid = rsID, Genes = top_genes, p_value = P.meta)]
   willis[, dataset := 'willis']
   dats[['willis']] <- willis
 }
 
 for(x in studies[!(studies %in% c('ebi', 'liu', 'willis'))]) {
-  dat <- fread(snakemake@input[[x]], select = c('chromosome', 'base_pair_location', 'rsid', 'effect_allele', 'other_allele', 'p_value', 'topGene'), header = T)
-  setnames(dat, 'topGene', 'Genes')
+  dat <- fread(snakemake@input[[x]], select = c('chromosome', 'base_pair_location', 'rsid', 'effect_allele', 'other_allele', 'p_value', 'top_genes'), header = T)
+  setnames(dat, 'top_genes', 'Genes')
   dat[, dataset := x]
   dats[[x]] <- dat
 }

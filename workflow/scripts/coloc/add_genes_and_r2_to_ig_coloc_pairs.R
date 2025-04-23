@@ -4,11 +4,11 @@ library(LDlinkR)
 all_pairs <- fread(snakemake@input$all_pairs)
 
 iga <- fread(snakemake@input$iga)
-iga[, genes := paste(unique(sort(c(topGene, nearestGene))), collapse = ', '), by = 1:nrow(iga)]
+iga[, genes := paste(unique(sort(c(top_genes, nearest_gene))), collapse = ', '), by = 1:nrow(iga)]
 igg <- fread(snakemake@input$igg)
-igg[, genes := paste(unique(sort(c(topGene, nearestGene))), collapse = ', '), by = 1:nrow(igg)]
+igg[, genes := paste(unique(sort(c(top_genes, nearest_gene))), collapse = ', '), by = 1:nrow(igg)]
 igm <- fread(snakemake@input$igm)
-igm[, genes := paste(unique(sort(c(topGene, nearestGene))), collapse = ', '), by = 1:nrow(igm)]
+igm[, genes := paste(unique(sort(c(top_genes, nearest_gene))), collapse = ', '), by = 1:nrow(igm)]
 
 rbound_genes <- rbindlist(list(iga[, .(rsid, genes)],
                                igg[, .(rsid, genes)],
