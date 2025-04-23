@@ -1,36 +1,113 @@
 * The serum Ig paper <2024-11-02 Sat>
-
 ** TODO list
 
-*** Analyses
-
-- [-] drop Gudjonsson and see what happens
-  - [X] IgA
-  - [ ] IgG
-  - [ ] IgM
-- [-] IGH locus issue (after Manhattans)
-  - [X] determine affected studies
-  - [ ] tabulate summary stats for lead SNPs across studies
-    - [ ] concatenate lead snps files
-    - [ ] merge with isotype merged file in turn to add in summary stats
-  - [ ] implement exclusion pipeline
+- [-] write up lymphocyte count hits
+- [ ] react to reactome data Chris produced
+- [ ] add coloc plots for the analyses mentioned in the paper
+- [ ] sanity check on covid-igg rg estimates as the signs are wrong
+- [ ] go through DMs on Slack and make sure I didn't miss anything
+- [ ] MR of IMD and lymphocyte counts
+- [ ] fix Dorn dissertation citation
+- [ ] experiment with genes on Manhattan
 - [-] Z-score plots
   - [X] draw them
   - [ ] inspect them
-- [ ] possibility of Gudjonsson/Eldjarn sample overlap
-- [ ] h2 estimation with BLD-LDAK
-  - [ ] download and liftover annotations
-- [ ] forest plots
-- [ ] analysis of heterogeneity
-- [ ] random effects? Kiryluk did it.
 
-*** Write-up
+*** TODOs to integrate
 
-- [ ] table of different phenotype scales, i.e. transformations etc.
+****** Serum Ig paper
 
-*** Longer-term stuff
+******* =serum_ig_pipeline=
 
-- [ ] with/out SMP normalisation in the Eldjarn data sets?
+- [ ] report =liu-iga= and =liu-decode-iga= (inclusion of 4,699 SNPs with p < 1e-6) sdY.est disparity
+
+******** Ideas
+
+- [ ] comparison with 23andme infection summary statistics
+- [ ] do loci influencing volume of ab production also affect antibody repertoires?
+
+******** Writing
+
+********* Introduction
+
+********** h2 estimate studies:
+
+- 'The genetic control of antibody production. A study of isoimmune antibodies in cattle twins'
+
+********** Additional general Ig studies
+
+Seems like I have too many citations as it is!
+
+*********** IgE
+
+- Weidinger et al. (2008)
+- Granada et al. (2013)
+- Levin et al. (2013)
+- Liao et al. (2013)
+- Akenroye et al. (2022)
+- Daya et al. (2022)
+
+********** General references:
+
+-  Gonzalez-Quintela for sex-specific variation
+
+********** Things to mention
+
+- [ ] meta-analysis of (Western?) European and Icelandic populations
+
+********* Material and methods
+
+- [X] describe standardisation procedure
+- [X] reference IgAD paper for EPIC GWAS in Material and Methods
+- [X] was Pietzner SMP'd?
+- [X] need to add GRAMD1B as known association for IgM via anti-PC IgM study in CLL (mentioned in the IgE publications, too, not sure if GWS), also Ig light chain amyloidosis
+- [ ] mention SMP issue
+- [X] exclusion of IGH
+- [ ] cite new locuszoomr paper
+
+********* Discussion
+
+- [ ] viktorin Swedish twin study has h2 estimates for serum IgA, ~0.5
+
+******** Analyses
+
+- [ ] need reminder that we need to drop low info score EPIC SNPs
+- [-] fetch MAF for unknown SNPs
+  - [X] query gnomAD
+  - [X] plot effect size vs. maf
+  - [ ] refactor use of gnomad MAFs, stop fetching them in the =annotate_lead_snps= rules
+  - [ ] need to replace EAF where NA or 0 (for rarer SNPs)
+- [ ] add IGH explanation
+- [ ] better Manhattan plots
+  - [ ] drop gene names; if want to restore, need a better way
+- [ ] compile rsids for meta-analyses
+  - [ ] add to annotated lead SNPs where it is missing
+- [ ] need to replace =global.yaml= with an R-specific one
+- [ ] exclusion of IGH when? Post meta-analysis? Definitely needs to be excluded from downstream analyses
+  - [ ] need an analysis of the Manhattan plots, locuszoomr at the IGH locus (IGK and IGL worth a look, too); code for this is in =pid_cfdr_pipeline=
+- [ ] Ig rg estimation
+  - [ ] run job
+- [ ] local rg with SUPERGNOVA
+
+********* Rules to crib from =pid_cfdr_pipeline=
+
+- [ ] Ig* lead SNP tables in =cvid_paper/tables.smk=
+- [ ] =pub/cvid_paper/ig_locuszoom_plots.smk=
+- [ ] =pub/cvid_paper/zscore_plots.smk=
+
+******** Outstanding harmoniser issues
+
+- [ ] need to ultimately reintegrate stuff on the =ebispot_harmoniser= branch back into the =master= branch
+- [X] =otherAllele= formatting is done by hand, is an issue with the Eldjarn data sets
+  - [X] investigate hypothesis that problem is that =other_allele= and =otherAllele= are both present in input to =gwas-ssf=
+  - [X] =gwas-ssf= worked the second time
+  - [X] not working again <2025-01-24 Fri>, problem with config output I think rather than the format step
+- [ ] needs to strip leading =chr= from chrom. column
+- [ ] should gwas-ssf md5sum be for file immediately prior to processing?
+
+******** Pipeline release issues
+
+- [ ] plink2 version available through bioconda is too old, doesn't have --r2-phased program like the more recent binaries
 
 ** TODO Setting up the pipeline
 
@@ -428,9 +505,11 @@ Chrom   Pos     Name    rsids   effectAllele    otherAllele     Beta    Pval    
 
 =effectAllele= is handled correctly.
 
+Actually happened again on <2025-01-24 Fri>.
+
 ****** PR for this issue
 
-Would need to edit header schema. =otherAllele= is absent, but perhaps the matching checks for capitalised/uncapitalised versions.
+Would need to edit header schema. =otherAllele= is absent, but perhaps the matching checks for capitalised/uncapitalised versions. Main problem is that it's not picked up when generating the json.
 
 ***** =rsid= column where multiple rsIDs are present <2024-12-06 Fri>
 
@@ -666,7 +745,6 @@ NB:
 Re: 2, if my fix to the strand counts step was merged in through a PR, I could probably revert to using the public version.
 
 ** Study inclusion
-
 *** Scepanovic and sdY estimates <2025-01-10 Fri>
 
 There are only 1,000 subjects in this study, so inclusion is hardly critical to the power of the meta-analysis.
@@ -720,15 +798,15 @@ sdY estimates:
 19:    eldjarn-igm 1.0969310
 #+end_quote
 
-| Study      | Scale           | Notes                                                                 |
-|------------+-----------------+-----------------------------------------------------------------------|
-| Dennis     | standard normal | rank-based INT, sdY.est values suggestive of standardised Y           |
-| Liu        | standard normal | standard-normalised residuals from regression of log Y on age and sex |
-| EPIC       | log             |                                                                       |
-| Pietzner   | standard normal | rank-based INT                                                        |
-| Gudjonsson | Box-Cox         | Box-Cox transformation                                                |
-| Eldjarn    | standard normal | rank-based INT                                                        |
-| Scepanovic | log10           |                                                                       |
+| Study      | Transformation                                                                                            | Other details                                                                      |
+|------------+-----------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------|
+| Dennis     | rank-based INT, sdY.est values suggestive of standardised Y, sex, age, ancestry accounted for (see below) |                                                                                    |
+| Liu        | standard-normalised residuals from regression of log Y on age and sex                                     |                                                                                    |
+| EPIC       | log Y then standardised                                                                                   | age, sex, and 10 PC scores in linear model for GWAS                                |
+| Pietzner   | rank-based INT                                                                                            | 'corrected for age, sex, the first ten genetic principal components and test site' |
+| Gudjonsson | Box-Cox transformation                                                                                    | age, sex, 5 PCs, and genotyping platform                                           |
+| Eldjarn    | rank-based INT then extracted standard residuals                                                          | 'adjusted for age, sex, and sample age'                                            |
+| Scepanovic | log10                                                                                                     | age, sex, 2 PCs                                                                    |
 
 NB: 'INT' is inverse normal transformation, so on the scale of a standard normal. See Fig1b in the Dennis paper for where I saw this.
 
@@ -738,6 +816,8 @@ I suppose these are all ways of getting response variable values to be approxima
 
 #+begin_quote
 In our primary analysis, we transformed lab values to fit the normal distribution to improve the performance of the linear regression models [21]. We applied the rank-based inverse normal quantile transformation to all labs, which ensured trait normality by replacing the value of each observation with its quantile from the standard normal distribution. The inverse normal quantile transformation thus preserved the rank ordering of observations, but not the values themselves, and model coefficients therefore are uninterpretable on the original scale.
+...
+All h2SNP and GWAS analyses included covariates for sex, cubic splines (knots = 4) of median age across the medical record (to control for non-linear effects of age), and the top 10 principal components of ancestry.
 #+end_quote
 
 **** Liu
@@ -841,6 +921,16 @@ For single-variant association analyses, we only considered SNPs with a MAF of >
 
 All three =pietnzer= data sets, =gudjonsson-iga=, =eldjarn-igg= are within 0.05 of 1 (the expected sdY under N(0,1)), so I'll leave these as they are for fear of introducing more noise into them.
 
+*** Dataset idiosyncrasies
+
+**** Eldjarn
+
+Need to:
+- strip leading =chr= from chromosome column
+- explicitly map =otherAllele= to =other_allele= in the json config
+- explicitly map =rsids= to =rsid= in the json config
+- specify genome assembly as GRCh38?
+
 ** TODO Z-score plots
 
 ** Existing associations
@@ -848,7 +938,6 @@ All three =pietnzer= data sets, =gudjonsson-iga=, =eldjarn-igg= are within 0.05 
 I've tabulated these in the past, but now we have two studies, Gudjonsson and Eldjarn, whose associations don't seem to be tabulated in the usual places.
 
 ** Big signals in the IGH locus
-
 *** Which studies have these
 
 - =eldjarn-iga= has signal labelled IGHA1
@@ -860,12 +949,21 @@ I've tabulated these in the past, but now we have two studies, Gudjonsson and El
 - =pietzner-igg= has signal labelled IGHG1
 
 ** Content for the paper
-
 *** Introduction
 
 Idea that the study of common-variant architecture of physiological trait might inform understanding of traits in which dysregulation of the same antibody isotypes is implicated. Could cite our IgAD paper here but that seems a bit obnoxious; Kiryluk/Liu paper talked about IgAN.
 
 Idea that immune-mediated diseases and immune-related traits (which?) show evident of widespread pleiotropy, motivates interrogation of the shared genetic architecture which underlies variance in these physiological traits as well as the pathological ones.
+**** Content
+
+- what are antibodies? cover different types
+- get on to genetic variation: physiological and pathological variation in antibody phenotypes
+- have studied variation's impact on antibody repertoire
+- quantity of antibody next: rare variants causing pathological state, more recently have been able to study common variation in the form of GWAS
+
+**** Draft
+
+Antibodies are soluble proteins which form the basis of humoral immunity. Antibodies are the soluble form of immunoglobulins, which also exist in a membrane-bound form as the antigen-binding moiety of B cell receptors.
 
 *** Methods
 
@@ -874,6 +972,31 @@ Re: sdY estimation, I used a prune of the 1kGP panel of SNPs with MAF > 0.005 in
 *** Discussion
 
 Heterogeneity among component study methods
+
+*** Snipped text
+
+#+begin_quote
+An IgM-associated SNP, rs12531349, is an intronic CARD11 variant and eQTL for this gene (Võsa et al., 2021), in which loss- and gain-of-function mutations can cause three distinct inborn errors of immunity, including a hyper IgE syndrome (Ma et al., 2017), a combined immunodeficiency (Greil et al., 2013), and an antibody deficiency (Brohl et al., 2015; Snow et al., 2012). rs2667978, also associated with IgM, is an intronic variant in LYN and an sQTL for the same gene. The LYN tyrosine kinase mediates both positive and negative signalling in the BCR pathway (Lamagna et al., 2014) and gain-of-function mutations in LYN cause an autosomal dominant autoinflammatory disorder (Louvrier et al., 2023). The IgM-associated SNP rs12554596 is an intronic variant in PAX5, which encodes a transcription factor and ‘master regulator’ of B cell development (Medvedovic et al., 2011). A single case of PAX5 deficiency is known, featuring B-cell lymphopaenia and hypogammaglobulinaemia (Kaiser et al., 2022). The IgM-associated variant rs11215032 is an sQTL for REXO2 in which a dominant negative mutation has been reported to cause an interferenopathy in one patient (Idiiatullina et al., 2024).  rs34033173, associated with IgM, is an intronic variant in, and eQTL for, CIITA, encoding the MHC class II transactivator. This protein is the master regulator of MHC class II expression and mutations in CIITA cause an autosomal recessive combined immunodeficiency, MHC class II deficiency 1 (Steimle et al., 1993). rs7194131 is an IgM-associated SNP in an intron of PLCG2, encoding the phospholipase C γ2 which is essential for memory and germinal centre B cell formation (Hikida et al., 2009). Mutations in PLCG2 cause two distinct autoinflammatory syndromes, familial cold autoinflammatory syndrome 3 (Gandhi et al., 2009) and autoinflammation, antibody deficiency, and immune dysregulation (‘APLAID’), of which the latter features hypogammaglobulinaemia (Neves et al., 2018). rs305080 is an intronic variant in IRF8 associated with IgM. IRF8 deficiency encompasses both autosomal dominant and recessive disorders which feature susceptibility to infection by mycobacteria (Mace et al., 2017).
+
+In two cases, variants associated with IgA and IgM appeared to represent distinct causal variants (low LD and coloc favouring the distinct causal variant hypothesis) but both variants were linked to the same gene. rs290243, another IgM-associated SNP, and rs4744011, an IgA-associated SNP, are both eQTLs for SYK in NK cells and monocytes respectively. SYK encodes a non-receptor tyrosine kinase which participates in BCR signalling (Ackermann et al., 2015) and in which gain-of-function mutations cause an autoinflammatory disorder (L. Wang et al., 2021). rs290243 and rs4744011 are not in LD (r2=0.181) and coloc indicated they represent distinct causal variants for IgA and IgM (Supplementary Table X). rs6589225 is an IgM-associated intronic variant in, and eQTL for, POU2AF1, a gene in which a loss-of-function mutation has been observed to cause an autosomal recessive, CVID-like antibody deficiency, BOB1 deficiency, in one patient (Kury et al., 2021). We also mapped a previously reported IgA-associated SNP, rs4938518, to the same gene, but these variants were not in LD (r2 = 0.28). 
+
+The majority of associations were isotype specific. [ everything else that was novel to follow ]
+
+
+Need some lead-in text introducing the novel hits, could group by theme, maybe across isotypes, e.g. B cell-related hits etc.
+
+We could relate many novel IgA associations to B-cell biology and B cell-related malignancies. rs13388394 is a missense variant in RASGRP3, which encodes a guanine nucleotide exchange factor and RAS activator. Its murine orthologue RasGRP3 contributes to B-cell receptor-induced Ras activation and the deletion of Rasgrp3 leads to deficient production of certain IgG subclasses  (Coughlin et al., 2005). rs62193147 is an intronic variant in SP140 and an eQTL in B cells (Fairfax et al., 2012; Momozawa et al., 2018) for the same gene, which is highly expressed in B cells and whose product SP140, a ‘chromatin regulator’, may maintain B cell identity through transcriptional silencing of inappropriate genes such as HOX (Fraschilla & Jeffrey, 2020; Karaky et al., 2018). Loss-of-function mutations in SP140 contribute to the risk of chronic lymphocytic leukaemia, a B cell-related cancer (Fraschilla & Jeffrey, 2020). rs55901664 is an intronic variant in TBL1XR1, in which somatic mutations cause impaired plasma cell differentiation and a bias towards the production of immature memory B cells in aggressive B cell lymphomas (Venturutti et al., 2020). Another intronic variant, rs17505102, is an eQTL for the TP53 paralogue TP63, known to participate in somatic gene fusion events with TBL1XR1 in a small minority of diffuse large B-cell lymphomas (Scott et al., 2012). rs2101521 is located in an intron of TLR1, encoding the Toll-like receptor TLR1 which is expressed in activated and memory B cells and whose ligation with bacterial lipoproteins permits modulation of the adaptive immune response  (Browne, 2012). rs1585213 is an intronic variant and eQTL in NFKB1 (Võsa et al., 2021), which encodes NF-κB, a critical immune regulator downstream of TLR and B-cell receptor (BCR) signalling and integral to development of the humoral response (Guldenpfennig et al., 2023). Loss-of-function mutations in NFKB1 have been identified as the most common cause of common variable immunodeficiency (Tuijnenburg et al., 2018), an antibody deficiency characterised by IgG deficiency alongside IgA and/or IgM deficiency; IgA is absent in a majority of patients (Bonilla et al., 2016). Similar to this NKFB1-related variant, rs6890853 is an e-, s-, and pQTL for IL7R/IL7Rɑ, whose expression and signalling is important in the early stage of B-cell progenitor development. Loss-of-function mutations in IL7R cause the B cell-positive severe combined immunodeficiency IL7R deficiency (Kaiser et al., 2023). rs10440635 is an eQTL for PTGER4, the gene encoding the EP4 prostaglandin receptor. Prostaglandin E2 suppresses B cell proliferation through its action at this receptor and antagonises BCR signalling (Murn et al., 2008). 
+
+rs113495277 is a missense variant in TRAF1. TNF receptor associated factor 1 (TRAF1) forms multimeric complexes with TRAF2 which bind to the cytoplasmic domain of CD40, the cell-surface receptor for the costimulatory ligand CD40L, upon ligation and activate the canonical NF-κB signalling pathway (Elgueta et al., 2009; Fotin-Mleczek et al., 2004). rs1058935 is a synonymous variant in IFITM2 and e- and sQTL for IFITM1, IFITM2, and IFITM3, all of which encode interferon-induced transmembrane proteins. In addition to their role in antiviral intrinsic immunity, the proteins encoded by these genes participate in signal transduction in B cells through their interaction with the B-cell CD19/CD21/CD81 co-receptor complex (Friedlová et al., 2022). rs1681630 is an eQTL for PTPRJ, encoding the CD148 protein tyrosine phosphatase which promotes BCR signalling in B1 B cells (Skrzypczynska et al., 2016). Two newly associated variants, rs1008866 and rs539846, are eQTLs for the BCL2 family genes BCL2L14 and BMF, respectively (Võsa et al., 2021); Bmf contributes to apoptosis in murine B cells alongside Bim in the absence of survival signals (Woess et al., 2015). rs2286564 lies upstream of CD79B and is an eQTL for this gene (among others) in blood (Võsa et al., 2021) and B cells (Fairfax et al., 2012). CD79B dimerises with CD79A to form the CD79 signal transduction moiety of the BCR and mutations in CD79B cause the antibody deficiency agammaglobulinaemia 6 (Dobbs et al., 2007; Ferrari et al., 2007). rs7245642 is an intronic variant in ZBTB7A and an eQTL for the same gene, which encodes the transcription factor lymphoma/leukaemia-related factor (LRF). Lrf appears to be necessary for commitment of lymphoid progenitors to the B-cell lineage and the maintenance and function of germinal centre B cells (C. Zhu et al., 2018). rs3177243 is a missense variant in DERL3, a gene recently associated with B cell activation and differentiation, and the unfolded protein response (Lin et al., 2022). Its association with the latter may explain its expression in plasma cells given the burden of secretory protein synthesis on them; rs3177243 is also associated with an IgG N-glycan phenotype (Landini et al., 2022) and non-albumin serum protein levels (Sinnott-Armstrong et al., 2021). rs3810277 is an eQTL for SPIB (Võsa et al., 2021), a gene whose murine orthologue SpiB contributes to the maintenance of memory B cells. rs2256609 is an intronic variant in UBE2L3 and an eQTL for the same gene in blood (Võsa et al., 2021) and B cells (Fairfax et al., 2012). It is in LD with rs140490 (r2 = 0.93), a UBE2L3 promoter variant associated with systemic lupus erythematosus (SLE); this association is thought to be driven by an increase in UBE2L3 expression which in turn increases NF-kB activation and thereby plasmablast proliferation (Lewis et al., 2015).
+
+Novel IgG associations
+
+rs9864859 is an intronic variant in ABHD6 and an eQTL for PXK, which encode the PXK serine/threonine kinase. rs9864859 is in LD with rs6445972 (r2 = 0.92), a SNP associated with SLE whose risk allele reduces BCR internalisation in a PXK-dependent manner not explained by a change in expression (Vaughn et al., 2014). rs7918084 is an eQTL for HHEX, which encodes a transcription factor whose murine orthologue Hhex promotes the development of memory B cells (Laidlaw et al., 2020). rs184552867 is an intronic variant in PRDM11 which has been identified as a tumour suppressor gene in B cells which may be downregulated in DLBCL (Asmar et al., 2010). 
+
+Novel IgM associations
+
+rs12026735 is an eQTL for LAPTM5, a gene whose murine orthologue contributes to the maintenance of B cell tolerance through mediation of immature B cell apoptosis (Y. Wang et al., 2022). rs115979345 is an intronic variant in, and eQTL for, FARP2; SNPs mapped to this gene are associated with monoclonal B-cell lymphocytosis (Crowther-Swanepoel et al., 2010). rs36027301 is a missense variant in TCIRG1, which encodes both an isoform of a V-type ATPase subunit and the TIRC7 membrane protein through alternative splicing. TIRC7 is an immune checkpoint inhibitor expressed by T and B cells which restrains lymphocyte activation and proliferation (Krause et al., 2021). rs6495122 is an eQTL for CSK in B cells, a gene encoding the Src family tyrosine kinase CSK which participates in T- and B-cell receptor signalling (S. Zhu et al., 2023). rs7236090 is an intronic variant in BCL2, named for its dysfunction in B-cell lymphoma. rs10419696 is an eQTL for KLF2 which encodes the transcription factor Krüppel-like factor 2, implicated in many aspects of B-cell biology (Wittner & Schuh, 2023). rs11666267 is a missense variant in NIBAN3, encoding B cell novel protein 1, a regulator of BCR signalling (Hong et al., 2019). rs10412811 is an eQTL for a number of genes in blood and B cells; of these, CD37 is noteworthy as it encodes the CD37 tetraspanin, essential for B cell survival in mice (van Spriel et al., 2012). rs192881351 is an intronic variant in GRIK1, which encodes the GluK1 kainate receptor subunit; glutamate stimulation has been shown to enhance B cell activation and antibody secretion (Sturgill et al., 2011).
+#+end_quote
 
 ** Miscellaneous data set-specific issues
 *** To SMP or not SMP?
@@ -920,6 +1043,12 @@ I downloaded the SomaScan data, i.e. the Icelandic data, not the UKB data.
 The AGES-Reykjavik sample is drawn from an established population-based cohort, the Reykjavik Study. This cohort of men and women born between 1907 and 1935 has been followed in Iceland since 1967 by the Icelandic Heart Association.
 #+end_quote
 
+Eldjarn et al. refer to an earlier paper by [[https://www.nature.com/articles/s41588-021-00978-w#Sec14][Ferkingstad et al.]], which describes the study participants:
+
+#+begin_quote
+From 24 August 2000 until 11 January 2019, we collected plasma samples from 40,004 Icelanders through two main projects: the Icelandic Cancer Project47 (52% of participants; samples collected from 2001 to 2005) and various genetic programs at deCODE genetics, Reykjavík, Iceland (48%). In the Icelandic Cancer Project, we invited all Icelanders with prevalent and newly diagnosed cancer and their relatives to participate in a comprehensive study of cancer, along with a control population, randomly selected from the National Registry. This sample set is enriched for cancer; 36% of the samples correspond to a cancer diagnosis up to the year 2019. For a given cancer, the fraction of active cancer (diagnosis from 2 years before to 1 month after sampling) out of the whole set was never higher than 1% for the 13 cancer types with at least 100 cases. The largest fraction of cases diagnosed before sampling out of the 36,000 individuals in the study was below 5% for all cancers (Supplementary Table 19). The samples collected at deCODE genetics were mainly collected through the population-based deCODE Health study, and the rest were mainly collected through various programs at deCODE. The median collection date for samples collected in the Icelandic Cancer Project was 1 July 2002, whereas the median collection date for deCODE samples was 15 May 2015. The average participant age was 55 years (s.d. = 17 years), and 57% were women. All participants who donated samples gave informed consent, and the National Bioethics Committee of Iceland approved the study, which was conducted in agreement with conditions issued by the Data Protection Authority of Iceland (VSN_14-015). Personal identities for the participant’s data and biological samples were encrypted by a third-party system (Identity Protection System), approved and monitored by the Data Protection Authority.
+#+end_quote
+
 ** Downloading the deCODE data (Eldjarn et al.)
 
 NB: remember to have up-to-date keys in =~/.aws/credentials= as supplied in the deCODE request response email.
@@ -941,7 +1070,7 @@ done < decode_files.txt
 
 Contents of the README:
 #+begin_quote
-These files contain GWAS summary statistics from the Icelandic SomaScan proteomics data (with and without SMP normalization), 
+These files contain GWAS summary statistics from the Icelandic SomaScan proteomics data (with and without SMP normalization),
 as well as GWAS summary statistics from the UK Biobank Olink proteomics data (for British/Irish, African, and South Asian ancestries):
 
 The different groups can be identified by the start of the file name:
@@ -978,3 +1107,1972 @@ Proteomics_SMP_PC0_13231_90_IGHG4_IgG4__Kappa_10032022.txt.gz
 
 aws s3 cp s3://largescaleplasma-2023/final_somascan_smp/Proteomics_SMP_PC0_2744_57_IGHG1_IGHG2_IGHG3_IGHG4_IGK_IGL_IgG_10032022.txt.g --endpoint-url https://s3-ext.decode.is:10443 .
 #+end_quote
+
+** Heritability estimation
+
+*** Literature estimates <2025-04-01 Tue>
+
+| Study    | IgA         | IgG          | IgM          | Method           | Sample                        |
+|----------+-------------+--------------+--------------+------------------+-------------------------------|
+| Hatagima | 0.41 (0.03) | 0.617 (0.02) | 0.54 (0.023) | Pathway analysis | 552 Brazilians in 91 sibships |
+| Viktorin | 0.31 (0.06) |              |              | GCTA             | 12,000 Swedish twins          |
+| Viktorin | 0.5         |              |              | Twin ACE model   | 12,000 Swedish twins          |
+|          |             |              |              |                  |                               |
+
+Other studies are old and one I looked at was tiny, not sure it's worth the investment of time.
+
+*** BLD-LDAK model <2025-01-28 Tue>
+
+As the preponderance of the data comes from imputed SNP data sets, I choose [[https://dougspeed.com/pre-computed-tagging-files/][the HapMap3 panel over the smaller, directly genotyped set]].
+
+Tried to run tagging calculate for one of the 65 annotations, takes way too long!
+
+*** Trouble after rerunning <2025-02-14 Fri>
+
+**** Troublesome results
+
+Earlier I got much larger estimates (h2 = 0.18 and 0.16 with/out MHC) for IgA, but now:
+
+#+begin_quote
+Component Heritability Her_SD Influence Inf_SD
+Her_Base 0.086463 0.003757 0.005099 0.000222
+Her_All 0.086463 0.003757 0.005099 0.000222
+#+end_quote
+
+From the log:
+#+begin_quote
+Reading details for 4421450 predictors...
+
+[...]
+
+In total, 613226 predictors have ambiguous alleles
+
+[...]
+
+Warning, results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/with_mhc/snps_only/procd.assoc contains (valid) summary statistics for only 3918240 of the 4421450 predictors
+#+end_quote
+
+I have modified the code used to produce the =assoc= file.
+
+Ok, got it:
+
+#+begin_quote
+      chr      N
+   <char>  <int>
+1:      1 775449
+2:      2 830726
+3:      3 703194
+4:      4 722857
+5:      5 640607
+6:      6 245407
+#+end_quote
+
+Maybe the =tmp= directory was full? Rerunning these jobs now.
+
+**** Including IGH/K/L as annotations
+
+#+begin_quote
+Component Heritability Her_SD Influence Inf_SD
+Her_P1 0.005954 0.000641 0.001655 0.000178
+Her_P2 0.001351 -9999.000000 -0.000041 -304.042900
+Her_P3 0.000013 0.000110 0.000000 0.000000
+Her_P4 0.176995 0.005406 0.003981 0.000122
+Her_All 0.184312 0.005052 0.005595 0.000204
+#+end_quote
+
+** Genetic correlation estimation
+*** Does SumHer report the genetic covariance intercept?
+
+What does =Overlap= mean?
+
+** New Ig associations
+
+*** Workflow
+
+- OMIM for text
+- OTG for PheWAS, candidate genes
+- 
+
+*** Candidate novel IgA hits
+**** POU3F1
+
+Very far away from POU3F1 TSS (~127kb), which seems to relate to development of the myelin sheath in mice.
+
+No obvious relationship to POU2AF1.
+
+Lead SNP is associated with a scattering of IMDs.
+
+**** GOLPH3L, HORMAD1
+
+This SNP is associated with a ton of white blood cell traits.
+
+It is an intronic variant in GOLPH3L.
+
+GOLPH3L is localised at Golgi stack, may have regulatory role in Golgi trafficking [[https://www.ncbi.nlm.nih.gov/gene/55204][GenBank]].
+
+Overexpressed in some cancers.
+
+HORMAD1 has some relationship with DSBs.
+
+**** SCYL3 (rs3766151)
+
+Intronic variant in SCYL3.
+
+SNP is associated with E-selectin levels; E-selectin is a cell adhesion molecule mediating attachment of leukocytes to endothelial cells.
+
+**** FAM98A,RASGRP3 (rs13388394)
+
+SNP is a missense variant in RASGRP3, I've written up more in the paper draft. This is a good hit.
+
+**** B3GNT2,COMMD1
+
+Intergenic SNP.
+
+COMMD1 has some relationship with NFKB regulation [[https://www.ncbi.nlm.nih.gov/gene/150684][GenBank]].
+
+B3GNT2 encodes a poly-N-acetyllactosamine poly-LacNAc synthase.
+
+[[https://www.nature.com/articles/s41467-022-29205-8][From]]:
+#+begin_quote
+In the immune system, B3GNT2 is upregulated in T cells upon activation and B3GNT2 knockout mice have lower poly-LacNAc on B and T cells, resulting in hyperactivity35,37. Single nucleotide polymorphisms that reduced expression of B3GNT2 have been associated with autoimmune diseases38,39,40.
+#+end_quote
+
+Other than being about ~48kb away from B3GNT2, there's not a good link between this SNP and B3GNT2.
+
+**** EIF2AK3,RPIA
+
+[[https://genetics.opentargets.org/Variant/2_88613755_G_C/associations][OTG]]
+
+Missense variant in EIF2AK3
+
+RPIA encodes ribose-5-phosphate isomerase A, part of pentose phosphate pathway.
+
+Mutations in EIF2AK3 (encodes PERK protein) cause IDDM as part of Wolcott-Rallison syndrome.
+
+This SNP is strongly associated with anthropometric traits like height and 'appendicular lean mass'.
+
+Linked to RPIA with PCHi-C data.
+
+eQTL for both genes in blood and brain.
+
+Apparently EIF2AK3 is largely suppressed in plasma cells and does not play a role in the unfolded protein response [[https://pubmed.ncbi.nlm.nih.gov/19898960/][paper.]]
+
+**** SP110,SP140 (rs62193147)
+
+[[https://genetics.opentargets.org/Variant/2_230251645_T_C/associations][otg]]
+
+Intronic variant in SP140, also an s-/eQTL for this gene.
+
+SP140 is a 'nuclear body protein', 'SP' is 'speckled protein' [[https://www.cell.com/trends/immunology/fulltext/S1471-4906(20)30072-7][review]]
+
+SNP's associated with a lot of blood cell traits, including 'lymphocyte percentage'-type traits.
+
+Abundantly expressed in B cells and linked with [[https://academic.oup.com/hmg/article/27/23/4012/5068135?login=false][IMDs]]
+
+**** TSEN2,MKRN2,RAF1 
+
+[[https://genetics.opentargets.org/Variant/3_12461456_G_T/associations][OTG]]
+
+MKRN2 encodes a E3 ubiquitin ligase which negatively regulates inflammatory responses, targets the p65 subunit of NF-kB [[https://www.nature.com/articles/srep46097][paper]].
+
+RAF1 encodes a protein in the MAPK-ERK pathway, involved in B cell development/plasma cell development [[https://pubmed.ncbi.nlm.nih.gov/33975980/#:~:text=By%20analyzing%20mice%20with%20B,B%20cells%20to%20pre%2Dplasmablasts][paper]]
+
+TSEN2 encodes a tRNA-splicing endonuclease, can't relate this easily to B cells.
+
+No e-/sQTL evidence for this SNP in B cells.
+
+**** ACTRT3
+
+[[https://genetics.opentargets.org/Variant/3_169764547_T_C/associations][OTG]]
+
+Non-coding transcript exon variant.
+
+ACTRT3 encodes actin-related protein T3.
+
+GPR160 hsa some role in prostate cancer.
+
+SNP's associated with a lot of cancers and blood cell traits.
+
+**** TBL1XR1 (rs55901664)
+
+[[https://genetics.opentargets.org/Variant/3_177042914_A_T/associations][OTG]]
+
+Intronic variant in TBL1XR1.
+
+**** TP63
+
+[[https://genetics.opentargets.org/Variant/3_189683987_G_C/associations][OTG]]
+
+Intronic variant in TP63.
+
+
+**** TLR1
+
+[[https://genetics.opentargets.org/Variant/4_38809930_G_T/associations][OTG]]
+
+Relatively rare SNP
+
+Expressed in activated and memory B cells, TLR1/2 heterodimer senses bacterial lipoproteins [[https://pmc.ncbi.nlm.nih.gov/articles/PMC3401975/][paper]]
+
+TLR11 does not produce a functional protein.
+
+**** NFKB1
+
+[[https://genetics.opentargets.org/Variant/4_102523541_C_T/associations][OTG]]
+
+**** IL7R (rs6890853)
+
+[[https://genetics.opentargets.org/Variant/5_35852209_G_A/associations][OTG]]
+
+**** PTGER4 (rs10440635)
+
+[[https://genetics.opentargets.org/Variant/5_40490688_G_A/associations][OTG]]
+
+
+PTGER4 encodes the PGE2 prostaglandin E2 receptor.
+
+
+**** HIVEP2
+
+This is in moderate LD (r2 = ~0.65) with a SNP which came up in a multivariate analysis of IgG N-glycosylation phenotypes.
+
+**** SNX13
+
+[[https://genetics.opentargets.org/Variant/7_17685515_C_T/associations][OTG]]
+
+Far away from SNX13, not much to say.
+
+SNX13 is a GTPase activating protein, some role in vesicular trafficking.
+
+**** POU5F1B
+
+[[https://genetics.opentargets.org/Variant/8_127210176_T_C/associations][OTG]]
+
+Gene may relate to prostate and colon cancer. SNP is ~113kb away from POU5F1B, though.
+
+**** SYK
+
+[[https://genetics.opentargets.org/Variant/9_90792925_C_T/associations][OTG]]
+
+SYK is a non-receptor tyrosine kinase ('spleen-associated tyrosine kinase').
+
+**** TRAF1 (rs113495277)
+
+[[https://genetics.opentargets.org/Variant/9_120913617_A_G/associations][OTG]]
+
+**** IFITM1,IFITM2
+[[https://genetics.opentargets.org/Variant/11_308363_G_C/associations][OTG]]
+
+This SNP has extremely significant associations with lots of blood cell traits.
+
+IFITM1/2 are known as factors in cell-intrinsic antiviral immunity.
+
+**** PTPRJ/MTCH2
+
+[[https://genetics.opentargets.org/Variant/11_47947600_T_C/associations][OTG]]
+
+MTCH2 participates in apoptosis so probably easy to relate this to B cells.
+
+PTPRJ is CD148, a receptor-like PTP. CD148 is a 'Src-family
+
+**** TRIM49B,FOLH1
+
+FOLH1 encodes a folate hydrolase.
+
+This SNP is an intronic variant in TRIM49B, thought to encode a ubiquitin ligase.
+
+SNP is an eQTL for PTPRJ.
+
+**** GRAMD1B (rs2714073)
+
+The lead SNP for IgM is rs735665, which is associated with IgM, lymphocyte counts, CLL, and follicular lymphoma.
+
+The anti-PC IgM lead SNP and rs735665 have r2 = ~1.
+
+**** BCL2L14 (rs1008866)
+
+[[https://genetics.opentargets.org/Variant/12_12022938_G_A/associations][OTG]]
+
+BCL2 family member, aka BCLG.
+
+Has some apoptic-related function but nothing I can find relating it to B cells specifically.
+
+**** FBRSL1
+
+[[https://genetics.opentargets.org/Variant/12_132469613_G_A/associations][OTG]]
+
+Variants in FBRSL1 cause intellectual disability and malformation syndrome.
+
+**** BMF
+
+[[https://genetics.opentargets.org/Variant/15_40105735_G_T/associations][OTG]]
+
+
+
+**** FRMD5,ADAL
+
+**** MAF,WWOX
+
+**** GSDMB
+
+**** PHOSPHO1,GNGT2
+
+**** CD79,FTSJ3
+
+**** SLC25A19,GRB2
+
+**** CBX4,TBC1D16
+
+**** ZBTB7A
+
+**** SLC35E1,C19orf44
+
+**** CLASRP
+
+**** MYBPC2,SPIB
+
+**** RIMBP3C,UBE2L3
+
+**** DERL3
+*** TODO Candidate novel IgG hits
+
+There are more hits which were not annotated by OTG.
+
+**** AFF3
+**** RPP14,PXK
+**** HHEX
+**** ZPBP2,GSDMB
+
+*** Candidate novel IgM hits
+
+**** LAPTM5
+
+**** TARS2,ADAMTSL4
+
+**** MTIF2,CLHC1
+
+**** STK25,FARP2
+
+**** SLC35G2
+
+**** MBNL1
+
+**** RHOH
+
+**** STAP1,UBA6
+
+**** unlabelled chr6:121,440,620
+
+**** HIVEP2,HIVEP2
+
+**** CARD11
+
+IEI gene?
+
+**** TRA2A,CCDC126
+
+**** PRKAR2B,HBP1
+
+**** BCAP29,HBP1
+
+**** RPS20,LYN
+
+**** PAX5,ZCCHC7
+
+**** SYK
+
+**** KLF6
+
+**** DUSP5
+
+**** TCIRG1
+
+**** COLCA2,POU2AF1
+
+**** NXPE1,REX02
+
+**** RAB21
+
+**** SLITRK6
+
+**** BATF,NEK9
+
+**** LGMN,RIN3
+
+**** unlabelled chr15:50,492,793
+
+**** CPLX3,ULK3
+
+**** CIITA
+
+**** PLCG2
+
+**** IRF8
+
+**** TNFRSF13B
+
+**** BCL2
+
+**** KLF2
+
+**** COLGALT1,NIBAN3
+
+**** KASH5,DKKL1
+
+**** GRIK1
+
+**** unlabelled chr22:50,704,843
+** EPIC phenotypic correlations
+
+#+begin_src
+> cor(dat[, .SD, .SDcols = patterns('IG')], use = 'pairwise.complete.obs')
+           IGA_CONC   IGG1_CONC   IGG2_CONC  IGG3_CONC    IGG4_CONC
+IGA_CONC   1.000000000  0.16948769  0.22426911 0.17878454  0.174424557
+IGG1_CONC  0.169487687  1.00000000 -0.06646444 0.02177384  0.086556574
+IGG2_CONC  0.224269112 -0.06646444  1.00000000 0.16396403  0.229087348
+IGG3_CONC  0.178784544  0.02177384  0.16396403 1.00000000  0.044582203
+IGG4_CONC  0.174424557  0.08655657  0.22908735 0.04458220  1.000000000
+IGM_CONC  -0.004271912  0.05946210  0.09329625 0.08815389 -0.006951686
+IGG_CONC   0.300423384  0.82011455  0.44850020 0.23345022  0.414992445
+              IGM_CONC   IGG_CONC
+IGA_CONC  -0.004271912 0.30042338
+IGG1_CONC  0.059462096 0.82011455
+IGG2_CONC  0.093296247 0.44850020
+IGG3_CONC  0.088153887 0.23345022
+IGG4_CONC -0.006951686 0.41499245
+IGM_CONC   1.000000000 0.09890761
+IGG_CONC   0.098907611 1.00000000
+#+end_src
+
+i.e.
+
+| First isotype | Second isotype |      r |
+|---------------+----------------+--------|
+| IgA           | IgG            |  0.300 |
+| IgA           | IgM            | -0.004 |
+| IgM           | IgG            |  0.099 |
+| IgM           | IgG1           |  0.059 |
+| IgM           | IgG2           |  0.093 |
+| IgM           | IgG3           |  0.088 |
+| IgM           | IgG4           | -0.007 |
+| IgA           | IgG1           |  0.169 |
+| IgA           | IgG2           |  0.224 |
+| IgA           | IgG3           |  0.179 |
+| IgA           | IgG4           |  0.174 |
+
+Note that these are on the scale of the raw data. The GWAS was performed on log-transformed Ig concentrations:
+#+begin_src
+> dat[, cor(log(IGA_CONC), log(IGM_CONC), use = 'complete.obs')]
+[1] 0.05032
+> dat[, cor(log(IGG_CONC), log(IGM_CONC), use = 'complete.obs')]
+[1] 0.1756809
+> dat[, cor(log(IGG_CONC), log(IGA_CONC), use = 'complete.obs')]
+[1] 0.3768878
+#+end_src
+
+If we log-transform them and standardise, naturally it makes no difference to the Pearson correlation.
+#+begin_src
+> dat[!is.na(IGM_CONC) & !is.na(IGA_CONC), cor(preproc(IGM_CONC), preproc(IGA_CONC), use = 'complete.obs')]
+[1] 0.05032
+> dat[!is.na(IGG_CONC) & !is.na(IGM_CONC), cor(preproc(IGG_CONC), preproc(IGM_CONC), use = 'complete.obs')]
+[1] 0.1756809
+> dat[!is.na(IGG_CONC) & !is.na(IGA_CONC), cor(preproc(IGG_CONC), preproc(IGA_CONC), use = 'complete.obs')]
+[1] 0.3768878
+#+end_src
+
+*** Constraining the LDSC intercept for the EPIC data
+
+**** IgG and IgA
+
+***** LDSC
+
+Without:
+#+begin_src
+Heritability of phenotype 1
+---------------------------
+Total Observed scale h2: 0.1909 (0.0564)
+Lambda GC: 1.0285
+Mean Chi^2: 1.0427
+Intercept: 1.0072 (0.0046)
+Ratio: 0.1686 (0.1067)
+
+Heritability of phenotype 2/2
+-----------------------------
+Total Observed scale h2: 0.1438 (0.0658)
+Lambda GC: 1.0135
+Mean Chi^2: 1.0301
+Intercept: 1.005 (0.0047)
+Ratio: 0.1665 (0.1546)
+
+Genetic Covariance
+------------------
+Total Observed scale gencov: 0.0605 (0.0304)
+Mean z1*z2: 0.377
+Intercept: 0.3669 (0.0027)
+
+Genetic Correlation
+-------------------
+Genetic Correlation: 0.3653 (0.1356)
+Z-score: 2.6947
+P: 0.007
+
+
+Summary of Genetic Correlation Results
+p1                                          p2      rg      se       z      p  h2_obs  h2_obs_se  h2_int  h2_int_se  gcov_int  gcov_int_se
+results/ldsc/epic-iga/epic-iga.sumstats.gz  results/ldsc/epic-igg/epic-igg.sumstats.gz  0.3653  0.1356  2.6947  0.007  0.1438     0.0658   1.005     0.0047    0.3669       0.0027
+
+Analysis finished at Sun Feb  9 23:53:57 2025
+Total time elapsed: 1.0m:22.64s
+#+end_src
+
+That's a pretty good estimate of the intercept!
+
+With constrained intercept:
+
+#+begin_src
+Heritability of phenotype 1
+---------------------------
+Total Observed scale h2: 0.1909 (0.0564)
+Lambda GC: 1.0285
+Mean Chi^2: 1.0427
+Intercept: 1.0072 (0.0046)
+Ratio: 0.1686 (0.1067)
+
+Heritability of phenotype 2/2
+-----------------------------
+Total Observed scale h2: 0.1438 (0.0658)
+Lambda GC: 1.0135
+Mean Chi^2: 1.0301
+Intercept: 1.005 (0.0047)
+Ratio: 0.1665 (0.1546)
+
+Genetic Covariance
+------------------
+Total Observed scale gencov: -0.0012 (0.026)
+Mean z1*z2: 0.377
+Intercept: constrained to 0.377
+
+Genetic Correlation
+-------------------
+Genetic Correlation: -0.007 (0.162)
+Z-score: -0.0432
+P: 0.9655
+#+end_src
+
+***** SumHer
+
+#+begin_src
+Component Value SD
+Her1_All 0.418535 0.083220
+Her2_All 0.239618 0.105015
+Coher_All 0.104272 0.053953
+Cor_All 0.329262 0.133811
+Scaling1 1.002914 0.002977
+Scaling2 1.005616 0.003566
+Overlap 0.367195 0.001786
+#+end_src
+
+If =Overlap= is the intercept, it's pretty close to that estimated by LDSC.
+
+**** IgG and IgM
+
+***** LDSC
+Without:
+#+begin_quote
+Heritability of phenotype 1
+---------------------------
+Total Observed scale h2: 0.3711 (0.0971)
+Lambda GC: 1.0466
+Mean Chi^2: 1.0702
+Intercept: 0.9983 (0.0057)
+Ratio < 0 (usually indicates GC correction).
+
+Heritability of phenotype 2/2
+-----------------------------
+Total Observed scale h2: 0.1438 (0.0658)
+Lambda GC: 1.0135
+Mean Chi^2: 1.0301
+Intercept: 1.005 (0.0047)
+Ratio: 0.1666 (0.1546)
+
+Genetic Covariance
+------------------
+Total Observed scale gencov: 0.032 (0.0306)
+Mean z1*z2: 0.1825
+Intercept: 0.1774 (0.0025)
+
+Genetic Correlation
+-------------------
+Genetic Correlation: 0.1384 (0.1228)
+Z-score: 1.1266
+P: 0.2599
+#+end_quote
+
+With:
+
+#+begin_quote
+Heritability of phenotype 1
+---------------------------
+Total Observed scale h2: 0.3711 (0.0971)
+Lambda GC: 1.0466
+Mean Chi^2: 1.0702
+Intercept: 0.9983 (0.0057)
+Ratio < 0 (usually indicates GC correction).
+
+Heritability of phenotype 2/2
+-----------------------------
+Total Observed scale h2: 0.1438 (0.0658)
+Lambda GC: 1.0135
+Mean Chi^2: 1.0301
+Intercept: 1.005 (0.0047)
+Ratio: 0.1666 (0.1546)
+
+Genetic Covariance
+------------------
+Total Observed scale gencov: 0.043 (0.0263)
+Mean z1*z2: 0.1825
+Intercept: constrained to 0.1757
+
+Genetic Correlation
+-------------------
+Genetic Correlation: 0.1861 (0.1098)
+Z-score: 1.6948
+P: 0.0901
+#+end_quote
+
+***** SumHer
+
+#+begin_quote
+Component Value SD
+Her1_All 0.239702 0.105021
+Her2_All 0.613568 0.147122
+Coher_All 0.066774 0.057580
+Cor_All 0.174116 0.139211
+Scaling1 1.005611 0.003566
+Scaling2 1.001453 0.004103
+Overlap 0.176587 0.002023
+#+end_quote
+
+**** IgA and IgM
+***** LDSC
+Without:
+
+#+begin_src
+Heritability of phenotype 1
+---------------------------
+Total Observed scale h2: 0.1909 (0.0564)
+Lambda GC: 1.0285
+Mean Chi^2: 1.0427
+Intercept: 1.0072 (0.0046)
+Ratio: 0.1686 (0.1067)
+
+Heritability of phenotype 2/2
+-----------------------------
+Total Observed scale h2: 0.3711 (0.0971)
+Lambda GC: 1.0466
+Mean Chi^2: 1.0702
+Intercept: 0.9983 (0.0057)
+Ratio < 0 (usually indicates GC correction).
+
+Genetic Covariance
+------------------
+Total Observed scale gencov: 0.0007 (0.0356)
+Mean z1*z2: 0.0845
+Intercept: 0.084 (0.0026)
+
+Genetic Correlation
+-------------------
+Genetic Correlation: 0.0026 (0.1473)
+Z-score: 0.0178
+P: 0.9858
+#+end_src
+
+With:
+
+#+begin_src 
+Heritability of phenotype 1
+---------------------------
+Total Observed scale h2: 0.1909 (0.0564)
+Lambda GC: 1.0285
+Mean Chi^2: 1.0427
+Intercept: 1.0072 (0.0046)
+Ratio: 0.1686 (0.1067)
+
+Heritability of phenotype 2/2
+-----------------------------
+Total Observed scale h2: 0.3711 (0.0971)
+Lambda GC: 1.0466
+Mean Chi^2: 1.0702
+Intercept: 0.9983 (0.0057)
+Ratio < 0 (usually indicates GC correction).
+
+Genetic Covariance
+------------------
+Total Observed scale gencov: 0.2177 (0.0275)
+Mean z1*z2: 0.0845
+Intercept: constrained to 0.0503
+
+Genetic Correlation
+-------------------
+Genetic Correlation: 0.818 (0.224)
+Z-score: 3.6519
+P: 0.0003
+#+end_src
+
+***** SumHer
+
+#+begin_quote
+Component Value SD
+Her1_All 0.419135 0.083249
+Her2_All 0.614008 0.146983
+Coher_All 0.010734 0.063136
+Cor_All 0.021158 0.129049
+Scaling1 1.003017 0.002967
+Scaling2 1.001453 0.004103
+Overlap 0.083595 0.002010
+#+end_quote
+** Effect allele frequencies
+
+Not able to fetch all EAFs from gnomAD r4. Can I use the =effect_allele_frequency= columns from the contributing studies? In fact, using the study estimates is probably preferable, anyway.
+
+Would need to check that these columns are concordant with the gnomAD reports.
+
+What about the =AF1.dennis= and =ImpMAF.eldjarn= columns (latter in particular is quite comprehensive)?
+
+=ImpMAF.eldjarn= doesn't always give the effect allele; it's labelled 'MAF' after all. E.g. with the IgA lead SNPs:
+
+#+begin_src
+> dat[!is.na(EAF)][effect_allele_frequency.scepanovic > 0.5][1, .SD, .SDcols = patterns('rsid|EAF|freq|ImpMAF|AF1')]
+        rsid       EAF effect_allele_frequency.epic
+      <char>     <num>                        <num>
+1: rs3766151 0.6803925                     0.326583
+   effect_allele_frequency.pietzner effect_allele_frequency.scepanovic
+                              <num>                              <num>
+1:                           0.6645                           0.678068
+   AF1.dennis ImpMAF.eldjarn
+        <num>          <num>
+1:   0.316375        0.32104
+#+end_src
+
+Also note how the EPIC frequency looks to be wrongly specified and does not agree with EAF!
+
+When I do try to coalesce these in the absence of =EAF= from gnomAD, I will need to check that all columns are consistently >/< 0.5.
+
+*** Harmonising the 'sign' and pooling estimates
+
+Need to make sure that I am dealing with the effect allele frequency when considering all of the columns.
+
+E.g. AF1.dennis was > 0.5 for one SNP in the IgA meta-analysis, so close to being the MAF but not quite. Of three datasets for which I had =effect_allele_frequency= estimates, two were >0.5. ImpMAF.eldjarn was <0.5 for all (as per the name).
+
+#+begin_ai
+I have a data.table and I want to create a boolean column based on whether other columns are all < 0.5
+
+[AI]: Assuming your data.table is called DT and the columns you want to check are, for example, "a", "b", and "c", you can create a new boolean column that is TRUE when all the specified columns in a row are less than 0.5. Here are two common methods:
+
+Method 1: Using rowSums  
+This method counts how many values per row are below 0.5 and compares that count to the total number of columns checked.
+
+ââDT[, boolcol := rowSums(.SD < 0.5) == length(.SD), .SDcols = c("a", "b", "c")]
+
+Explanation:
+ââ¢ .SD refers to the Subset of Data for the specified columns.
+ââ¢ .SD < 0.5 creates a logical matrix.
+ââ¢ rowSums(.SD < 0.5) counts the TRUE values per row.
+ââ¢ If the count equals the number of columns (length(.SD)), then all values are below 0.5.
+
+Method 2: Using Reduce with logical AND  
+This approach applies a logical AND across the specified columns.
+
+ââDT[, boolcol := Reduce(`&`, lapply(.SD, function(x) x < 0.5)), .SDcols = c("a", "b", "c")]
+
+Explanation:
+ââ¢ lapply(.SD, function(x) x < 0.5) applies the test to each column.
+ââ¢ Reduce(`&`, â¦) combines the logical vectors by taking the elementâwise AND across them.
+
+Pick the method that best fits your style or needs. Both will add a new column âboolcolâ to your data.table indicating whether all specified columns in each row are less than 0.5.
+
+[ME]: 
+#+end_ai
+
+#+begin_src
+r$> dat[, `:=` (na_sum = rowSums(is.na(.SD)), sup_0_5 = rowSums(.SD > 0.5, na.rm =T), sub_0_5 = rowSums(.SD < 0.5, na.rm = T)), .SDcols = patterns('freq|ImpMAF|AF1')]
+r$> dat[(sub_0_5 == 0 & sup_0_5 > 0) | (sup_0_5 == 0 & sub_0_5 > 0), signif(.SD, 2), .SDcols = patterns('freq|ImpMAF|AF1')]
+r$> dat[!((sub_0_5 == 0 & sup_0_5 > 0) | (sup_0_5 == 0 & sub_0_5 > 0)), signif(.SD, 2), .SDcols = patterns('EAF|freq|ImpMAF|AF1')]
+#+end_src
+
+For IgA, 53 SNPs agree on  match the criteria.
+
+If I want to take the same approach as before:
+- relabel all the various study allele frequency columns into some more uniform format
+- sort the columns
+- matrix multiplication to get weighted sums
+
+
+#+begin_ai
+I have a data.table with columns corresponding to MAF estimates. These columns contain NA values. I want to compute sample size-weighted meta-analytic MAF estimates using these columns.
+
+[AI]: Below is one way to do this in R using data.table. The idea is to compute a weighted average for each row where the weights are the sample sizes, so that the metaâanalytic MAF is
+
+ââmeta_MAF = (ââ nâ Ã MAFâ) / (ââ nâ)
+
+In the example below, we assume your table (called dt) has, for example, three MAF columns (e.g., MAF_1, MAF_2, MAF_3) and corresponding sample size columns (e.g., N_1, N_2, N_3). We then use rowSums (with na.rm=TRUE) to âskip overâ any NA values in the weighted average calculation. (Be cautious: if a particular row has NA for all sample sizes, the denominator will be 0 and you might want to handle that case.)
+
+Hereâs some example code:
+
+-------------------------------------------------
+library(data.table)
+
+# Example data
+dt <- data.table(
+  MAF_1 = c(0.10, NA, 0.15, 0.20),
+  MAF_2 = c(0.12, 0.14, NA, 0.18),
+  MAF_3 = c(NA, 0.13, 0.16, 0.19),
+  N_1   = c(100, 150, 120, 130),
+  N_2   = c(200, 220, 180, 210),
+  N_3   = c(150, 160, 140, 190)
+)
+
+# Compute the meta-analytic MAF as sample size-weighted average across the MAF columns.
+# The formula is: meta_MAF = (MAF_1*N_1 + MAF_2*N_2 + MAF_3*N_3) / (N_1+N_2+N_3)
+# We want to remove NA values â meaning if a particular MAF is missing, we ignore its sample size as well.
+
+dt[, meta_MAF := {
+  # Compute weighted contributions; NA values in multiplication will yield NA so we use cbind() with na.rm
+  # For each row, the weighted sum is:
+  numer <- rowSums(cbind(MAF_1 * N_1, MAF_2 * N_2, MAF_3 * N_3), na.rm = TRUE)
+  # And the total weight is the sum of sample sizes, but only for non-NA MAF estimates.
+  denom <- rowSums(cbind(ifelse(is.na(MAF_1), 0, N_1),
+                         ifelse(is.na(MAF_2), 0, N_2),
+                         ifelse(is.na(MAF_3), 0, N_3)),
+                    na.rm = TRUE)
+  # Avoid division by zero:
+  out <- ifelse(denom > 0, numer/denom, NA_real_)
+  out
+}]
+
+print(dt)
+-------------------------------------------------
+
+Explanation:
+1. We create a weighted sum in the numerator. Multiplying MAF_i * N_i results in NA if MAF_i is NA. Using rowSums with na.rm = TRUE ignores those NA contributions.
+2. For the denominator, we only want to add the sample size N_i if the corresponding MAF_i is not NA. We use ifelse(is.na(MAF_i), 0, N_i) to achieve that.
+3. The meta_MAF is then the weighted sum divided by the total sample size for which we had a MAF estimate.
+4. We use an ifelse to return NA in cases where no valid MAFs are available (denom is 0).
+
+This approach easily scales for more than three columns. Just adjust the column names (or use patterns / .SDcols if they follow a naming convention).
+
+Alternate Approach Using .SD:
+If your column names have a clear pattern, you can take advantage of .SD. For example:
+
+-------------------------------------------------
+# Suppose your MAF columns all start with "MAF" and sample size columns with "N".
+mafcols <- grep("^MAF", names(dt), value = TRUE)
+ncols   <- grep("^N",   names(dt), value = TRUE)
+
+dt[, meta_MAF := {
+  numer <- rowSums(mapply(function(maf, n){
+    # For each pair, replace MAF NA with 0 so it doesn't contribute.
+    ifelse(is.na(maf), 0, maf * n)
+  }, .SD[[mafcols]], .SD[[ncols]]), na.rm=TRUE)
+  
+  denom <- rowSums(mapply(function(maf, n){
+    ifelse(is.na(maf), 0, n)
+  }, .SD[[mafcols]], .SD[[ncols]]), na.rm=TRUE)
+  
+  ifelse(denom > 0, numer/denom, NA_real_)
+}, .SDcols = c(mafcols, ncols)]
+-------------------------------------------------
+
+Choose the approach that best fits your data setup. This method correctly handles NA values and yields the sample sizeâweighted meta-analytic MAF estimate for each row.
+
+[ME]: What if I have the sample sizes in a separate vector?
+
+[AI]: Assume you have a data.table with several MAF columns (which may contain NA values) and that your sample sizes for these columns are stored in a separate vector. For example, suppose your data.table (named dt) looks like this:
+
+  MAF_1   MAF_2   MAF_3
+1  0.10    0.12     NA
+2   NA     0.14    0.13
+3  0.15     NA     0.16
+4  0.20    0.18    0.19
+
+and your sample sizes vector is defined as
+
+  sample_sizes = c(100, 200, 150)
+
+That is, the weight for MAF_1 is 100, for MAF_2 is 200, and for MAF_3 is 150. The desired meta-analytic MAF estimate for each row is computed as:
+
+ââmeta_MAF = (MAF_1*100 + MAF_2*200 + MAF_3*150) / (sum of sample sizes for nonâmissing MAF values)
+
+Below are two ways to do this in R. Both methods construct a weighted average for each row by zeroing out weights corresponding to NA MAF estimates.
+
+ââââââââââââââââââââââââââ
+Method 1: Using Matrix Operations
+
+In this example we convert the relevant MAF columns into a matrix, compute the numerator and denominator rowâwise, and properly handle the NA values:
+
+-------------------------------------------------
+library(data.table)
+
+# Example data.table with MAF columns
+dt <- data.table(
+  MAF_1 = c(0.10, NA, 0.15, 0.20),
+  MAF_2 = c(0.12, 0.14, NA, 0.18),
+  MAF_3 = c(NA, 0.13, 0.16, 0.19)
+)
+
+# Sample sizes vector corresponding to the MAF columns
+sample_sizes <- c(100, 200, 150)
+
+# Calculate meta-analytic MAF weighted by sample sizes
+dt[, meta_MAF := {
+  # Create matrix from the selected MAF columns
+  maf_mat <- as.matrix(.SD)
+  
+  # Multiply each element by its corresponding sample size.
+  # Here we replicate the sample_sizes vector by row.
+  weight_mat <- matrix(sample_sizes, nrow(maf_mat), length(sample_sizes), byrow = TRUE)
+  
+  # For NA values, set the effective weight to 0.
+  effective_weights <- ifelse(is.na(maf_mat), 0, weight_mat)
+  
+  # Compute the weighted sum for each row.
+  numerator <- rowSums(ifelse(is.na(maf_mat), 0, maf_mat) * weight_mat)
+  
+  # Compute the total weight for each row (only counting non-NA MAF estimates).
+  denominator <- rowSums(effective_weights)
+  
+  # Return the weighted average; if no weights present (denom==0), return NA.
+  ifelse(denominator > 0, numerator / denominator, NA_real_)
+}, .SDcols = c("MAF_1", "MAF_2", "MAF_3")]
+
+print(dt)
+-------------------------------------------------
+
+ââââââââââââââââââââââââââ
+Method 2: Using apply() Over Rows
+
+This approach processes each row separately. The function checks whether a given MAF value is missing; if it is, its corresponding weight is set to zero. Then it computes the weighted mean for that row.
+
+-------------------------------------------------
+dt[, meta_MAF := apply(.SD, 1, function(maf_row) {
+  # Use the provided sample_sizes vector.
+  # Create a weight vector where NA MAF's get a weight of zero.
+  effective_weights <- ifelse(is.na(maf_row), 0, sample_sizes)
+  
+  # Calculate the weighted average.
+  if(sum(effective_weights) > 0) {
+    sum(maf_row * sample_sizes, na.rm = TRUE) / sum(effective_weights)
+  } else {
+    NA_real_
+  }
+}), .SDcols = c("MAF_1", "MAF_2", "MAF_3")]
+
+print(dt)
+-------------------------------------------------
+
+ââââââââââââââââââââââââââ
+Explanation
+
+â¢ For each row the numerator is calculated as the sum of (MAF Ã corresponding sample size). If a MAF value is NA, its contribution is zero.
+â¢ The denominator is the sum of the sample sizes for positions where the MAF value is not missing.
+â¢ Finally, the meta-analytic MAF is computed as the numerator divided by the denominator (or NA if no valid data exist).
+
+Choose whichever method best fits your coding style or performance needs. Both methods correctly account for NA values by âdropping outâ the sample size associated with any missing MAF estimate.
+
+[ME]: The maf columns have the form 'af.study_name' where study_name differs. If I have a named vector of samples sizes also corresponding to studies, how can I make sure weights and maf estimates are matched up correctly?
+
+[AI]: Below is one way to do it. The main idea is to extract the study name from each MAF column name (assuming they all start with "af.") and then use that to reorder your named sample size vector so that the weights line up with the correct columns. For example, suppose your data.table (dt) looks like this:
+
+ââaf.StudyAââaf.StudyBââaf.StudyC  
+ââ0.10ââââNAââââ0.15  
+ââ0.12ââ0.14ââââ NA  
+ââNAââââ0.13ââââ0.16  
+
+and your sample sizes are stored in a named vector like
+
+ââsample_sizes <- c(StudyA = 100, StudyB = 200, StudyC = 150)
+
+You can match up the weights and MAF estimates by doing the following:
+
+1. Extract the names of the MAF columns.
+2. Remove the prefix (here "af.") to derive the study names.
+3. Subset the sample size vector using these study names so that the ordering in the vector corresponds to the ordering of the columns.
+4. Use that ordered vector when computing the weighted average.
+
+Hereâs an example using data.table:
+
+-------------------------------------------------
+library(data.table)
+
+# Example data.table with allele frequency (af.) columns:
+dt <- data.table(
+  "af.StudyA" = c(0.10, 0.12, NA),
+  "af.StudyB" = c(NA,   0.14, 0.13),
+  "af.StudyC" = c(0.15, NA,   0.16)
+)
+
+# Named vector of sample sizes
+sample_sizes <- c(StudyA = 100, StudyB = 200, StudyC = 150)
+
+# Identify the MAF columns (assuming all such columns start with "af.")
+maf_cols <- grep("^af\\.", names(dt), value = TRUE)
+
+# Get corresponding study names by stripping the prefix
+studies <- sub("^af\\.", "", maf_cols)
+
+# Ensure weights are in the same order as the maf columns:
+weights <- sample_sizes[studies]
+# Print to check ordering:
+print(weights)
+# > StudyA StudyB StudyC 
+# >    100    200    150 
+
+# Now compute weighted meta-analytic AF for each row.
+# The formula: meta_af = (sum(af * weight)) / (sum(weights for non-NA af's))
+dt[, meta_af := {
+  # Turn the subset of MAF estimates into a matrix
+  maf_mat <- as.matrix(.SD)
+  # Create a matrix with the weights replicated by row.
+  weight_mat <- matrix(weights, nrow(maf_mat), length(weights), byrow = TRUE)
+  # For each position, if the maf value is NA, set its effective weight to 0.
+  effective_weights <- ifelse(is.na(maf_mat), 0, weight_mat)
+  # Calculate the weighted numerator, replacing NA with 0.
+  numer <- rowSums(ifelse(is.na(maf_mat), 0, maf_mat) * weight_mat)
+  # Calculate the denominator as the sum of effective weights.
+  denom <- rowSums(effective_weights)
+  # Compute weighted average; return NA if the denominator is 0.
+  ifelse(denom > 0, numer / denom, NA_real_)
+}, .SDcols = maf_cols]
+
+print(dt)
+-------------------------------------------------
+
+Explanation of the Code:
+â¢ The grep() call finds all columns starting with "af." and stores them in maf_cols.
+â¢ The sub() function removes the "af." prefix to extract study names.
+â¢ By subsetting sample_sizes using these study names (weights <- sample_sizes[studies]), you ensure that the order of weights exactly follows the order of the MAF columns.
+â¢ Next, the code turns the relevant columns into a matrix and constructs a corresponding matrix of weights.
+â¢ For each row, NA values in the MAF matrix are given a weight of 0. Then, a weighted sum (numerator) and total weights (denom) are calculated.
+â¢ Finally, if the total effective weight is not zero, the meta-analytic allele frequency is computed as the weighted sum divided by the sum of weights; otherwise, an NA is returned.
+
+This workflow guarantees that the weights used in the calculations correspond exactly to the studies indicated in the column names.
+
+[ME]: 
+#+end_ai
+
+*** Getting the MAF instead
+
+This should be more straightforward. I can map x to 1-x where x > 0.5.
+
+*** Troubleshooting gnomad code
+
+#+begin_ai
+Please explain the following error to me:
+
+Traceback (most recent call last):
+  File "/rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/.snakemake/conda/751f12767b3749334dba0071878176e2_/lib/python3.13/site-packages/anyio/_core/_tasks.py", line 115, in fail_after
+    yield cancel_scope
+  File "/rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/.snakemake/conda/751f12767b3749334dba0071878176e2_/lib/python3.13/site-packages/gql/client.py", line 1538, in _execute                                                                                                                                                                      
+    result = await self.transport.execute(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "/rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/.snakemake/conda/751f12767b3749334dba0071878176e2_/lib/python3.13/site-packages/gql/transport/aiohttp.py", line 332, in execute
+    async with self.session.post(self.url, ssl=self.ssl, **post_args) as resp:
+               ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/.snakemake/conda/751f12767b3749334dba0071878176e2_/lib/python3.13/site-packages/aiohttp/client.py"
+, line 1425, in __aenter__                                                                                                                                                                   
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+  File "/rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/.snakemake/conda/751f12767b3749334dba0071878176e2_/lib/python3.13/site-packages/aiohttp/client.py"
+, line 730, in _request                                                                                                                                                                      
+    await resp.start(conn)
+  File "/rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/.snakemake/conda/751f12767b3749334dba0071878176e2_/lib/python3.13/site-packages/aiohttp/client_reqrep.py", line 1059, in start
+    message, payload = await protocol.read()  # type: ignore[union-attr]
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/rds/project/rds-HNdhZnUvWRk/analysis/pid/common_variant_analysis/serum_ig_pipeline/.snakemake/conda/751f12767b3749334dba0071878176e2_/lib/python3.13/site-packages/aiohttp/streams.py", line 672, in read
+    await self._waiter
+asyncio.exceptions.CancelledError: Cancelled by cancel scope 14b25930bb70
+
+
+[AI]: This error means that an asynchronous operation was cancelled before it could complete. In your case, a CancelledError was raised from within an async context (using anyioâs cancel scope) when making an HTTP request with aiohttp via the gql client.
+
+Hereâs whatâs happening step by step:
+
+1. The code enters a cancel scope (often via anyioâs fail_after context manager). Cancel scopes are used to enforce timeouts or cancel groups of asynchronous tasks.
+
+2. The gql client calls its transport method to execute a GraphQL request. Under the hood, it uses aiohttpâs async session to make an HTTP POST request.
+
+3. While waiting (in the async context managed by aiohttp), the operation gets cancelled. This cancellation might occur because a timeout expired (if youâre using something like fail_after) or because some other part of your code/program decided to cancel the pending task.
+
+4. As soon as the cancellation is signaled (with a unique scope id like â14b25930bb70â), the asynchronous task is interrupted, and the coroutine awaiting the HTTP response raises asyncio.exceptions.CancelledError. 
+
+In summary, the error indicates that the request was interrupted by the cancel scope because the allotted time for the operation was exceeded or an explicit cancellation was triggered. If this cancellation wasnât expected, you might need to look into your timeout settings or how cancel scopes are being managed in your workflow.
+
+[ME]: 
+#+end_ai
+
+Having read this, I halved the number of requests per minute to ask for 5, rather than 10, and it worked.
+
+** DONE Slow =distance_clump= <2025-03-10 Mon>
+
+#+begin_org-ai
+Can you optimise the following R code? It uses data.table.
+dat <- fread(snakemake@input[[1]], sep = '\t', select = c(chr_col, bp_col, ref_col, alt_col, rsid_col, p_col, beta_col, se_col))
+
+if(!snakemake@params$mhc) {
+  dat <- dat[!(get(chr_col) == 6 & get(bp_col) %between% c(24e6, 45e6))]
+}
+
+dat[, (chr_col) := as.character(get(chr_col))]
+dat[, (bp_col) := as.integer(get(bp_col))]
+
+#dat <- dat[!(get(snp_col) %in% snakemake@params$snps_to_ignore)]
+
+dat <- dat[get(p_col) <= index_threshold]
+
+dat <- dat[order(get(p_col))]
+
+for(i in unique(dat[[chr_col]])) {
+  j <- 1
+
+  while(j <= dat[get(chr_col) == i, .N]) {
+    bp <- dat[get(chr_col) == i][j][[bp_col]]
+
+    dat <- dat[!(get(chr_col) == i & get(bp_col) != bp & get(bp_col) %between% c(bp-distance_window/2, bp+distance_window/2))]
+
+    j <- j + 1
+  }
+}
+
+dat <- dat[order(get(chr_col), get(bp_col))]
+
+fwrite(dat, file = snakemake@output[[1]], sep = '\t')
+
+[AI]: Here's an optimized and vectorized version of your code:
+
+```r
+library(data.table)
+
+# Read file into a data.table
+dat <- fread(snakemake@input[[1]], sep = '\t', select = c(chr_col, bp_col, ref_col, alt_col, rsid_col, p_col, beta_col, se_col))
+
+# Remove rows if conditions hold
+if (!snakemake@params$mhc) {
+  dat <- dat[!(chr_col == 6 & bp_col %between% c(24e6, 45e6))]
+} # Convert desired columns to specific types dat[, c(chr_col, bp_col) := .(as.character(chr_col), as.integer(bp_col))]
+
+# Filter out rows based on column values
+dat <- dat[p_col <= index_threshold]
+
+# Order rows based on column values
+setorder(dat, p_col)
+
+dat <- dat[, !ranges := data.table::frankv(bp_col, ties.method = "dense")]
+
+median_bp <- median(bp_col)
+dat[, !rows_to_remove := abs(bp_col - median_bp) > distance_window/2]
+dat <- dat[!(rows_to_remove == TRUE),]
+
+# Order rows based on column values
+setorder(dat, chr_col, bp_col)
+
+# Write updated data.table to a file
+fwrite(dat, file = snakemake@output[[1]], sep = '\t')
+```
+
+This optimized version of the code accomplishes the same tasks as the original while providing several enhancements:
+
+1. The code uses direct reference to the column names instead of the `get()` function. You should notice a performance boost as a result, especially for larger data.
+
+2. The nested loop to remove rows has been replaced. While loops can be slower in R, this vectorized solution should also improve performance. 
+
+3. The code removes a redundant ordering operation (`setorder`) by ordering the data only once after all filtering operations have been performed.
+
+4. It simplifies your conditions to make your code cleaner as well as potentially faster.
+
+5. It adds measures to use `data.table`'s fast grouping and sorting capabilities, which is specially designed for large datasets.
+
+Overall, the optimization should make the code faster and easier to read and maintain.
+
+#+end_org-ai
+
+
+I don't think o3-mini got this right and the problem in any case was that the =p_value= column was identified as a =character= column.
+** Mendelian randomisation <2025-03-11 Tue>
+*** Ig and lymphocyte counts
+**** Ig variants as instruments
+
+Penalty is intended to account for heterogeneous (i.e. outlying) 'variant-specific estimates' as per the package docs.
+
+IgA only has a significant slope for 'penalized weighted median' and it's negative!
+
+IgM has significant estimates for quite a few methods but the sign and magnitude of the estimates are all over the place.
+
+IgG also has many significant estimates, all positive, a couple of non-significant negative estimates.
+
+***** IgA
+#+begin_quote
+Method	Estimate	Std Error	95% CI 	 	P-value
+Simple median	-0.292064393989576	1.02754215266547	-2.30601000581065	1.7218812178315	0.776229586316705
+Weighted median	-0.0980488058570843	0.0913206241374101	-0.277033940212127	0.0809363284979587	0.282967708481664
+Penalized weighted median	-1.27016375861641	0.239104810849575	-1.73880057641184	-0.801526940820985	1.08331564326494e-07
+IVW	-0.1881572616759	0.382821856682402	-0.938474313268161	0.562159789916362	0.623072262668913
+Penalized IVW	-1.26592488783181	5.66157926594536	-12.3624163447034	9.83056656903982	0.823069145911547
+Robust IVW	-0.0965570025077066	0.365299328081112	-0.812530529123367	0.619416524107954	0.791531063749147
+Penalized robust IVW	4.51737658865183	365.35937530395	-711.573840421143	720.608593598447	0.990135046624313
+MR-Egger	-0.122307819343941	0.525132877013255	-1.15154934538782	0.906933706699941	0.815832592965151
+(intercept)	-0.00159329081857271	0.00863110486620945	-0.0185099455031316	0.0153233638659862	0.853543798334486
+Penalized MR-Egger	-0.291351956132472	34.0133401179445	-66.9562735812151	66.3735696689501	0.99316555257444
+(intercept)	-0.0287278795017248	0.651226776416716	-1.30510890704661	1.24765314804316	0.964813947606332
+Robust MR-Egger	0.0017187864826584	0.488444660548349	-0.955615156632997	0.959052729598314	0.99719233215478
+(intercept)	-0.00239763149004518	0.00814582019106475	-0.0183631456890713	0.0135678827089809	0.768498975368123
+Penalized robust MR-Egger	0.0942327922857483	2703.35308313857	-5298.38044765463	5298.5689132392	0.999972187543484
+(intercept)	0.0309013102803779	13.1667286438924	-25.7754126259607	25.8372152465214	0.998127427365292
+#+end_quote
+
+***** IgM
+#+begin_quote
+Method	Estimate	Std Error	95% CI 	 	P-value
+Simple median	-3.34015790060455	1.05222034448571	-5.40247187959686	-1.27784392161223	0.00150151712255519
+Weighted median	0.825649575810365	0.266578438796665	0.303165436713987	1.34813371490674	0.00195351012385157
+Penalized weighted median	0.735448240003086	0.356246024683081	0.0372188619886812	1.43367761801749	0.0389760978366902
+IVW	0.498710868412086	0.439805317008841	-0.363291713134464	1.36071344995864	0.256821598574481
+Penalized IVW	-4.11999943233784	0.169503376985081	-4.45221994648651	-3.78777891818916	1.68171071954369e-130
+Robust IVW	0.511947836055821	0.34397429613672	-0.162229395979665	1.18612506809131	0.136663448807116
+Penalized robust IVW	-15.6397231431124	2.02878926149754	-19.6160770278692	-11.6633692583556	1.2691189627104e-14
+MR-Egger	1.12243133197234	0.584464933229058	-0.0230988873832241	2.2679615513279	0.0548020221528087
+(intercept)	-0.0149065441177159	0.00931657547777612	-0.0331666965134062	0.00335360827797432	0.109598027323663
+Penalized MR-Egger	1.04970448429729	0.300105601849476	0.461508313113603	1.63790065548098	0.000469141439228382
+(intercept)	-0.0238603806136729	0.0218010005995588	-0.0665895566157442	0.0188687953883984	0.27375212530677
+Robust MR-Egger	1.14670731822549	0.410139197831176	0.342849261828234	1.95056537462274	0.00517557494763765
+(intercept)	-0.016128356774393	0.0105704982055032	-0.0368461525558247	0.00458943900703861	0.127062258713992
+Penalized robust MR-Egger	-1.01915552314282	91.8997649373893	-181.139384988123	179.101073941837	0.991151753326959
+(intercept)	-0.0481736569465471	0.111770045775175	-0.267238921216283	0.170891607323189	0.666463379400734
+#+end_quote
+
+***** IgG
+#+begin_quote
+Method	Estimate	Std Error	95% CI 	 	P-value
+Simple median	5.63406968944305	3.46959759298169	-1.16621663364792	12.434356012534	0.104410063162765
+Weighted median	0.73788689696536	0.262852770660672	0.222704933233877	1.25306886069684	0.00499703089600192
+Penalized weighted median	2.58604904284121	0.378864896354241	1.84348749098039	3.32861059470202	8.74478752236686e-12
+IVW	0.97435698644189	1.25793640323428	-1.49115305873914	3.43986703162292	0.438595112109611
+Penalized IVW	5.65472086147145	0.437253210100625	4.7977203175497	6.5117214053932	2.95560284428802e-38
+Robust IVW	1.01165371608812	1.7443761764979	-2.40726076533744	4.43056819751368	0.561947272147809
+Penalized robust IVW	15.015900933128	0.0545733522403012	14.9089391282214	15.1228627380346	0
+MR-Egger	-0.869263863519347	2.01496943991424	-4.81853139570011	3.08000366866141	0.6661753681487
+(intercept)	0.0348099362210029	0.0299864496937379	-0.0239624252029456	0.0935822976449514	0.245700652420514
+Penalized MR-Egger	2.14819833522738	5.95465715737566	-9.52271523351256	13.8191119039673	0.718279341934751
+(intercept)	0.0349013720596397	0.0105159992308394	0.0142903923057435	0.0555123518135359	0.000903782580283119
+Robust MR-Egger	-0.949850503978567	1.98190934234803	-4.83432143560418	2.93462042764704	0.631753447557911
+(intercept)	0.0371216636774121	0.0216196829472359	-0.00525213625634494	0.0794954636111692	0.0859735262168735
+Penalized robust MR-Egger	13.9034818541937	1.07154020532637	11.8033016437674	16.00366206462	0
+(intercept)	0.00559001430322851	0.00257302020754335	0.000546987364949762	0.0106330412415072	0.0298142244842223
+#+end_quote
+
+**** Lymphocyte counts variants as instruments
+
+***** How many lead SNPs/discrete signals?
+
+| Window (Mb) | No. of lead SNPs |
+|-------------+------------------|
+|           1 |              782 |
+|           2 |              587 |
+|           3 |              509 |
+
+****** 1000kb
+
+******* IgM
+#+begin_quote
+                       Method Estimate Std Error  95% CI       V5 P-value
+                       <char>    <num>     <num>   <num>    <num>   <num>
+ 1:             Simple median  -0.0380   0.02200 -0.0810  5.5e-03 0.08700
+ 2:           Weighted median  -0.0082   0.02500 -0.0560  4.0e-02 0.74000
+ 3: Penalized weighted median  -0.0280   0.02400 -0.0760  2.0e-02 0.25000
+ 4:                       IVW   0.0130   0.02400 -0.0340  6.1e-02 0.58000
+ 5:             Penalized IVW  -0.0510   0.01500 -0.0810 -2.1e-02 0.00076
+ 6:                Robust IVW  -0.0360   0.02000 -0.0750  3.6e-03 0.07500
+ 7:      Penalized robust IVW  -0.0510   0.01600 -0.0820 -2.0e-02 0.00120
+ 8:                  MR-Egger   0.0900   0.05000 -0.0070  1.9e-01 0.06900
+ 9:               (intercept)  -0.0019   0.00110 -0.0041  2.1e-04 0.07700
+10:        Penalized MR-Egger   0.0410   0.03100 -0.0200  1.0e-01 0.19000
+11:               (intercept)  -0.0019   0.00068 -0.0032 -5.6e-04 0.00540
+12:           Robust MR-Egger   0.0310   0.03900 -0.0450  1.1e-01 0.43000
+13:               (intercept)  -0.0017   0.00081 -0.0032 -7.2e-05 0.04000
+14: Penalized robust MR-Egger   0.0350   0.03100 -0.0250  9.6e-02 0.25000
+15:               (intercept)  -0.0019   0.00069 -0.0032 -5.3e-04 0.00620
+#+end_quote
+
+#+begin_quote
+r$> dat[`P-value` < 0.05]
+                 Method     Estimate    Std Error       95% CI            V5      P-value
+                 <char>        <num>        <num>        <num>         <num>        <num>
+1:        Penalized IVW -0.051099495 0.0151703206 -0.080832777 -2.136621e-02 0.0007560966
+2: Penalized robust IVW -0.051376365 0.0158371907 -0.082416688 -2.033604e-02 0.0011785020
+3:          (intercept) -0.001885270 0.0006781865 -0.003214491 -5.560486e-04 0.0054380813
+4:          (intercept) -0.001659810 0.0008100085 -0.003247398 -7.222251e-05 0.0404497330
+5:          (intercept) -0.001877946 0.0006854810 -0.003221464 -5.344276e-04 0.0061513496
+#+end_quote
+
+******* IgA
+
+#+begin_quote
+                       Method Estimate Std Error  95% CI      V5 P-value
+                       <char>    <num>     <num>   <num>   <num>   <num>
+ 1:             Simple median  0.05600   0.02000  0.0180 0.09500 4.0e-03
+ 2:           Weighted median  0.08900   0.02100  0.0480 0.13000 1.9e-05
+ 3: Penalized weighted median  0.03600   0.02100 -0.0049 0.07600 8.5e-02
+ 4:                       IVW  0.08700   0.01900  0.0490 0.12000 8.6e-06
+ 5:             Penalized IVW  0.06300   0.01400  0.0360 0.08900 3.7e-06
+ 6:                Robust IVW  0.08400   0.02100  0.0430 0.13000 6.5e-05
+ 7:      Penalized robust IVW  0.06200   0.01500  0.0330 0.09200 3.8e-05
+ 8:                  MR-Egger  0.14000   0.04100  0.0570 0.22000 8.0e-04
+ 9:               (intercept) -0.00130   0.00090 -0.0030 0.00050 1.6e-01
+10:        Penalized MR-Egger  0.10000   0.02900  0.0450 0.16000 4.9e-04
+11:               (intercept) -0.00058   0.00061 -0.0018 0.00062 3.4e-01
+12:           Robust MR-Egger  0.09500   0.05100 -0.0054 0.20000 6.4e-02
+13:               (intercept) -0.00025   0.00093 -0.0021 0.00160 7.9e-01
+14: Penalized robust MR-Egger  0.09300   0.03700  0.0210 0.17000 1.2e-02
+15:               (intercept) -0.00043   0.00073 -0.0019 0.00100 5.5e-01
+#+end_quote
+
+#+begin_quote
+r$> dat[`P-value` < 0.05]
+                      Method   Estimate  Std Error     95% CI         V5      P-value
+                      <char>      <num>      <num>      <num>      <num>        <num>
+1:             Simple median 0.05631537 0.01956148 0.01797557 0.09465518 3.990767e-03
+2:           Weighted median 0.08903488 0.02079334 0.04828069 0.12978908 1.853084e-05
+3:                       IVW 0.08673600 0.01948868 0.04853889 0.12493312 8.563736e-06
+4:             Penalized IVW 0.06280727 0.01357837 0.03619416 0.08942039 3.736271e-06
+5:                Robust IVW 0.08443516 0.02113811 0.04300524 0.12586509 6.484395e-05
+6:      Penalized robust IVW 0.06238698 0.01513828 0.03271649 0.09205747 3.770033e-05
+7:                  MR-Egger 0.13678992 0.04078692 0.05684902 0.21673081 7.971888e-04
+8:        Penalized MR-Egger 0.10191782 0.02922567 0.04463657 0.15919908 4.879767e-04
+9: Penalized robust MR-Egger 0.09298107 0.03689118 0.02067569 0.16528645 1.172166e-02
+#+end_quote
+
+******* IgG
+
+#+begin_quote
+                       Method Estimate Std Error  95% CI      V5 P-value
+                       <char>    <num>     <num>   <num>   <num>   <num>
+ 1:             Simple median  0.03500   0.02000 -0.0048 0.07500  0.0840
+ 2:           Weighted median  0.03600   0.02300 -0.0086 0.08100  0.1100
+ 3: Penalized weighted median  0.03600   0.02300 -0.0086 0.08100  0.1100
+ 4:                       IVW  0.03900   0.01500  0.0097 0.06800  0.0089
+ 5:             Penalized IVW  0.04200   0.01300  0.0160 0.06800  0.0018
+ 6:                Robust IVW  0.04200   0.01500  0.0120 0.07300  0.0061
+ 7:      Penalized robust IVW  0.04300   0.01400  0.0150 0.07200  0.0027
+ 8:                  MR-Egger  0.06200   0.03000  0.0022 0.12000  0.0420
+ 9:               (intercept) -0.00058   0.00068 -0.0019 0.00074  0.3900
+10:        Penalized MR-Egger  0.07400   0.02700  0.0210 0.13000  0.0063
+11:               (intercept) -0.00079   0.00060 -0.0020 0.00038  0.1900
+12:           Robust MR-Egger  0.07100   0.03000  0.0120 0.13000  0.0190
+13:               (intercept) -0.00072   0.00063 -0.0020 0.00051  0.2500
+14: Penalized robust MR-Egger  0.07600   0.02900  0.0200 0.13000  0.0078
+15:               (intercept) -0.00081   0.00060 -0.0020 0.00037  0.1800
+#+end_quote
+
+All IVW estimates were significant.
+
+#+begin_quote
+r$> dat[`P-value` < 0.05]
+                      Method Estimate Std Error 95% CI    V5 P-value
+                      <char>    <num>     <num>  <num> <num>   <num>
+1:                       IVW    0.039     0.015 0.0097 0.068  0.0089
+2:             Penalized IVW    0.042     0.013 0.0160 0.068  0.0018
+3:                Robust IVW    0.042     0.015 0.0120 0.073  0.0061
+4:      Penalized robust IVW    0.043     0.014 0.0150 0.072  0.0027
+5:                  MR-Egger    0.062     0.030 0.0022 0.120  0.0420
+6:        Penalized MR-Egger    0.074     0.027 0.0210 0.130  0.0063
+7:           Robust MR-Egger    0.071     0.030 0.0120 0.130  0.0190
+8: Penalized robust MR-Egger    0.076     0.029 0.0200 0.130  0.0078
+#+end_quote
+
+****** 2000kb
+
+******* IgA
+
+#+begin_quote
+r$> iga
+                       Method Estimate Std Error  95% CI      V5 P-value
+                       <char>    <num>     <num>   <num>   <num>   <num>
+ 1:             Simple median  5.4e-02   0.02200  0.0120 0.09700 1.2e-02
+ 2:           Weighted median  9.3e-02   0.02300  0.0480 0.14000 4.1e-05
+ 3: Penalized weighted median  4.2e-02   0.02300 -0.0020 0.08700 6.1e-02
+ 4:                       IVW  9.1e-02   0.02100  0.0490 0.13000 2.1e-05
+ 5:             Penalized IVW  5.8e-02   0.01500  0.0290 0.08800 1.0e-04
+ 6:                Robust IVW  7.9e-02   0.02300  0.0330 0.12000 7.1e-04
+ 7:      Penalized robust IVW  5.8e-02   0.01700  0.0250 0.09100 5.4e-04
+ 8:                  MR-Egger  1.3e-01   0.04400  0.0450 0.22000 3.0e-03
+ 9:               (intercept) -1.1e-03   0.00100 -0.0031 0.00093 3.0e-01
+10:        Penalized MR-Egger  9.7e-02   0.03200  0.0350 0.16000 2.3e-03
+11:               (intercept) -5.8e-04   0.00069 -0.0019 0.00078 4.0e-01
+12:           Robust MR-Egger  8.1e-02   0.05500 -0.0260 0.19000 1.4e-01
+13:               (intercept) -4.7e-05   0.00100 -0.0021 0.00200 9.6e-01
+14: Penalized robust MR-Egger  9.1e-02   0.03900  0.0140 0.17000 2.0e-02
+15:               (intercept) -5.2e-04   0.00082 -0.0021 0.00110 5.3e-01
+#+end_quote
+
+******* IgG
+
+#+begin_quote
+r$> dat
+                       Method Estimate Std Error   95% CI      V5 P-value
+                       <char>    <num>     <num>    <num>   <num>   <num>
+ 1:             Simple median  0.01800   0.02300 -0.02600 0.06300   0.420
+ 2:           Weighted median  0.03600   0.02600 -0.01400 0.08600   0.160
+ 3: Penalized weighted median  0.03600   0.02600 -0.01400 0.08600   0.160
+ 4:                       IVW  0.03100   0.01700 -0.00160 0.06400   0.062
+ 5:             Penalized IVW  0.02700   0.01500 -0.00190 0.05700   0.067
+ 6:                Robust IVW  0.03300   0.01700 -0.00080 0.06700   0.056
+ 7:      Penalized robust IVW  0.03100   0.01600 -0.00033 0.06200   0.053
+ 8:                  MR-Egger  0.05400   0.03400 -0.01200 0.12000   0.110
+ 9:               (intercept) -0.00061   0.00078 -0.00210 0.00092   0.440
+10:        Penalized MR-Egger  0.05500   0.03000 -0.00400 0.11000   0.068
+11:               (intercept) -0.00061   0.00069 -0.00200 0.00075   0.380
+12:           Robust MR-Egger  0.05800   0.03400 -0.00790 0.12000   0.084
+13:               (intercept) -0.00066   0.00073 -0.00210 0.00078   0.370
+14: Penalized robust MR-Egger  0.05900   0.03000  0.00067 0.12000   0.047
+15:               (intercept) -0.00067   0.00068 -0.00200 0.00065   0.320
+#+end_quote
+
+****** 3000kb
+
+Reran this with 3Mb clumping windows for fear of counting some signals many times over, no time to check almost 800 loci.
+
+IVW convincing for IgA, marginal for IgG, unconvincing for IgM.
+
+Estimate signs are mixed for IgM, too, whereas they are concordant across methods for IgA and for IgG, too.
+
+I haven't looked at enough of these plots to judge, but there are also a lot of SNPs looking quite null around the origin.
+
+There's maybe an argument for some penalty given the outlying variant effect estimates in each plot.
+
+We know these are associated with the exposure, but not the outcome.
+
+******* IgA
+
+#+begin_quote
+r$> iga
+                       Method Estimate Std Error  95% CI     V5 P-value
+                       <char>    <num>     <num>   <num>  <num>   <num>
+ 1:             Simple median  6.9e-02   0.02200  0.0250 0.1100 2.1e-03
+ 2:           Weighted median  6.8e-02   0.02300  0.0230 0.1100 3.4e-03
+ 3: Penalized weighted median  3.5e-02   0.02300 -0.0110 0.0800 1.4e-01
+ 4:                       IVW  8.0e-02   0.02300  0.0350 0.1300 5.2e-04
+ 5:             Penalized IVW  6.8e-02   0.01600  0.0370 0.0980 1.2e-05
+ 6:                Robust IVW  7.9e-02   0.02300  0.0340 0.1300 6.2e-04
+ 7:      Penalized robust IVW  6.7e-02   0.01800  0.0330 0.1000 1.5e-04
+ 8:                  MR-Egger  8.3e-02   0.04800 -0.0120 0.1800 8.7e-02
+ 9:               (intercept) -6.6e-05   0.00110 -0.0023 0.0022 9.5e-01
+10:        Penalized MR-Egger  6.8e-02   0.03300  0.0027 0.1300 4.1e-02
+11:               (intercept)  1.6e-04   0.00075 -0.0013 0.0016 8.3e-01
+12:           Robust MR-Egger  4.2e-02   0.05300 -0.0630 0.1500 4.3e-01
+13:               (intercept)  9.4e-04   0.00110 -0.0012 0.0030 3.8e-01
+14: Penalized robust MR-Egger  5.8e-02   0.04300 -0.0260 0.1400 1.8e-01
+15:               (intercept)  3.3e-04   0.00092 -0.0015 0.0021 7.2e-01
+#+end_quote
+
+******* IgM
+
+#+begin_quote
+r$> igm
+                       Method Estimate Std Error  95% CI       V5 P-value
+                       <char>    <num>     <num>   <num>    <num>   <num>
+ 1:             Simple median -0.02900   0.02500 -0.0790  2.1e-02  0.2500
+ 2:           Weighted median  0.00038   0.02800 -0.0540  5.5e-02  0.9900
+ 3: Penalized weighted median -0.02800   0.02800 -0.0830  2.6e-02  0.3100
+ 4:                       IVW  0.01100   0.02800 -0.0440  6.6e-02  0.6900
+ 5:             Penalized IVW -0.04900   0.01700 -0.0820 -1.6e-02  0.0035
+ 6:                Robust IVW -0.03800   0.02300 -0.0830  6.6e-03  0.0950
+ 7:      Penalized robust IVW -0.04900   0.01800 -0.0850 -1.4e-02  0.0062
+ 8:                  MR-Egger  0.11000   0.05700 -0.0060  2.2e-01  0.0640
+ 9:               (intercept) -0.00260   0.00130 -0.0052  7.8e-05  0.0570
+10:        Penalized MR-Egger  0.05000   0.03400 -0.0160  1.2e-01  0.1400
+11:               (intercept) -0.00230   0.00079 -0.0039 -7.7e-04  0.0034
+12:           Robust MR-Egger  0.03300   0.04500 -0.0550  1.2e-01  0.4600
+13:               (intercept) -0.00190   0.00098 -0.0038  4.7e-05  0.0560
+14: Penalized robust MR-Egger  0.04400   0.03700 -0.0280  1.2e-01  0.2400
+15:               (intercept) -0.00220   0.00083 -0.0039 -6.1e-04  0.0071
+#+end_quote
+
+******* IgG
+
+#+begin_quote
+r$> igg
+                       Method Estimate Std Error  95% CI     V5 P-value
+                       <char>    <num>     <num>   <num>  <num>   <num>
+ 1:             Simple median  3.5e-02   0.02400 -0.0110 0.0820   0.140
+ 2:           Weighted median  3.6e-02   0.02600 -0.0160 0.0870   0.170
+ 3: Penalized weighted median  3.6e-02   0.02600 -0.0150 0.0880   0.170
+ 4:                       IVW  3.2e-02   0.01800 -0.0024 0.0660   0.069
+ 5:             Penalized IVW  3.4e-02   0.01500  0.0038 0.0650   0.027
+ 6:                Robust IVW  3.6e-02   0.01700  0.0028 0.0700   0.034
+ 7:      Penalized robust IVW  3.7e-02   0.01600  0.0059 0.0690   0.020
+ 8:                  MR-Egger  2.9e-02   0.03600 -0.0410 0.0990   0.420
+ 9:               (intercept)  8.5e-05   0.00085 -0.0016 0.0017   0.920
+10:        Penalized MR-Egger  3.7e-02   0.03100 -0.0240 0.0990   0.240
+11:               (intercept) -9.3e-05   0.00074 -0.0016 0.0014   0.900
+12:           Robust MR-Egger  4.0e-02   0.03200 -0.0220 0.1000   0.210
+13:               (intercept) -9.2e-05   0.00073 -0.0015 0.0013   0.900
+14: Penalized robust MR-Egger  4.4e-02   0.03000 -0.0140 0.1000   0.140
+15:               (intercept) -1.9e-04   0.00069 -0.0015 0.0012   0.790
+#+end_quote
+
+*** Ig and Covid-19 IgG seronegativity
+
+**** Non-lead SNP instruments?
+
+We have very few instruments, can we get more by substituting GWS SNPs in LD with IgG lead SNPs for the lead SNPs themselves?
+
+On the inner join of =igg= and =covid-igg=:
+#+begin_quote
+r$> dat[`p_value.igg-meta` < 5e-8][ , .N, by = chromosome]
+   chromosome     N
+        <int> <int>
+1:         10    20
+2:         11     1
+3:         14    86
+4:         17   259
+5:         20     1
+#+end_quote
+
+| Chromosome | Discrete signals |
+|------------+------------------|
+|         10 |                1 |
+|         11 |                1 |
+|         14 |                2 |
+|         17 |                3 |
+|         20 |                1 |
+
+There are three signals on chromosome 17, but the p-values for the Covid-19 GWAS are very much null. This is the case elsewhere, too. I don't think this is worth pursuing.
+
+*** Notes on reading
+
+#+begin_ai
+I know about Mendelian randomisation, but what is the 'MR-Egger' method?
+
+[AI]: MRâEgger is an extension of the standard Mendelian randomisation (MR) framework that helps detect and adjust for a common problem known as directional (or unbalanced) pleiotropy. Hereâs what that means and how MRâEgger works:
+
+1. Background in MR:  
+   In MR studies, genetic variants (usually single nucleotide polymorphisms, or SNPs) are used as instrumental variables (IVs) to estimate the causal effect of an exposure on an outcome. A key assumption here is that these genetic instruments affect the outcome only through the exposure, not through any other pathway. When a genetic variant influences the outcome via additional pathways, itâs said to exhibit "pleiotropy."
+
+2. The Challenge of Pleiotropy:  
+   Pleiotropy becomes particularly problematic when it is directionalâmeaning the pleiotropic effects are not balanced around zero but tend to push the outcome in one direction. This violates one of the core assumptions of a valid IV, potentially biasing the causal estimate.
+
+3. What MRâEgger Does:  
+   MRâEgger regression adapts the idea of Egger regression (originally developed to detect publication bias in meta-analyses) to MR:
+   - It involves regressing the SNPâoutcome association estimates against the SNPâexposure association estimates.
+   - Unlike the traditional inverse-variance weighted (IVW) MR method (which assumes the intercept is zero), MRâEgger allows the intercept to be non-zero.
+   - This intercept represents the average pleiotropic effect across the genetic instruments. If it is significantly different from zero, that suggests the presence of directional pleiotropy.
+
+4. How to Interpret the MRâEgger Output:  
+   - The Slope: It represents the causal effect of the exposure on the outcome, adjusted for the pleiotropic effects.
+   - The Intercept: A statistically significant intercept is an indication that the IVs collectively are affecting the outcome via pathways independent of the exposure. In other words, it signals directional pleiotropy.
+
+5. Assumptions and Limitations:  
+   - MRâEgger relies on the Instrument Strength Independent of Direct Effect (InSIDE) assumption. This means that the magnitude of the pleiotropic effects should be independent of the strength of the SNPâexposure association.
+   - While MRâEgger can provide a more robust estimate in the presence of pleiotropy, it often comes at the cost of decreased precision (i.e., a wider confidence interval) compared to standard methods.
+   - It is best seen as a sensitivity analysis tool, used alongside other methods to gauge the robustness of the findings.
+
+In summary, MRâEgger regression is a useful tool in the MR toolkit. It helps to test for and adjust the causal estimates for the influence of directional pleiotropy, thereby enhancing the reliability of MR inferences when the standard IV assumptions might be violated.
+
+[ME]: 
+#+end_ai
+
+** =coloc=
+*** Lymphocyte counts gives too many H4 results
+*** Troubleshooting new Ig-non Ig approach
+
+#+begin_src 
+Error in coloc.abf(ig_dataset, non_ig_dataset) : 
+  dataset1 and dataset2 should contain the same snps in the same order, or should contain snp names through which the common snps can be identified
+In addition: Warning messages:
+1: In min(p) : no non-missing arguments to min; returning Inf
+2: In min(p) : no non-missing arguments to min; returning Inf
+3: In check_dataset(d = dataset1, 1) : minimum p value is: Inf
+If this is what you expected, this is not a problem.
+If this is not as small as you expected, please check you supplied var(beta) and not sd(beta) for the varbeta argument. If that's not the explanation, please check the 02_data vignette.
+4: In min(p) : no non-missing arguments to min; returning Inf
+5: In min(p) : no non-missing arguments to min; returning Inf
+6: In check_dataset(d = dataset2, 2) : minimum p value is: Inf
+If this is what you expected, this is not a problem.
+If this is not as small as you expected, please check you supplied var(beta) and not sd(beta) for the varbeta argument. If that's not the explanation, please check the 02_data vignette.
+#+end_src
+
+Not reading the =dat= in properly, start with that first.
+
+#+begin_src
+  "results/coloc/iga_and_lymphocyte-counts/rs149340486/sumstats.tsv"
+#+end_src
+
+No SNPs in the subset. Ah, no chromosome X/23 in one of the data sets.
+
+Set some flag in the config to handle this.
+
+Found another error whereby the lymphocyte counts p-values were being read as =char=, messed up the if statements big time. Found this because I was checking for the smallest p-value in the non-Ig trait.
+
+*** RHOH signal for IgA and IgM
+
+Is the IgM lead SNP also associated with IgA?
+
+#+begin_quote
+> dat[rsid == 'rs1397934']
+
+   chromosome base_pair_location other_allele effect_allele      rsid
+        <int>              <int>       <char>        <char>    <char>
+1:          4           40185976            A             G rs1397934
+         beta standard_error      p_value sample_size
+        <num>          <num>        <num>       <int>
+1: 0.03702114    0.005511858 1.859684e-11       77527
+#+end_quote
+
+*** Notes on coloc issues
+
+**** Slack discussion on <2025-03-26 Wed>
+
+IgA/IgG around TNFSF13 (rs3803800 and rs758641530): trimmed analysis (with abs difference between fracs limited to 0.1) says signals colocalise (H4), but untrimmed plots show distinct signals.
+
+The rs3803800-rs758641530 is the only example where H4 goes to H3 without trimming. More or less y = x for PP.H4 for trimmed and untrimmed, though.
+
+Need to run both trimmed and untrimmed versions and check disparities manually.
+
+No clear criteria for trimming, so need to manually inspect them.
+
+*** Ig-lymphocyte counts <2025-04-10 Thu>
+
+#+begin_src
+r$> dat[`Non-Ig trait` == 'lymphocyte count'][`Max. posterior hypothesis` == 'PP.H4.abf'][orde
+    r(Isotype, -PP.H4.abf)][, .(Isotype, ig_snp, non_ig_snp, PP.H4.abf, r2, genes, `Posterior 
+    odds of H4`)]
+    Isotype      ig_snp  non_ig_snp PP.H4.abf     r2           genes Posterior odds of H4
+     <char>      <char>      <char>     <num>  <num>          <char>                <num>
+ 1:     IgA   rs3757387   rs3778754 0.9938716 0.9229            IRF5           162.174051
+ 2:     IgA   rs1003342    rs714027 0.9825463 1.0000      ASCC2, LIF            56.294494
+ 3:     IgA   rs2256609   rs5998509 0.9495259 0.9801 RIMBP3C, UBE2L3            18.812161
+ 4:     IgA   rs2286564  rs11657448 0.9297808 0.3868    CD79B, FTSJ3            13.241128
+ 5:     IgA   rs6570530  rs62428835 0.9280593 0.0180          HIVEP2            12.900344
+ 6:     IgA   rs2872516   rs4795397 0.9237226 0.8327           GSDMB            12.110045
+ 7:     IgA   rs3810277   rs3810276 0.7120045 0.1807    MYBPC2, SPIB             2.472277
+ 8:     IgA rs148076268 rs139974673 0.7043296 0.7000     ADAL, FRMD5             2.382144
+ 9:     IgA      rs3743   rs8074930 0.6872742 0.2960   CBX4, TBC1D16             2.197689
+10:     IgG   rs1260326   rs1260326 0.9960134 1.0000            GCKR           249.840122
+11:     IgM   rs2476601   rs2476601 0.9995209 1.0000  DCLRE1B, RSBN1          2086.360334
+12:     IgM   rs6891054   rs6882861 0.9878811 0.9712          ZNF608            81.515954
+13:     IgM   rs4795397   rs4795397 0.9860295 1.0000    GSDMB, ZPBP2            70.579508
+14:     IgM    rs735665  rs36020612 0.9819009 0.9572         GRAMD1B            54.251515
+15:     IgM   rs9293515    rs247557 0.9268573 0.5782         , MEF2C            12.671906
+16:     IgM  rs28671336   rs9835571 0.8476447 0.9090         SLC35G2             5.563604
+17:     IgM   rs6495122      rs6938 0.5183077 0.4858     CPLX3, ULK3             1.076014
+18:     IgM    rs290243    rs296683 0.5138288 0.0035             SYK             1.056888
+
+#+end_src
+
+**** Reviewing plots
+
+| Isotype | Ig SNP      | Pearson correlation | Notes                                                                                             |
+|---------+-------------+---------------------+---------------------------------------------------------------------------------------------------|
+| IgM     | rs2476601   |                0.72 | Definitely                                                                                        |
+| IgM     | rs6891054   |               -0.33 | Definitely                                                                                        |
+| IgM     | rs4795397   |                0.76 | Definitely                                                                                        |
+| IgM     | rs735665    |                0.38 | Definitely                                                                                        |
+| IgM     | rs9293515   |                0.36 | Marginal signal's not so strong but H4 looks good and visual concordance                          |
+| IgM     | rs28671336  |               -0.81 | Definitely                                                                                        |
+| IgM     | rs6495122   |                0.62 | Visual concordance looks very good, PP.H4.abf not so great, H3/H4 close                           |
+| IgM     | rs290243    |               -0.15 | SNPs are in LE, signal's just GWS in Chen, I'm not really convinced, H3/H4 close                  |
+| IgG     | rs1260325   |               -0.67 | Definitely                                                                                        |
+| IgA     | rs3757387   |               -0.34 | Definitely                                                                                        |
+| IgA     | rs1003342   |                -0.8 | Definitely                                                                                        |
+| IgA     | rs2256609   |               -0.58 | Definitely                                                                                        |
+| IgA     | rs2286564   |                 0.4 | Definitely                                                                                        |
+| IgA     | rs6570530   |                0.19 | Marginal signals in both aren't really strong, signals do look concordant but not at the lead SNP |
+| IgA     | rs2872516   |                0.52 | Definitely                                                                                        |
+| IgA     | rs3810277   |               -0.11 | Visual concordance                                                                                |
+| IgA     | rs148076268 |               -0.66 | Hmm, not sure. A soft yes, 7/3 posterior odds                                                     |
+| IgA     | rs3743      |                0.07 | Signals are both just over GWS, H4 is 0.69, soft yes.                                             |
+
+**** Selected loci
+
+| Isotype | Ig SNP     | Pearson correlation | Notes                                                                                             |
+|---------+------------+---------------------+---------------------------------------------------------------------------------------------------|
+| IgM     | rs2476601  |                0.72 | Definitely                                                                                        |
+| IgM     | rs6891054  |               -0.33 | Definitely                                                                                        |
+| IgM     | rs4795397  |                0.76 | Definitely                                                                                        |
+| IgM     | rs735665   |                0.38 | Definitely                                                                                        |
+| IgM     | rs9293515  |                0.36 | Marginal signal's not so strong but H4 looks good and visual concordance                          |
+| IgM     | rs28671336 |               -0.81 | Definitely                                                                                        |
+| IgG     | rs1260325  |               -0.67 | Definitely                                                                                        |
+| IgA     | rs3757387  |               -0.34 | Definitely                                                                                        |
+| IgA     | rs1003342  |                -0.8 | Definitely                                                                                        |
+| IgA     | rs2256609  |               -0.58 | Definitely                                                                                        |
+| IgA     | rs2286564  |                 0.4 | Definitely                                                                                        |
+| IgA     | rs6570530  |                0.19 | Marginal signals in both aren't really strong, signals do look concordant but not at the lead SNP |
+| IgA     | rs2872516  |                0.52 | Definitely                                                                                        |
+| IgA     | rs3810277  |               -0.11 | Visual concordance                                                                                |
+| IgA     | rs148076268 |               -0.66 | Hmm, not sure. A soft yes, 7/3 posterior odds                                                     |
+| IgA     | rs3743      |                0.07 | Signals are both just over GWS, H4 is 0.69, soft yes.                                             |
+
+**** Hit write-up
+
+rs1003342 was mapped to LIF and ASCC2, but is apparently an intronic variant in HORMAD2. [[https://pmc.ncbi.nlm.nih.gov/articles/PMC7265702/#sec1_3][LIF increases Gd-IgA1 secretion by IgA1-secreting cell lines]] and this is relevant in IgAN.
+
+** DONE Bias in sign of lead SNPs for IgA
+
+Found this while doing MR, e.g. for IgA:
+#+begin_src
+> dat[, .N, by = sign(beta)]
+    sign     N
+   <num> <int>
+1:    -1    61
+2:     1    44
+#+end_src
+
+IgM:
+#+begin_src
+> dat[, .N, by = sign(beta)]
+    sign     N
+   <num> <int>
+1:     1    42
+2:    -1    46
+#+end_src
+
+IgG:
+#+begin_src
+> dat[, .N, by = sign(beta)]
+    sign     N
+   <num> <int>
+1:    -1    11
+2:     1     7
+#+end_src
+
+For IgA, there are 19 SNPs with beta < -0.5 and 16 of these are on chromosome 1. These do look quite close, all between 19.4Mb and 31Mb. They may just be one continuous signal.
+
+Turns out there is just one big signal on chromosome 1. I will need to reconsider clumping.
+** DONE Reconsidering the clumping approach <2025-03-12 Wed>
+
+Problem is the RUNX3 signal in IgA, GWS SNPs spanning the interval 19.5-31Mb and beyond.
+
+How can we do it? Can use =distance_clump= as a checkpoint then generate plots with 1Mb either side.
+
+Logging the candidate lead SNPs to drop in =config.yaml=
+
+*** IgA
+**** Chromosome 1
+#+begin_quote
+            rsid chromosome base_pair_location       p_value
+          <char>      <int>              <int>         <num>
+ 1:  rs746234782          1           19432479  6.140871e-09
+ 2:  rs543261951          1           20344243  3.259902e-11
+ 3:  rs762141322          1           21376594  8.899024e-12
+ 4:  rs535269494          1           21998347  5.539661e-16
+ 5:  rs765348868          1           22971602  4.219736e-11
+ 6:  rs781445232          1           23501623  5.569659e-17
+ 7:  rs546722789          1           24306004  6.446018e-33
+ 8:  rs188468174          1           24965206 1.668808e-308
+ 9:   rs74593753          1           25499340  3.107399e-63
+10:  rs760351385          1           26014185  9.730406e-24
+11:  rs765183915          1           26699947  8.382099e-23
+12:  rs200807314          1           27595000  3.801186e-21
+13:   rs11582631          1           28731992  2.360482e-19
+14:  rs755241705          1           29303382  1.050294e-17
+15:  rs762472871          1           30028204  6.390226e-15
+16: rs1053363817          1           30966900  2.179885e-10
+17:    rs7544568          1           38173536  2.282975e-10
+18:   rs11204701          1          150689703  1.110827e-08
+19:   rs79316700          1          161595524  3.264760e-10
+20:    rs3766151          1          169886435  1.741997e-11
+21:    rs4090390          1          173177782  1.266369e-15
+22:   rs10920074          1          200943599  2.730469e-25
+23:   rs73100295          1          217389764  3.848169e-08
+#+end_quote
+
+You can even see the signal decaying in the p-values here. Was silly to identify this as distinct hits.
+
+rs188468174 and rs7544568
+
+On chromosome 4, two SNPs [[https://ldlink.nih.gov/?var1=rs2101521&var2=rs10517538&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][are within 1.5Mb but are not in LD]]
+
+On chromosome 5, [[https://ldlink.nih.gov/?var1=rs28744551&var2=rs6859219&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][same story again]]
+
+I came back just to see what r2 looked like within the RUNX3 signal ('na' if the SNP's not in the 1kGP panel or one's monomorphic).
+
+| First SNP   | Second SNP  | EUR r2 | CEU r2 | TSI r2 | Link   | Notes                      |
+|-------------+-------------+--------+--------+--------+--------+----------------------------|
+| rs188468174 | rs74593753  | 0.1576 | 0.2449 | 0.4997 | [[https://ldlink.nih.gov/?var1=rs188468174&var2=rs74593753&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][ldlink]] |                            |
+| rs188468174 | rs760351385 | na     | na     | na     |        |                            |
+| rs188468174 | rs546722789 | na     | na     | na     |        |                            |
+| rs188468174 | rs781445232 | na     | na     | na     |        |                            |
+| rs188468174 | rs765348868 | na     | na     | na     |        |                            |
+| rs188468174 | rs200807314 | na     | na     | na     |        |                            |
+| rs188468174 | rs535269494 | na     | na     | na     | [[https://ldlink.nih.gov/?var1=rs188468174&var2=rs535269494&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][ldlink]] | rs535269494 is monomorphic |
+
+*** IgG
+
+Just dropped a handful here.
+
+*** IgM
+
+**** To drop
+
+- rs12061333 (chr1)
+- rs34635213 (chr2)
+- rs2336142 (chr3)
+- rs2395833 (chr7)
+- rs118008550 (chr14)
+
+['rs12061333', 'rs34635213', 'rs2336142', 'rs2395833', 'rs118008550']
+
+**** TODO chr1
+
+Not sure about rs12040769 and rs188468174, they look to be separate but they're still close, I want to check the [[https://ldlink.nih.gov/?var1=rs12040769&var2=rs188468174&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][LD]]. Ok, they're not in LD.
+
+**** chr4
+
+See rs865020 plot: close but all three seem independent.
+
+#+begin_src
+         rsid chromosome base_pair_location      p_value
+       <char>      <int>              <int>        <num>
+1:  rs1397934          4           40185976 3.077926e-15
+2: rs67960624          4           67613670 3.188564e-09
+3: rs17611664          4           99837400 1.234269e-09
+4:   rs865020          4          101398129 7.050093e-13
+5:  rs1080081          4          103029268 1.759724e-11
+#+end_src
+
+[[https://ldlink.nih.gov/?var1=rs17611664&var2=rsrs865020&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][rs17611664 and rs865020 are not in LD]] and [[https://ldlink.nih.gov/?var1=rs1080081&var2=rs865020&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][rs865020 and rs1080081]] are not either.
+
+**** chr9
+
+[[https://ldlink.nih.gov/?var1=rs140275930&var2=rs12554596&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][rs140275930 and rs12554596 are not in LD]]
+
+*** Lymphocyte counts
+
+I collapsed variants by hand by inspecting locuszoomr plots, checking the r2 for variants close to one another, and removing the less significant. Can I automate this?
+
+**** The script
+
+#+begin_ai
+I have a data.table object containing SNPs. I want to look at pairs of SNPs which lie within a specified minimum distance of one another on the same chromosome. Are there any features of data.table that will allow me to do this efficiently?
+
+[AI]: Yes â you can do this very efficiently with data.tableâs nonâequi joins (and, if you prefer, rolling joins or foverlaps). The idea is to âself joinâ your SNP table by matching records on the same chromosome and then enforcing a condition on the positions (e.g., that the distance is less than your minimum threshold). Because data.table maintains the keys in a sorted order and uses binary search for joins, these non-equi joins can be extremely fast even for large datasets.
+
+For example, suppose your data.table (called DT) has columns "chr" (chromosome) and "pos" (position). You can do something like the following (assuming you want to find pairs where SNP2 is within min_dist of SNP1):
+
+ââlibrary(data.table)
+
+ââ# Example data
+ââDT <- data.table(chr = c("chr1", "chr1", "chr1", "chr2","chr2"),
+ââââââââââpos = c(100, 110, 130, 50, 55))
+ââmin_dist <- 20
+
+ââ# Set keys for efficient join
+ââsetkey(DT, chr, pos)
+
+ââ# Self join using non-equi conditions:
+ââpairs <- DT[DT, 
+ââââallow.cartesian = TRUE,
+ââââon = .(chr, pos >= pos, pos <= pos + min_dist), 
+âââânomatch = 0]
+
+In this join, the i. columns refer to the "outer" DT, and the "x" columns refer to the matched SNPs. This code finds, for each SNP (from the i-side), all SNPs on the same chromosome that are located between its position and position + min_dist. (You might want to adjust the join direction or filter out self-matches as needed.)
+
+If you need to consider SNPs within a window on either side of a given SNP (both upstream and downstream), you could modify the join conditions accordingly or use a combination of two joins.
+
+Another approach (especially if you want to work with intervals) is to use foverlaps. In that case you would treat each SNP as an interval â for example, setting the start and end positions as pos and pos + min_dist â and then perform an overlap join to find SNP pairs that fall into each otherâs windows.
+
+Either way, data.tableâs non-equi join syntax provides a very concise and efficient way to do what you need.
+
+So in summary, data.table supports exactly the operation you need and doing self joins with non-equi conditions is the recommended approach for efficiently finding pairs of SNPs within a specified distance on the same chromosome.
+
+[ME]: 
+#+end_ai
+
+So the non-equi join in data.table is given by:
+#+begin_src
+res <- dat[dat, allow.cartesian = TRUE, on = .(chromosome, pos >= pos_lower, pos <= pos_upper), nomatch = 0]
+res <- res[rsid != i.rsid]
+#+end_src
+
+*** Asthma
+
+**** chr9
+
+[[https://ldlink.nih.gov/?var1=rs12379417&var2=rs2111363&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][rs1237947 and rs2111363]] are not in LD.
+
+**** chr17
+
+[[https://ldlink.nih.gov/?var1=rs7209222+&var2=rs12453507+&pop=CEU%2BTSI%2BFIN%2BGBR%2BIBS&genome_build=grch38_high_coverage&r2_d=r2&tab=ldpop][rs12453507 and rs7209222]] are not in LD.
+
+*** Ideas for an automated solution
+
+ 
+What if I use ldetect to get approximate LD blocks?
+
+Rely on some kind of classifier?
+
+Smoothing approach that can model decay of signal?
+
+#+begin_ai
+Are you listening?
+
+[AI]: Yes, I'm listening. How can I help you today?
+
+[ME]: I want to clump GWAS summary statistics to identify discrete signals, but I have no LD information available, only the summary statistics. I don't have the genotype data either. I'm thinking about developing a solution based on the 'decay' of the p-values away from the centre of the signals. Maybe some form of smoothing? Or is there a better classifier?
+
+[AI]: You're on the right track thinking about the âdecayâ of association signals as a possible clue for separating true loci from nearby noise, but there are several challenges and alternative strategies to consider.
+
+1. LD versus physical distance:  
+ââ¢ In typical clumping approaches, you use linkage disequilibrium (LD) from genotype data (or a reference panel) to decide whether two nearby associations are âindependentâ versus simply correlated by LD.  
+ââ¢ Physical distance (or a decay in p-values away from a lead SNP) is only an approximate surrogate for LD. In many regions, LD decays roughly with distance, but this relationship is not uniform genomeâwide. Some regions have extended LD (e.g., the MHC), while others break down faster. So, a decay/smoothing approach might work well in some regions but could misclassify signals in others.
+
+2. Smoothing or peak detection methods:  
+ââ¢ You could consider applying a smoothing algorithm (for example, Gaussian kernel smoothing or local regression) to your âlog(p) values across the genome. This might help highlight peaks and allow you to define a âsignal centreâ from which you can observe decay.  
+ââ¢ Once smoothed, you could use peak detection or changeâpoint analysis to detect boundariesâessentially segments of the genome that âbelongâ to a single signal. However, choosing the window size and kernel parameters will require careful calibration.  
+ââ¢ Simulations can help here: simulate summary statistics with known âsignalsâ and noise to assess how well your smoothing/peak detection method recovers the underlying clumps.
+
+3. Alternative approaches without direct LD information:  
+ââ¢ Even if you don't have your own genotype data, publicly available resources (e.g., 1000 Genomes or the Haplotype Reference Consortium) can sometimes serve as a proxy for LD. Although these wonât match your sample perfectly, they could give you an approximate LD structure that might improve clumping.  
+ââ¢ There are summaryâstatistic fineâmapping tools (such as COJO from GCTA, FINEMAP, or SuSiE) that usually require an LD reference. In many cases, using an LD referenceâeven an imperfect oneâtends to perform better than ignoring LD altogether.
+ââ¢ Alternatively, you might consider spatial statistical approaches like hidden Markov models (HMMs) or changeâpoint detection methods that incorporate the idea that the association signal âdecaysâ or changes as you move away from a causal variant. A Bayesian hierarchical model could also incorporate both the âstrengthâ and âspreadâ of significance across genomic locations.
+
+4. Considerations and potential pitfalls:  
+ââ¢ P-value âdecayâ might be confounded by local genomic features (e.g., gene density, recombination rates, or differential imputation quality) that affect both association statistics and the physical extent of signals.  
+ââ¢ Relying solely on a smoothed decay curve might miss complex signal patterns (like multiple independent causal variants in tight proximity) or may merge signals that are actually distinct.
+ââ¢ Calibration is crucial. Youâll likely need extensive simulation and cross-validation using loci where independent LD-based clumping is available for comparison.
+
+In summary, while smoothing the p-value signal is a creative idea, consider it as one component of your analysis rather than a complete replacement for LD-based clumping. If obtaining a reference LD panel is infeasible, you might combine smoothing/peak detection with methods that account for spatial variation, or explore approximate LD estimates from public data. This multi-pronged strategy will likely yield better identification of discrete signals from your summary statistics.
+
+What do you think about these directions? Do you need more details on any particular method or simulation strategy?
+
+[ME]: 
+#+end_ai
+
+** Misc.
+
+*** Notes on the humoral immune response by Janeway
+
+Thymus-dependent antigens require antigen-specific T-cell help, in particular lymphoid tissue-resident T follicular helper cells.
+
+Plasmablasts secrete antibody but retain some characteristics of activated B cells and continue to divide. 'Some' eventually die after a few days (what about the rest?)
+
+Plasma cells initially differentiate from unswitched activated B cells and later from those activated B cells which have entered the germinal centre and undergone somatic hypermutation and class switching.
+
+**** Locations
+
+circulating naive B cells move into primary lymphoid follicles drawn by CXCR5 ligand CXCL13 expressed by FDCs (these also secrete BAFF to keep B cells alive).
+
+mention 'secondary lymphoid tissues' as site of B cell activation
+
+**** Process
+
+1. BCR binds antigen (presented by FDC), B cell migrates in follicle to border with T-cell zone (follicular/interfollicular zone)
+2. BCR-antigen internalised, processed, antigen peptides presented on MHCII molecules
+3. naive T cells also activated by antigen-presenting DC in the T-cell zone, migrates to border with B-cell follicle
+3. T cell binds MHCII with TCR, CD40L-CD40 ligation for costimulatory signal, IL-21 secretion
+4. activation of B cells causes them to move to outer follicular/interfollicular zones, some form primary focus in medullary cords
+5. some primary focus B cells differentiate into plasmablasts, these secrete antibody; other cells move back to follicle, where they differentiate into plasma cells
+6. long-lived plasma cells migrate to bone marrow and secrete antibody
