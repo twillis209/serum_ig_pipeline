@@ -2,7 +2,7 @@ rule draw_zscore_plot_for_ig_gwas:
     input:
         "results/{isotype}_meta/merged.tsv.gz"
     output:
-        "results/{isotype}_meta/zscore_plots/{study_a}_{study_b}.png"
+        "results/{isotype}_meta/zscore_plots/{ighkl_inclusion}/{study_a}_{study_b}.png"
     params:
         beta_a = lambda w: f"{config.get('beta_col')}.{w.study_a}",
         beta_b = lambda w: f"{config.get('beta_col')}.{w.study_b}",
@@ -17,4 +17,4 @@ rule draw_zscore_plot_for_ig_gwas:
 
 rule zscore_plots:
     input:
-        [[f"results/{x}_meta/zscore_plots/{study_a}_{study_b}.png" for study_a, study_b in combinations(config.get(f'{x}_studies'), 2)] for x in ['iga', 'igm', 'igg']]
+       [[f"results/{x}_meta/zscore_plots/{study_a}_{study_b}.png" for study_a, study_b in combinations(config.get(f'{x}_studies'), 2)] for x in ['iga', 'igm', 'igg']]
