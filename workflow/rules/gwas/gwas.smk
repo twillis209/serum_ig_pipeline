@@ -19,6 +19,7 @@ rule join_pair_gwas:
         mhc = lambda wildcards: False if wildcards.variant_set == 'sans_mhc' else True,
         join = lambda wildcards: wildcards.join,
     group: "gwas"
+    conda: env_path("global.yaml")
     script:
         script_path("gwas/join_pair_gwas_stats.R")
 
