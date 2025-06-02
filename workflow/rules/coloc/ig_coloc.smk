@@ -63,10 +63,12 @@ rule run_coloc_for_all_ig_pairs:
         iga_igm = lambda w: [f"results/coloc/iga_and_igm/{first_rsid}_and_{second_rsid}/{trim}/coloc.tsv" for first_rsid, second_rsid in get_rsids_from_merged_lead_snps(w, isotype_a = 'iga', isotype_b = 'igm') for trim in ['trimmed', 'untrimmed']]
     output:
         "results/coloc/all_ig_pairs.tsv"
+    params:
+        cols = ["nsnps", "PP.H0.abf", "PP.H1.abf", "PP.H2.abf", "PP.H3.abf", "PP.H4.abf", "first_trait", "second_trait", "ig_snp", "non_ig_snp", "min_p.first", "min_p.second", "pearson.cor"]
     localrule: True
     run:
         if(len(input) == 0):
-            daf = pd.DataFrame(columns = ["nsnps", "PP.H0.abf", "PP.H1.abf", "PP.H2.abf", "PP.H3.abf", "PP.H4.abf", "first_trait", "second_trait", "ig_snp", "non_ig_snp", "min_p.first", "min_p.second", "pearson.cor"])
+            daf = pd.DataFrame(columns = params.cols)
         else:
             daf = pd.concat([pd.read_csv(x, sep = '\t') for x in input])
 

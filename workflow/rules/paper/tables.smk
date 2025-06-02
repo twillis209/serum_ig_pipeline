@@ -102,7 +102,7 @@ rule ig_and_non_ig_coloc_results:
                 daf['first_trait'] = daf['first_trait'].map(config.get('pretty_isotypes'))
                 daf['second_trait'] = config.get('gwas_datasets').get(daf['second_trait'][0]).get('pretty_phenotype')
 
-                daf.rename(columns = {'nsnps': 'No. of SNPs', "first_trait": "Isotype", "second_trait": "Non-Ig trait", "ig_snp": "Isotype's lead SNP", "non_ig_snp": "Non-Ig trait's lead SNP", "min_p.first": "Min. locus p-value for isotype", "min_p.second": "Min. locus p-value for non-Ig trait", "genes.first_snp": "Genes for first lead SNP", "genes.second_snp": "Genes for second lead SNP", "max_post": "Max. posterior hypothesis", "pearson.cor": "Pearson correlation"}, inplace = True)
+                daf.rename(columns = {'nsnps': 'No. of SNPs', "first_trait": "Isotype", "second_trait": "Non-Ig trait", "ig_snp": "Isotype's lead SNP", "non_ig_snp": "Non-Ig trait's lead SNP", "min_p.first": "Min. locus p-value for isotype", "min_p.second": "Min. locus p-value for non-Ig trait", "genes.first_snp": "Genes for first lead SNP", "genes.second_snp": "Genes for second lead SNP", "max_post": "Max. posterior hypothesis", "pearson.cor": "Pearson correlation", "ig_snp_effect_ratio": "Effect ratio at Ig lead SNP", "non_ig_snp_effect_ratio": "Effect ratio at non-Ig lead SNP"}, inplace = True)
 
                 dafs.append(daf)
 

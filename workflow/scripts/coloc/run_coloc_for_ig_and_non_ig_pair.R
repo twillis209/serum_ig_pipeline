@@ -57,9 +57,13 @@ z_cor <- dat[, cor(z_a, z_b, use = "pairwise.complete.obs", method = "pearson"),
 
 saveRDS(res, file = snakemake@output[['rds']])
 
+                                        # Ratio of effect estimates at lead SNPs
+
+ig_lead_snp_effect_ratio <- dat[rsid == snakemake@wildcards$isotype_rsid, beta_a/beta_b, env = list(beta_a = beta_a, beta_b = beta_b)]
+non_ig_lead_snp_effect_ratio <- dat[rsid == min_p_rsid_non_ig, beta_a/beta_b, env = list(beta_a = beta_a, beta_b = beta_b)]
 
 res_dat <- data.table(t(res$summary))
 
-res_dat[, `:=` (first_trait = snakemake@wildcards$isotype, second_trait = snakemake@wildcards$non_ig, ig_snp = snakemake@wildcards$isotype_rsid, non_ig_snp = min_p_rsid_non_ig, min_p.first = min_p_ig, min_p.second = min_p_non_ig, pearson.cor = z_cor)]
+res_dat[, `:=` (first_trait = snakemake@wildcards$isotype, second_trait = snakemake@wildcards$non_ig, ig_snp = snakemake@wildcards$isotype_rsid, non_ig_snp = min_p_rsid_non_ig, min_p.first = min_p_ig, min_p.second = min_p_non_ig, pearson.cor = z_cor, ig_snp_effect_ratio = ig_lead_snp_effect_ratio, non_ig_snp_effect_ratio = non_ig_lead_snp_effect_ratio)]
 
 fwrite(res_dat, file = snakemake@output$tsv, sep = '\t')

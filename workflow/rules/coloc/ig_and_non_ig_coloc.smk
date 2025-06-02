@@ -53,6 +53,8 @@ use rule run_coloc_for_all_ig_pairs as run_coloc_for_all_snps_for_ig_and_non_ig_
         lambda w: [f"results/coloc/{{isotype}}_and_{{non_ig}}/{isotype_rsid}/coloc.tsv" for isotype_rsid in get_rsids_from_candidate_lead_snps_for_ig_non_ig_pair(w)]
     output:
         "results/coloc/{isotype}_and_{non_ig}/results.tsv"
+    params:
+        cols = ["nsnps", "PP.H0.abf", "PP.H1.abf", "PP.H2.abf", "PP.H3.abf", "PP.H4.abf", "first_trait", "second_trait", "ig_snp", "non_ig_snp", "min_p.first", "min_p.second", "pearson.cor", "ig_snp_effect_ratio", "non_ig_snp_effect_ratio"]
 
 rule draw_locuszoom_plots_for_all_snps_for_ig_and_non_ig_pair:
     input:
