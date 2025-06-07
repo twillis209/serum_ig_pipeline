@@ -6,9 +6,6 @@ library(ggrepel)
 library(serumIgPipelineCode)
 library(patchwork)
 
-save.image('stacked.RData')
-stop()
-
 theme_set(theme_bw()+
           theme(
             axis.title = element_text(size=12),
