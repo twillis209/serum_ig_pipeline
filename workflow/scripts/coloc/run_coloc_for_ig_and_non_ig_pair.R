@@ -57,8 +57,7 @@ z_cor <- dat[, cor(z_a, z_b, use = "pairwise.complete.obs", method = "pearson"),
 
 saveRDS(res, file = snakemake@output[['rds']])
 
-                                        # Ratio of effect estimates at lead SNPs
-
+# Ratio of effect estimates at lead SNPs
 ig_lead_snp_effect_ratio <- dat[rsid == snakemake@wildcards$isotype_rsid, beta_a/beta_b, env = list(beta_a = beta_a, beta_b = beta_b)]
 non_ig_lead_snp_effect_ratio <- dat[rsid == min_p_rsid_non_ig, beta_a/beta_b, env = list(beta_a = beta_a, beta_b = beta_b)]
 

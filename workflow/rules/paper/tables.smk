@@ -77,8 +77,10 @@ rule ig_coloc_results:
 
         daf['first_trait'] = daf['first_trait'].map(config.get('pretty_isotypes'))
         daf['second_trait'] = daf['second_trait'].map(config.get('pretty_isotypes'))
+        daf["genes.first_snp"] = daf["genes.first_snp"].apply(lambda s: ",".join(sorted(set(s.split(",")))) if pd.notna(s) else s)
+        daf["genes.second_snp"] = daf["genes.second_snp"].apply(lambda s: ",".join(sorted(set(s.split(",")))) if pd.notna(s) else s)
 
-        daf.rename(columns = {'nsnps': 'No. of SNPs', "first_trait": "First isotype", "second_trait": "Second isotype", "first_snp": "First isotype's lead SNP", "second_snp": "Second isotype's lead SNP", "trimmed": "Filtered", "min_p.first": "Min. locus p-value for first isotype", "min_p.second": "Min. locus p-value for second isotype", "genes.first_snp": "Genes for first lead SNP", "genes.second_snp": "Genes for second lead SNP", "max_post": "Max. posterior hypothesis", "pearson.cor": "Pearson correlation"}, inplace = True)
+        daf.rename(columns = {'nsnps': 'No. of SNPs', "first_trait": "First isotype", "second_trait": "Second isotype", "first_snp": "First isotype's lead SNP", "second_snp": "Second isotype's lead SNP", "trimmed": "Filtered", "min_p.first": "Min. locus p-value for first isotype", "min_p.second": "Min. locus p-value for second isotype", "genes.first_snp": "Genes for first lead SNP", "genes.second_snp": "Genes for second lead SNP", "max_post": "Max. posterior hypothesis", "pearson.cor": "Pearson correlation", "first_iso_lead_snp_effect_ratio": "Effect ratio at first lead SNP", "second_iso_lead_snp_effect_ratio": "Effect ratio at second lead SNP"}, inplace = True)
 
         daf['Posterior odds of H4'] = daf['PP.H4.abf']/(1. - daf['PP.H4.abf'])
 
@@ -99,10 +101,12 @@ rule ig_and_non_ig_coloc_results:
             daf = pd.read_csv(x, sep = '\t')
 
             if(len(daf) > 0):
+                print(daf)
                 daf['first_trait'] = daf['first_trait'].map(config.get('pretty_isotypes'))
                 daf['second_trait'] = config.get('gwas_datasets').get(daf['second_trait'][0]).get('pretty_phenotype')
+                daf["genes"] = daf["genes"].apply(lambda s: ",".join(sorted(set(s.split(",")))) if pd.notna(s) else s)
 
-                daf.rename(columns = {'nsnps': 'No. of SNPs', "first_trait": "Isotype", "second_trait": "Non-Ig trait", "ig_snp": "Isotype's lead SNP", "non_ig_snp": "Non-Ig trait's lead SNP", "min_p.first": "Min. locus p-value for isotype", "min_p.second": "Min. locus p-value for non-Ig trait", "genes.first_snp": "Genes for first lead SNP", "genes.second_snp": "Genes for second lead SNP", "max_post": "Max. posterior hypothesis", "pearson.cor": "Pearson correlation", "ig_snp_effect_ratio": "Effect ratio at Ig lead SNP", "non_ig_snp_effect_ratio": "Effect ratio at non-Ig lead SNP"}, inplace = True)
+                daf.rename(columns = {'nsnps': 'No. of SNPs', "first_trait": "Isotype", "second_trait": "Non-Ig trait", "ig_snp": "Isotype's lead SNP", "non_ig_snp": "Non-Ig trait's lead SNP", "min_p.first": "Min. locus p-value for isotype", "min_p.second": "Min. locus p-value for non-Ig trait", "max_post": "Max. posterior hypothesis", "pearson.cor": "Pearson correlation", "ig_snp_effect_ratio": "Effect ratio at Ig lead SNP", "non_ig_snp_effect_ratio": "Effect ratio at non-Ig lead SNP"}, inplace = True)
 
                 dafs.append(daf)
 

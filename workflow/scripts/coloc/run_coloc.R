@@ -52,8 +52,12 @@ z_cor <- dat[, cor(z_a, z_b, use = "pairwise.complete.obs", method = "pearson"),
 
 saveRDS(res, file = snakemake@output[['rds']])
 
+# Ratio of effect estimates at lead SNPs
+first_iso_lead_snp_effect_ratio <- dat[rsid == snakemake@wildcards$first_rsid, beta_a/beta_b, env = list(beta_a = beta_a, beta_b = beta_b)]
+second_iso_lead_snp_effect_ratio <- dat[rsid == snakemake@wildcards$second_rsid, beta_a/beta_b, env = list(beta_a = beta_a, beta_b = beta_b)]
+
 res_dat <- data.table(t(res$summary))
 
-res_dat[, `:=` (first_trait = snakemake@wildcards$first_isotype, second_trait = snakemake@wildcards$second_isotype, trimmed = snakemake@wildcards$trim == 'trimmed', first_snp = snakemake@wildcards$first_rsid, second_snp = snakemake@wildcards$second_rsid, min_p.first = min_p_first_isotype, min_p.second = min_p_second_isotype, pearson.cor = z_cor)]
+res_dat[, `:=` (first_trait = snakemake@wildcards$first_isotype, second_trait = snakemake@wildcards$second_isotype, trimmed = snakemake@wildcards$trim == 'trimmed', first_snp = snakemake@wildcards$first_rsid, second_snp = snakemake@wildcards$second_rsid, min_p.first = min_p_first_isotype, min_p.second = min_p_second_isotype, pearson.cor = z_cor, first_iso_lead_snp_effect_ratio = first_iso_lead_snp_effect_ratio, second_iso_lead_snp_effect_ratio = second_iso_lead_snp_effect_ratio)]
 
 fwrite(res_dat, file = snakemake@output$tsv, sep = '\t')

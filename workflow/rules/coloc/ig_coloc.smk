@@ -64,7 +64,7 @@ rule run_coloc_for_all_ig_pairs:
     output:
         "results/coloc/all_ig_pairs.tsv"
     params:
-        cols = ["nsnps", "PP.H0.abf", "PP.H1.abf", "PP.H2.abf", "PP.H3.abf", "PP.H4.abf", "first_trait", "second_trait", "ig_snp", "non_ig_snp", "min_p.first", "min_p.second", "pearson.cor"]
+        cols = ["nsnps", "PP.H0.abf", "PP.H1.abf", "PP.H2.abf", "PP.H3.abf", "PP.H4.abf", "first_trait", "second_trait", "ig_snp", "non_ig_snp", "min_p.first", "min_p.second", "pearson.cor", "first_iso_lead_snp_effect_ratio", "second_iso_lead_snp_effect_ratio"]
     localrule: True
     run:
         if(len(input) == 0):
