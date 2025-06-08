@@ -1,0 +1,10 @@
+name: gwasrapidd
+channels:
+  - bioconda
+  - conda-forge
+  - dnachun
+dependencies:
+  - r-gwasrapidd
+  - r-dplyr
+  - r-tidyr
+  - r-fuzzyjoin
