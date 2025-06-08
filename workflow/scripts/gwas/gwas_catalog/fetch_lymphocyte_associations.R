@@ -142,8 +142,8 @@ total_lymphocyte_count_and_b_cell_assocs <- fuzzy_join_assocs(
 )
 
 write.table(b_and_t_cell_assocs, sep = "\t", file = snakemake@input$b_and_t_cell_assocs)
-write.table(gws_t_cell_assocs, sep = "\t", file = snakemake@input$gws_t_cell_assocs)
-write.table(gws_b_cell_assocs, sep = "\t", file = snakemake@input$gws_b_cell_assocs)
+write.table(gws_t_cell_assocs, sep = "\t", file = snakemake@input$t_cell_assocs)
+write.table(gws_b_cell_assocs, sep = "\t", file = snakemake@input$b_cell_assocs)
 write.table(total_lymphocyte_count_assocs, sep = "\t", file = snakemake@input$lymphocyte_count_assocs)
 write.table(total_lymphocyte_count_and_t_cell_assocs, sep = "\t", file = snakemake@input$lymphocyte_count_and_t_cell_assocs)
 write.table(total_lymphocyte_count_and_b_cell_assocs, sep = "\t", file = snakemake@input$lymphocyte_count_and_b_cell_assocs)

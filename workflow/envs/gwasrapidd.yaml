@@ -4,6 +4,7 @@ channels:
   - conda-forge
   - dnachun
 dependencies:
+  - r-base
   - r-gwasrapidd
   - r-dplyr
   - r-tidyr
