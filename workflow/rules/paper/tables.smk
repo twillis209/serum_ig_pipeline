@@ -114,6 +114,10 @@ rule ig_and_non_ig_coloc_results:
 
         daf['Posterior odds of H4'] = daf['PP.H4.abf']/(1. - daf['PP.H4.abf'])
 
+        int_cols = ["Chromosome", "Ig lead SNP position", "Non-Ig lead SNP position"]
+
+        daf[int_cols] = daf[int_cols].astype(int)
+
         daf.to_csv(output[0], sep = '\t', index = False)
 
 rule ig_ig_coloc_hits:
