@@ -4,7 +4,7 @@ library(LDlinkR)
 ig <- fread(snakemake@input$ig)
 
 if(ig[, .N] == 0) {
-  fwrite(data.table(nsnps = integer(), PP.H0.abf = numeric(), PP.H1.abf = numeric(), PP.H2.abf = numeric(), PP.H3.abf = numeric(), PP.H4.abf = numeric(), first_trait = character(), second_trait = character(), ig_snp = character(), non_ig_snp = character(), min_p.first = numeric(), min_p.second = numeric(), ig_snp_effect_ratio = numeric(), non_ig_snp_effect_ratio = numeric()), sep = '\t', file = snakemake@output[[1]])
+  fwrite(data.table(nsnps = integer(), PP.H0.abf = numeric(), PP.H1.abf = numeric(), PP.H2.abf = numeric(), PP.H3.abf = numeric(), PP.H4.abf = numeric(), first_trait = character(), second_trait = character(), ig_snp = character(), non_ig_snp = character(), chromosome = integer(), ig_snp_pos = integer(), non_ig_snp_pos = integer(), min_p.first = numeric(), min_p.second = numeric(), ig_snp_effect_ratio = numeric(), non_ig_snp_effect_ratio = numeric()), sep = '\t', file = snakemake@output[[1]])
 } else {
   ig[, genes := paste(unique(sort(c(top_genes, nearest_gene))), collapse = ','), by = 1:nrow(ig)]
 
