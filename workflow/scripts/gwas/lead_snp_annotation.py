@@ -8,8 +8,6 @@ I will add:
 - genes for which the lead variant is missense;
 - genes for which the lead variants is in a qtl credible set;
 - if none of the above,  nearest gene
-
-# TODO query for nearest gene using variant targets?
 """
 base_url = "https://api.platform.opentargets.org/api/v4/graphql"
 
@@ -27,20 +25,27 @@ def query_snp_id_by_rsid(rsid):
 
     variables = {"rsid": rsid}
 
-    r = requests.post(base_url, json = {"query": variant_id_query, "variables": variables})
+    r = requests.post(
+        base_url, json={"query": variant_id_query, "variables": variables}
+    )
 
-    response_data = json.loads(r.text)['data']
+    response_data = json.loads(r.text)["data"]
 
     # return response_data
 
-    if response_data['search']['hits'] is None or len(response_data['search']['hits']) == 0:
+    if (
+        response_data["search"]["hits"] is None
+        or len(response_data["search"]["hits"]) == 0
+    ):
         return None
 
-    daf = pd.json_normalize(response_data['search']['hits']).sort_values(by = 'score', ascending = False)
+    daf = pd.json_normalize(response_data["search"]["hits"]).sort_values(
+        by="score", ascending=False
+    )
 
-    return daf.loc[0, 'id']
+    return daf.loc[0, "id"]
 
-def query_snp_credible_sets(variant_id, size = 1000, index = 0):
+def query_snp_credible_sets(variant_id, size=1000, index=0, include_trans_qtls=False):
     credible_sets_query = """
     query QTLCredibleSetsQuery($variant_id: String!, $size: Int!, $index: Int!) {
     variant(variantId: $variant_id) {
@@ -87,75 +92,88 @@ def query_snp_credible_sets(variant_id, size = 1000, index = 0):
 
     variables = {"variant_id": variant_id, "size": size, "index": index}
 
-    r = requests.post(base_url, json = {"query": credible_sets_query, "variables": variables})
+    r = requests.post(
+        base_url, json={"query": credible_sets_query, "variables": variables}
+    )
 
-    response_data = json.loads(r.text)['data']
+    response_data = json.loads(r.text)["data"]
 
-    daf = pd.json_normalize(response_data['variant']['qtlCredibleSets']['rows'])
+    if not response_data["variant"]:
+        return None
+    else:
+        daf = pd.json_normalize(response_data["variant"]["qtlCredibleSets"]["rows"])
 
-    # TODO handle empty daf
+        daf["locus.rows_extracted"] = daf["locus.rows"].apply(
+            lambda x: x[0] if isinstance(x, list) and x else {}
+        )
 
-    daf['locus.rows_extracted'] = daf['locus.rows'].apply(lambda x: x[0] if isinstance(x, list) and x else {})
+        expanded = daf["locus.rows_extracted"].apply(pd.Series)
 
-    expanded = daf["locus.rows_extracted"].apply(pd.Series)
+        daf = daf.drop(["locus.rows", "locus.rows_extracted"], axis=1).join(expanded)
 
-    daf = daf.drop(["locus.rows","locus.rows_extracted"], axis=1).join(expanded)
+        daf = daf[daf["isTransQtl"] == include_trans_qtls]
 
-    return daf
+        return daf
 
-missense_query = """
-query missense_and_credible_sets($variant_id: String!) {
-    variant(variantId: $variant_id) {
-    id
-    rsIds
-    transcriptConsequences {
-        target {
-        approvedSymbol
-        symbolSynonyms {
+def query_snp_missense_and_nearest(variant_id):
+    missense_and_nearest_gene_query = """
+    query missense_and_nearest_gene($variant_id: String!) {
+        variant(variantId: $variant_id) {
+            id
+            mostSevereConsequence {
             label
+            id
+            }
+            transcriptConsequences {
+            target {
+
+                approvedSymbol
+            }
+            variantConsequences {
+                # id
+                label
+            }
+            distanceFromFootprint
+            distanceFromTss
+            target {
+                id
+                approvedSymbol
+                biotype
+            }
+            }
         }
         }
-        consequenceScore
-        variantConsequences {
-        label
-        id
-        }
-    }
-    }
-}
-"""
-# # NB: Based on the sample script provided by Open Targets Genetics here: https://genetics-docs.opentargets.org/data-access/graphql-api#available-endpoints
-# genes_query = """
-# query nearest_gene_and_top_genes($variant_id: String!) {
-#     variantInfo(variantId: $variant_id) {
-#         nearestGene {
-#             symbol
-#         }
-#         nearestGeneDistance
-#         mostSevereConsequence
-#         }
-#     genesForVariant(variantId: $variant_id) {
-#         overallScore
-#         gene {
-#         symbol
-#         id
-#         }
-#   }
-# }
-# """
+    """
 
-# base_url = "https://api.genetics.opentargets.org/graphql"
+    variables = {"variant_id": variant_id}
 
-# daf = pd.read_csv(snakemake.input[0], sep = '\\s+')
+    r = requests.post(
+        base_url,
+        json={"query": missense_and_nearest_gene_query, "variables": variables},
+    )
 
-# if daf.shape[0] == 0:
-#     pd.DataFrame(columns = ['rsid', 'chromosome', 'base_pair_location', 'other_allele', 'effect_allele', 'nearest_gene', 'nearest_gene_distance', 'top_gene', 'most_severe_consequence']).to_csv(snakemake.output[0], sep = '\t')
-# else:
-#     res_dicts = []
+    response_data = json.loads(r.text)["data"]
 
-#     for index, row in daf.iterrows():
-#          res_dicts.append(query_snp(row.rsid, row.chromosome, row.base_pair_location, row.other_allele, row.effect_allele))
+    daf = pd.json_normalize(
+        response_data["variant"], record_path=["transcriptConsequences"]
+    )
 
-#     annot_daf = pd.DataFrame(res_dicts)
+    daf["variantConsequences_extracted"] = daf["variantConsequences"].apply(
+        lambda x: x[0] if isinstance(x, list) and x else {}
+    )
 
-#     pd.merge(daf, annot_daf, on = 'rsid').to_csv(snakemake.output[0], sep = '\t', index = False)
+    expanded = daf["variantConsequences_extracted"].apply(pd.Series)
+
+    daf = daf.drop(
+        ["variantConsequences", "variantConsequences_extracted"], axis=1
+    ).join(expanded)
+
+    daf.rename(
+        columns={
+            "label": "variantConsequence",
+        },
+        inplace=True,
+    )
+
+    daf.sort_values("distanceFromFootprint", inplace=True)
+
