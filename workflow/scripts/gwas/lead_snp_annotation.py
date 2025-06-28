@@ -2,6 +2,10 @@ import requests
 import json
 import pandas as pd
 import re
+import asyncio
+from gql import Client, gql
+from gql.transport.aiohttp import AIOHTTPTransport
+from gql.transport.exceptions import TransportQueryError
 
 """
 I will add:
@@ -348,34 +352,159 @@ def fetch_genes_using_open_targets_api(daf):
     return (daf, reason_daf)
 
 
-# TODO
-def query_snp_genes_using_gnomad(variant_id):
-    # https://gnomad.broadinstitute.org/api
-    gnomad_query = """
-        query genes($variant_id: String!) {
-        variant(variantId: $variant_id, dataset: gnomad_r4) {
-        variant_id
-        rsid
-        chrom
-        pos
-        ref
-        alt
-        sortedTranscriptConsequences {
-        consequence_terms
-        gene_id
-        gene_symbol
-        }
-    }
-    }
-    """
+iga_daf = pd.read_csv("~/Downloads/ig_paper/iga_lead_snps.tsv", sep="\\s+")
+igg_daf = pd.read_csv("~/Downloads/ig_paper/igg_lead_snps.tsv", sep="\\s+")
+igm_daf = pd.read_csv("~/Downloads/ig_paper/igm_lead_snps.tsv", sep="\\s+")
 
-
-in_daf = pd.read_csv(
-    "~/Downloads/ig_paper/1000kb_gws_collapsed_iga_lead_snps.tsv", sep="\\s+"
-)
 # daf = pd.read_csv(snakemake.input[0], sep="\\s+")
 
-ot_daf, ot_reason_daf = fetch_genes_using_open_targets_api(in_daf)
+# iga_daf.rename(
+#     columns={
+#         "rsID": "rsid",
+#         "Chromosome": "chromosome",
+#         "Position": "base_pair_location",
+#     },
+#     inplace=True,
+# )
+# iga_daf["other_allele"] = iga_daf["rsid"].apply(lambda x: x.split(":")[1].split(">")[0])
+# iga_daf["effect_allele"] = iga_daf["rsid"].apply(
+#     lambda x: x.split(":")[1].split(">")[1]
+# )
+# iga_daf["rsid"] = iga_daf["rsid"].apply(lambda x: x.split(":")[0])
+
+# igg_daf.rename(
+#     columns={
+#         "rsID": "rsid",
+#         "Chromosome": "chromosome",
+#         "Position": "base_pair_location",
+#     },
+#     inplace=True,
+# )
+# igg_daf["other_allele"] = igg_daf["rsid"].apply(lambda x: x.split(":")[1].split(">")[0])
+# igg_daf["effect_allele"] = igg_daf["rsid"].apply(
+#     lambda x: x.split(":")[1].split(">")[1]
+# )
+# igg_daf["rsid"] = igg_daf["rsid"].apply(lambda x: x.split(":")[0])
+
+# igm_daf.rename(
+#     columns={
+#         "rsID": "rsid",
+#         "Chromosome": "chromosome",
+#         "Position": "base_pair_location",
+#     },
+#     inplace=True,
+# )
+# igm_daf["other_allele"] = igm_daf["rsid"].apply(lambda x: x.split(":")[1].split(">")[0])
+# igm_daf["effect_allele"] = igm_daf["rsid"].apply(
+#     lambda x: x.split(":")[1].split(">")[1]
+# )
+# igm_daf["rsid"] = igm_daf["rsid"].apply(lambda x: x.split(":")[0])
+
+iga_ot_daf, iga_ot_reason_daf = fetch_genes_using_open_targets_api(iga_daf)
+igg_ot_daf, igg_ot_reason_daf = fetch_genes_using_open_targets_api(igg_daf)
+igm_ot_daf, igm_ot_reason_daf = fetch_genes_using_open_targets_api(igm_daf)
+
+iga_ot_daf[
+    [
+        "chromosome",
+        "base_pair_location",
+        "other_allele",
+        "effect_allele",
+        "variant_id",
+        "rsid",
+        "beta",
+        "standard_error",
+        "p_value",
+        "maf.meta",
+        "gene",
+    ]
+].to_csv("~/Downloads/ig_paper/iga_lead_snps_with_genes.tsv", sep="\t", index=False)
+
+igg_ot_daf[
+    [
+        "chromosome",
+        "base_pair_location",
+        "other_allele",
+        "effect_allele",
+        "variant_id",
+        "rsid",
+        "beta",
+        "standard_error",
+        "p_value",
+        "maf.meta",
+        "gene",
+    ]
+]
+igm_ot_daf[
+    [
+        "chromosome",
+        "base_pair_location",
+        "other_allele",
+        "effect_allele",
+        "variant_id",
+        "rsid",
+        "beta",
+        "standard_error",
+        "p_value",
+        "maf.meta",
+        "gene",
+    ]
+]
+
+# gnomad_url = "https://gnomad.broadinstitute.org/api"
+
+# transport = AIOHTTPTransport(url=gnomad_url, ssl=False)
+# client = Client(transport=transport, fetch_schema_from_transport=True)
+# semaphore = asyncio.Semaphore(5)  # 5 requests per minute
+
+
+# async def query_nearest_genes_using_gnomad_api(session, rsid):
+#     gnomad_query = """
+#         query genes($rsid: String!) {
+#         variant(rsid: $rsid, dataset: gnomad_r4) {
+#         variant_id
+#         rsid
+#         chrom
+#         pos
+#         ref
+#         alt
+#         sortedTranscriptConsequences {
+#         consequence_terms
+#         gene_id
+#         gene_symbol
+#         }
+#     }
+#     }
+#     """
+
+#     query = gql(gnomad_query)
+#     async with semaphore:
+#         try:
+#             result = await session.execute(query, variable_values={"rsid": rsid})
+
+#             if result is not None:
+#                 return result["variant"]["sortedTranscriptConsequences"]
+#                 # return pd.DataFrame(
+#                 #     result["variant"]["sortedTranscriptConsequences"]
+#                 # ).drop_duplicates()
+#             else:
+#                 return None
+#         except TransportQueryError:
+#             return None
+
+
+# async def main():
+#     async with client as session:
+#         tasks = [
+#             query_nearest_genes_using_gnomad_api(session, rsid)
+#             for rsid in ot_daf[ot_daf["gene"] == ""]["rsid"].tolist()
+#         ]
+#         results = await asyncio.gather(*tasks)
+
+#         return results
+
+
+# results = asyncio.run(main())
 
 # TODO some sort of justification daf that gives the reason for each assigned gene
 
