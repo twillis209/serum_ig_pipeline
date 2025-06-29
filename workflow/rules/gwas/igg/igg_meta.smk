@@ -3,7 +3,7 @@ def get_rsid_and_coordinates_from_igg_lead_snps(w):
 
     return zip(daf.rsid, daf.chromosome, daf.base_pair_location)
 
-igg_root = "results/igg_meta/{epic_inclusion}/{dennis_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}"
+igg_root = Path("results/igg_meta/{epic_inclusion}/{dennis_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}")
 
 use rule merge_iga_gwas as merge_igg_gwas with:
     input:
