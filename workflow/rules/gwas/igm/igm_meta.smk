@@ -3,6 +3,8 @@ def get_rsid_and_coordinates_from_igm_lead_snps(w):
 
     return zip(daf.rsid, daf.chromosome, daf.base_pair_location)
 
+igm_root = "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}"
+
 use rule merge_iga_gwas as merge_igm_gwas with:
     input:
         epic = "results/restandardised_gwas/epic-igm.tsv.gz",
@@ -17,15 +19,15 @@ use rule run_iga_meta_analysis as run_igm_meta_meta_analysis with:
     input:
         "results/igm_meta/merged.tsv.gz"
     output:
-        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz"
+        igm_root / "meta.tsv.gz"
     params:
         isotype = 'igm'
 
 use rule drop_selected_loci_from_iga_meta_analysis as drop_selected_loci_from_igm_meta_analysis with:
     input:
-        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz"
+        igm_root / "meta.tsv.gz"
     output:
-        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/filtered_meta.tsv.gz"
+        igm_root / "filtered_meta.tsv.gz"
 
 rule copy_igm_meta_to_harmonised_gwas:
     input:
@@ -37,9 +39,9 @@ rule copy_igm_meta_to_harmonised_gwas:
 
 checkpoint distance_clump_igm_meta:
     input:
-        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/filtered_meta.tsv.gz"
+        igm_root / "filtered_meta.tsv.gz"
     output:
-        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_lead_snps.tsv"
+        igm_root / "{window_size}_{threshold}_lead_snps.tsv"
     params:
         mhc = lambda w: False,
         index_threshold = lambda w: 5e-8 if w.threshold == 'gws' else 1e-5,
@@ -54,36 +56,48 @@ checkpoint distance_clump_igm_meta:
 
 use rule draw_iga_distance_clump_plot as draw_igm_distance_clump_plot with:
     input:
-        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/filtered_meta.tsv.gz"
+        igm_root / "filtered_meta.tsv.gz"
     output:
-        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}/{lead_rsid}_chr{chrom}_{start}_{end}.png"
+        igm_root / "{window_size}_{threshold}/{lead_rsid}_chr{chrom}_{start}_{end}.png"
     threads: 16
 
 use rule draw_loci_from_iga_distance_clump as draw_loci_from_igm_distance_clump with:
     input:
         lambda w: [f"results/igm_meta/{{epic_inclusion}}/{{scepanovic_inclusion}}/{{pietzner_inclusion}}/{{gudjonsson_inclusion}}/{{eldjarn_inclusion}}/{{window_size}}_{{threshold}}/{rsid}_chr{chrom}_{int(int(pos)-2e6)}_{int(int(pos)+2e6)}.png" for rsid, chrom, pos in get_rsid_and_coordinates_from_igm_lead_snps(w)]
     output:
-        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}/locus_plots.done"
+        igm_root / "{window_size}_{threshold}/locus_plots.done"
 
 use rule collapse_clumped_iga_lead_snps as collapse_clumped_igm_lead_snps with:
     input:
-        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_lead_snps.tsv"
+        igm_root / "{window_size}_{threshold}_lead_snps.tsv"
     output:
-        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_collapsed_lead_snps.tsv"
+        igm_root / "{window_size}_{threshold}_collapsed_lead_snps.tsv"
     params:
         snps_to_remove = config.get('gwas_datasets').get('igm-meta').get('lead_snps_to_remove')
 
-use rule annotate_lead_snps as annotate_igm_meta_lead_snps with:
+use rule annotate_lead_snps_with_missense_and_qtl_info as annotate_igm_lead_snps_with_missense_and_qtl_info with:
     input:
-        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_collapsed_lead_snps.tsv"
+        rules.collapse_clumped_igm_lead_snps.output
     output:
-        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps.tsv"
+        igm_root / "{window_size}_{threshold}_lead_snps_with_missense_and_qtl.tsv"
+
+use rule annotate_lead_snps_with_nearest_gene as annotate_igm_lead_snps_with_nearest_gene with:
+    input:
+        rules.annotate_igm_lead_snps_with_missense_and_qtl_info.output
+    output:
+        igm_root / "{window_size}_{threshold}_lead_snps_with_nearest_gene.tsv"
+
+use rule finalise_lead_snp_annotations as finalise_igm_lead_snp_annotations with:
+    input:
+        rules.annotate_igm_lead_snps_with_nearest_gene
+    output:
+        igm_root / "{window_size}_{threshold}_annotated_lead_snps.tsv"
 
 use rule draw_manhattan_with_lead_snp_annotation as draw_igm_meta_manhattan with:
     input:
-        gwas = "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/filtered_meta.tsv.gz"
+        gwas = igm_root / "filtered_meta.tsv.gz"
     output:
-        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/manhattan.png"
+        igm_root / "manhattan.png"
     params:
         title = '',
         width = 12,
@@ -92,80 +106,80 @@ use rule draw_manhattan_with_lead_snp_annotation as draw_igm_meta_manhattan with
 
 use rule add_gnomad_queried_mafs_to_annotated_lead_snps_for_iga_meta as add_gnomad_queried_mafs_to_annotated_lead_snps_for_igm_meta with:
     input:
-        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps.tsv"
+        igm_root / "{window_size}_{threshold}_annotated_lead_snps.tsv"
     output:
-        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_gnomad_maf.tsv"
+        igm_root / "{window_size}_{threshold}_annotated_lead_snps_with_gnomad_maf.tsv"
 
 use rule add_study_sumstats_to_annotated_lead_snps_for_iga_meta as add_study_sumstats_to_annotated_lead_snps_for_igm_meta with:
     input:
-        lead = "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps.tsv",
+        lead = igm_root / "{window_size}_{threshold}_annotated_lead_snps.tsv",
         merged = "results/igm_meta/merged.tsv.gz"
     output:
-        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_study_sumstats.tsv"
+        igm_root / "{window_size}_{threshold}_annotated_lead_snps_with_study_sumstats.tsv"
     params:
         isotype = 'igm'
 
 use rule add_novelty_flag_to_iga_lead_snps as add_novelty_flag_to_igm_lead_snps with:
     input:
-        lead = "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_study_sumstats.tsv",
-        novel = "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/candidate_novel_associations.tsv",
+        lead = igm_root / "{window_size}_{threshold}_annotated_lead_snps_with_study_sumstats.tsv",
+        novel = igm_root / "candidate_novel_associations.tsv",
     output:
-        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_novelty_flag.tsv"
+        igm_root / "{window_size}_{threshold}_annotated_lead_snps_with_novelty_flag.tsv"
 
 use rule add_ieis_to_annotated_lead_snps_for_iga_meta as add_ieis_to_annotated_lead_snps_for_igm_meta with:
     input:
-        lead = "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_novelty_flag.tsv",
+        lead = igm_root / "{window_size}_{threshold}_annotated_lead_snps_with_novelty_flag.tsv",
         ieis = "results/iei/ieis_by_gene.tsv"
     output:
-        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_ieis.tsv"
+        igm_root / "{window_size}_{threshold}_annotated_lead_snps_with_ieis.tsv"
 
 use rule make_plink_range as make_plink_range_for_igm_meta with:
     input:
         bim_file = "results/1kG/hg38/eur/{variant_type}/005/qc/all/merged.bim",
         gwas_file = branch(
             lambda w: w.ighkl_inclusion == 'with_ighkl',
-            then = "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz",
-            otherwise = "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/filtered_meta.tsv.gz"
+            then = igm_root / "meta.tsv.gz",
+            otherwise = igm_root / "filtered_meta.tsv.gz"
             )
     output:
-        "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/matching_ids.txt"
+        igm_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/matching_ids.txt"
 
 use rule subset_reference as subset_reference_for_igm_meta with:
     input:
         multiext("results/1kG/hg38/eur/{variant_type}/005/qc/all/merged", ".bed", ".bim", ".fam"),
-        range_file = "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/matching_ids.txt"
+        range_file = igm_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/matching_ids.txt"
     output:
-        temp(multiext("results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/merged", ".bed", ".bim", ".fam"))
+        temp(multiext(igm_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/merged", ".bed", ".bim", ".fam"))
 
 use rule calculate_human_default_taggings as calculate_human_default_taggings_for_igm_meta with:
     input:
-        multiext("results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/merged", ".bed", ".bim", ".fam")
+        multiext(igm_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/merged", ".bed", ".bim", ".fam")
     output:
-        tagging_file = temp("results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/merged.tagging")
+        tagging_file = temp(igm_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/merged.tagging")
     log:
-        log_file = "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/merged.tagging.log"
+        log_file = igm_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/merged.tagging.log"
 
 use rule process_sum_stats as process_sum_stats_for_igm_meta with:
     input:
         gwas_file = branch(
             lambda w: w.ighkl_inclusion == 'with_ighkl',
-            then = "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz",
-            otherwise = "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/filtered_meta.tsv.gz"
+            then = igm_root / "meta.tsv.gz",
+            otherwise = igm_root / "filtered_meta.tsv.gz"
             ),
-        range_file = "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/matching_ids.txt",
+        range_file = igm_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/matching_ids.txt",
     output:
-        temp("results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/procd.assoc")
+        temp(igm_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/procd.assoc")
     params:
         N = lambda w: get_combined_sample_size_for_ig_meta(w, 'igm')
 
 use rule estimate_h2_with_human_default as estimate_h2_with_human_default_for_igm_meta with:
     input:
-        gwas = "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/procd.assoc",
-        tagging_file = "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/merged.tagging"
+        gwas = igm_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/procd.assoc",
+        tagging_file = igm_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/merged.tagging"
     output:
-        multiext("results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/sumher.", "cats", "cross", "enrich", "extra", "hers", "share", "taus", "progress")
+        multiext(igm_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/sumher.", "cats", "cross", "enrich", "extra", "hers", "share", "taus", "progress")
     log:
-        log_file = "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/sumher.log"
+        log_file = igm_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/sumher.log"
 
 use rule draw_igh_locus_for_iga_datasets as draw_igh_locus_for_igm_datasets with:
     input:

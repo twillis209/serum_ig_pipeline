@@ -3,6 +3,8 @@ def get_rsid_and_coordinates_from_iga_lead_snps(w):
 
     return zip(daf.rsid, daf.chromosome, daf.base_pair_location)
 
+iga_root = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}"
+
 rule merge_iga_gwas:
     input:
         epic = "results/restandardised_gwas/epic-iga.tsv.gz",
@@ -25,7 +27,7 @@ rule run_iga_meta_analysis:
     input:
         "results/iga_meta/merged.tsv.gz"
     output:
-        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz"
+        iga_root / "meta.tsv.gz"
     params:
         isotype = 'iga'
     threads: 16
@@ -37,9 +39,9 @@ rule run_iga_meta_analysis:
 
 rule drop_selected_loci_from_iga_meta_analysis:
     input:
-        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz"
+        iga_root / "meta.tsv.gz"
     output:
-        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/filtered_meta.tsv.gz"
+        iga_root / "filtered_meta.tsv.gz"
     params:
         loci_to_drop = ['igh', 'igk', 'igl']
     threads: 16
@@ -59,9 +61,9 @@ rule copy_iga_meta_to_harmonised_gwas:
 
 checkpoint distance_clump_iga_meta:
     input:
-        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/filtered_meta.tsv.gz"
+        iga_root / "filtered_meta.tsv.gz"
     output:
-        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_lead_snps.tsv"
+        iga_root / "{window_size}_{threshold}_lead_snps.tsv"
     params:
         mhc = lambda w: False,
         index_threshold = lambda w: 5e-8 if w.threshold == 'gws' else 1e-5,
@@ -76,9 +78,9 @@ checkpoint distance_clump_iga_meta:
 
 rule draw_iga_distance_clump_plot:
     input:
-        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/filtered_meta.tsv.gz"
+        iga_root / "filtered_meta.tsv.gz"
     output:
-        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}/{lead_rsid}_chr{chrom}_{start}_{end}.png"
+        iga_root / "{window_size}_{threshold}/{lead_rsid}_chr{chrom}_{start}_{end}.png"
     threads: 12
     resources:
         runtime = 10
@@ -90,32 +92,44 @@ rule draw_loci_from_iga_distance_clump:
     input:
         lambda w: [f"results/iga_meta/{{epic_inclusion}}/{{liu_inclusion}}/{{scepanovic_inclusion}}/{{dennis_inclusion}}/{{pietzner_inclusion}}/{{gudjonsson_inclusion}}/{{eldjarn_inclusion}}/{{window_size}}_{{threshold}}/{rsid}_chr{chrom}_{int(int(pos)-2e6)}_{int(int(pos)+2e6)}.png" for rsid, chrom, pos in get_rsid_and_coordinates_from_iga_lead_snps(w)]
     output:
-        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}/locus_plots.done"
+        iga_root / "{window_size}_{threshold}/locus_plots.done"
     shell: "touch {output}"
 
 rule collapse_clumped_iga_lead_snps:
     input:
-        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_lead_snps.tsv"
+        iga_root / "{window_size}_{threshold}_lead_snps.tsv"
     output:
-        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_collapsed_lead_snps.tsv"
+        iga_root / "{window_size}_{threshold}_collapsed_lead_snps.tsv"
     params:
         snps_to_remove = config.get('gwas_datasets').get('iga-meta').get('lead_snps_to_remove')
     localrule: True
     run:
         pd.read_csv(input[0], sep = '\t').query("rsid not in @params.snps_to_remove").to_csv(output[0], sep = '\t', index = False)
 
-use rule annotate_lead_snps as annotate_iga_meta_lead_snps with:
+use rule annotate_lead_snps_with_missense_and_qtl_info as annotate_iga_lead_snps_with_missense_and_qtl_info with:
     input:
-        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_collapsed_lead_snps.tsv"
+        rules.collapse_clumped_iga_lead_snps.output
     output:
-        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps.tsv"
+        iga_root / "{window_size}_{threshold}_lead_snps_with_missense_and_qtl.tsv"
+
+use rule annotate_lead_snps_with_nearest_gene as annotate_iga_lead_snps_with_nearest_gene with:
+    input:
+        rules.annotate_iga_lead_snps_with_missense_and_qtl_info.output
+    output:
+        iga_root / "{window_size}_{threshold}_lead_snps_with_nearest_gene.tsv"
+
+use rule finalise_lead_snp_annotations as finalise_iga_lead_snp_annotations with:
+    input:
+        rules.annotate_iga_lead_snps_with_nearest_gene
+    output:
+        iga_root / "{window_size}_{threshold}_annotated_lead_snps.tsv"
 
 # NB: Taking this out for now due to timing problem with requests and redundancy of gnomad MAF estimate
 rule add_gnomad_queried_mafs_to_annotated_lead_snps_for_iga_meta:
     input:
-        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps.tsv"
+        rules.finalise_iga_lead_snp_annotations.output
     output:
-        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_gnomad_maf.tsv"
+        iga_root / "{window_size}_{threshold}_annotated_lead_snps_with_gnomad_maf.tsv"
     resources:
         gnomad_api_calls = 1,
         runtime = 10
@@ -125,10 +139,10 @@ rule add_gnomad_queried_mafs_to_annotated_lead_snps_for_iga_meta:
 
 rule add_study_sumstats_to_annotated_lead_snps_for_iga_meta:
     input:
-        lead = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps.tsv",
+        lead = iga_root / "{window_size}_{threshold}_annotated_lead_snps.tsv",
         merged = "results/iga_meta/merged.tsv.gz"
     output:
-        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_study_sumstats.tsv"
+        iga_root / "{window_size}_{threshold}_annotated_lead_snps_with_study_sumstats.tsv"
     params:
         isotype = 'iga'
     threads: 8
@@ -138,20 +152,20 @@ rule add_study_sumstats_to_annotated_lead_snps_for_iga_meta:
 
 rule add_novelty_flag_to_iga_lead_snps:
     input:
-        lead = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_study_sumstats.tsv",
+        lead = iga_root / "{window_size}_{threshold}_annotated_lead_snps_with_study_sumstats.tsv",
         novel = "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/candidate_novel_associations.tsv",
     output:
-        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_novelty_flag.tsv"
+        iga_root / "{window_size}_{threshold}_annotated_lead_snps_with_novelty_flag.tsv"
     localrule: True
     conda: env_path("global.yaml")
     script: script_path("gwas/iga_meta/add_novelty_flag_to_annotated_lead_snps.R")
 
 rule add_ieis_to_annotated_lead_snps_for_iga_meta:
     input:
-        lead = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_novelty_flag.tsv",
+        lead = iga_root / "{window_size}_{threshold}_annotated_lead_snps_with_novelty_flag.tsv",
         ieis = "results/iei/ieis_by_gene.tsv"
     output:
-        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{window_size}_{threshold}_annotated_lead_snps_with_ieis.tsv"
+        iga_root / "{window_size}_{threshold}_annotated_lead_snps_with_ieis.tsv"
     params:
         flank = 2e5
     localrule: True
@@ -160,9 +174,9 @@ rule add_ieis_to_annotated_lead_snps_for_iga_meta:
 
 use rule draw_manhattan_with_lead_snp_annotation as draw_iga_meta_manhattan with:
     input:
-        gwas = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/filtered_meta.tsv.gz",
+        gwas = iga_root / "filtered_meta.tsv.gz",
     output:
-        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/manhattan.png"
+        iga_root / "manhattan.png"
     params:
         title = '',
         width = 12,
@@ -171,10 +185,10 @@ use rule draw_manhattan_with_lead_snp_annotation as draw_iga_meta_manhattan with
 
 use rule draw_iga_meta_manhattan as draw_annotated_iga_meta_manhattan with:
     input:
-        gwas = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/filtered_meta.tsv.gz",
-        lead_snps = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/2000kb_gws_annotated_lead_snps.tsv"
+        gwas = iga_root / "filtered_meta.tsv.gz",
+        lead_snps = iga_root / "2000kb_gws_annotated_lead_snps.tsv"
     output:
-        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/annotated_manhattan.png"
+        iga_root / "annotated_manhattan.png"
     params:
         title = '',
         width = 12,
@@ -185,48 +199,48 @@ use rule make_plink_range as make_plink_range_for_iga_meta with:
         bim_file = "results/1kG/hg38/eur/{variant_type}/005/qc/all/merged.bim",
         gwas_file = branch(
             lambda w: w.ighkl_inclusion == 'with_ighkl',
-            then = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz",
-            otherwise = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/filtered_meta.tsv.gz"
+            then = iga_root / "meta.tsv.gz",
+            otherwise = iga_root / "filtered_meta.tsv.gz"
         )
     output:
-        "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/matching_ids.txt"
+        iga_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/matching_ids.txt"
 
 use rule subset_reference as subset_reference_for_iga_meta with:
     input:
         multiext("results/1kG/hg38/eur/{variant_type}/005/qc/all/merged", ".bed", ".bim", ".fam"),
-        range_file = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/matching_ids.txt"
+        range_file = iga_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/matching_ids.txt"
     output:
-        temp(multiext("results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/merged", ".bed", ".bim", ".fam"))
+        temp(multiext(iga_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/merged", ".bed", ".bim", ".fam"))
 
 use rule calculate_human_default_taggings as calculate_human_default_taggings_for_iga_meta with:
     input:
-        multiext("results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/merged", ".bed", ".bim", ".fam")
+        multiext(iga_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/merged", ".bed", ".bim", ".fam")
     output:
-        tagging_file = temp("results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/merged.tagging")
+        tagging_file = temp(iga_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/merged.tagging")
     log:
-        log_file = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/merged.tagging.log"
+        log_file = iga_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/merged.tagging.log"
 
 use rule process_sum_stats as process_sum_stats_for_iga_meta with:
     input:
         gwas_file = branch(
             lambda w: w.ighkl_inclusion == 'with_ighkl',
-            then = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/meta.tsv.gz",
-            otherwise = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/filtered_meta.tsv.gz"
+            then = iga_root / "meta.tsv.gz",
+            otherwise = iga_root / "filtered_meta.tsv.gz"
         ),
-        range_file = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/matching_ids.txt",
+        range_file = iga_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/matching_ids.txt",
     output:
-        temp("results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/procd.assoc")
+        temp(iga_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/procd.assoc")
     params:
         N = lambda w: get_combined_sample_size_for_ig_meta(w, 'iga')
 
 use rule estimate_h2_with_human_default as estimate_h2_with_human_default_for_iga_meta with:
     input:
-        gwas = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/procd.assoc",
-        tagging_file = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/merged.tagging"
+        gwas = iga_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/procd.assoc",
+        tagging_file = iga_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/merged.tagging"
     output:
-        multiext("results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/sumher.", "cats", "cross", "enrich", "extra", "hers", "share", "taus", "progress")
+        multiext(iga_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/sumher.", "cats", "cross", "enrich", "extra", "hers", "share", "taus", "progress")
     log:
-        log_file = "results/iga_meta/{epic_inclusion}/{liu_inclusion}/{scepanovic_inclusion}/{dennis_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}/{variant_set}/{variant_type}/{ighkl_inclusion}/sumher.log"
+        log_file = iga_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/sumher.log"
 
 rule draw_igh_locus_for_iga_datasets:
     input:
