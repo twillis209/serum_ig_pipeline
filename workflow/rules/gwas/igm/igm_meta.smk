@@ -84,7 +84,7 @@ use rule annotate_lead_snps_with_missense_and_qtl_info as annotate_igm_lead_snps
 use rule annotate_lead_snps_with_nearest_gene as annotate_igm_lead_snps_with_nearest_gene with:
     input:
         lead = rules.annotate_igm_lead_snps_with_missense_and_qtl_info.output,
-        edb = rules.download_ensembl_db.output
+        edb = "resources/gwas/ensembl_113_hsapiens_edb.sqlite"
     output:
         igm_root / "{window_size}_{threshold}_lead_snps_with_nearest_gene.tsv"
 
