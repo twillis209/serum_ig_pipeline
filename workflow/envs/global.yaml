@@ -27,7 +27,6 @@ dependencies:
 - r-httr
 - r-gridextra
 - r-locuszoomr
-- bioconductor-ensdb.hsapiens.v86
 - bioconductor-annotationhub
 - bioconductor-ensembldb
 - bioconductor-genomicranges

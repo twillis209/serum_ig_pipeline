@@ -63,7 +63,7 @@ se_col: 'standard_error'
 rsid_col: 'rsid'
 id_col: 'variant_id'
 pretty_isotypes: {"igm": "IgM", "igm-meta": "IgM", "iga": "IgA", "iga-meta": "IgA", "igg": "IgG", "igg-meta": "IgG"}
-imds: ['asthma', 'pbc', 'psc', 'ra', 'sle', 'crohns', 't1d', 'uc', 'ms', 'derm', 'hypothy', 'celiac', 'igan', 'lymphocyte-counts', 'covid-igg']
+imds: ['asthma', 'pbc', 'psc', 'ra', 'sle', 'crohns', 't1d', 'uc', 'ms', 'derm', 'hypothy', 'celiac', 'igan', 'lymphocyte-counts']
 iga_studies: ['epic', 'liu', 'dennis', 'scepanovic', 'pietzner', 'eldjarn']
 igg_studies: ['epic', 'dennis', 'scepanovic', 'pietzner', 'eldjarn']
 igm_studies: ['epic', 'scepanovic', 'pietzner', 'eldjarn']

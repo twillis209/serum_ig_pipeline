@@ -3,7 +3,7 @@ def get_rsid_and_coordinates_from_igm_lead_snps(w):
 
     return zip(daf.rsid, daf.chromosome, daf.base_pair_location)
 
-igm_root = "results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}"
+igm_root = Path("results/igm_meta/{epic_inclusion}/{scepanovic_inclusion}/{pietzner_inclusion}/{gudjonsson_inclusion}/{eldjarn_inclusion}")
 
 use rule merge_iga_gwas as merge_igm_gwas with:
     input:
@@ -90,7 +90,7 @@ use rule annotate_lead_snps_with_nearest_gene as annotate_igm_lead_snps_with_nea
 
 use rule finalise_lead_snp_annotations as finalise_igm_lead_snp_annotations with:
     input:
-        rules.annotate_igm_lead_snps_with_nearest_gene
+        rules.annotate_igm_lead_snps_with_nearest_gene.output
     output:
         igm_root / "{window_size}_{threshold}_annotated_lead_snps.tsv"
 
@@ -150,11 +150,11 @@ use rule subset_reference as subset_reference_for_igm_meta with:
         multiext("results/1kG/hg38/eur/{variant_type}/005/qc/all/merged", ".bed", ".bim", ".fam"),
         range_file = igm_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/matching_ids.txt"
     output:
-        temp(multiext(igm_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/merged", ".bed", ".bim", ".fam"))
+        temp(multiext(str(igm_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/merged"), ".bed", ".bim", ".fam"))
 
 use rule calculate_human_default_taggings as calculate_human_default_taggings_for_igm_meta with:
     input:
-        multiext(igm_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/merged", ".bed", ".bim", ".fam")
+        multiext(str(igm_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/merged"), ".bed", ".bim", ".fam")
     output:
         tagging_file = temp(igm_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/merged.tagging")
     log:
@@ -178,7 +178,7 @@ use rule estimate_h2_with_human_default as estimate_h2_with_human_default_for_ig
         gwas = igm_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/procd.assoc",
         tagging_file = igm_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/merged.tagging"
     output:
-        multiext(igm_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/sumher.", "cats", "cross", "enrich", "extra", "hers", "share", "taus", "progress")
+        multiext(str(igm_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/sumher."), "cats", "cross", "enrich", "extra", "hers", "share", "taus", "progress")
     log:
         log_file = igm_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/sumher.log"
 

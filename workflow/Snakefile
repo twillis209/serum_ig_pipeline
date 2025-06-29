@@ -6,6 +6,7 @@ import re
 import os
 import pandas as pd
 from itertools import combinations, chain
+from pathlib import Path
 
 configfile: "config/config.yaml"
 
