@@ -351,11 +351,6 @@ def fetch_genes_using_open_targets_api(daf):
 
     return daf
 
-
-iga_daf = pd.read_csv("~/Downloads/ig_paper/iga_lead_snps.tsv", sep="\\s+")
-igg_daf = pd.read_csv("~/Downloads/ig_paper/igg_lead_snps.tsv", sep="\\s+")
-igm_daf = pd.read_csv("~/Downloads/ig_paper/igm_lead_snps.tsv", sep="\\s+")
-
 daf = pd.read_csv(snakemake.input[0], sep="\\s+")
 
 gene_daf = fetch_genes_using_open_targets_api(daf)
