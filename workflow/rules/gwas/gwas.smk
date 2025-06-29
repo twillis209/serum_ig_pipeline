@@ -102,7 +102,8 @@ rule annotate_lead_snps_with_missense_and_qtl_info:
 
 rule annotate_lead_snps_with_nearest_gene:
     input:
-        rules.annotate_lead_snps_with_missense_and_qtl_info.output
+        lead = rules.annotate_lead_snps_with_missense_and_qtl_info.output,
+        edb = rules.download_ensembl_db.output
     output:
         "results/harmonised_gwas/{trait}/{window_size}_{threshold}_lead_snps_with_nearest_gene.tsv"
     resources:

@@ -89,7 +89,8 @@ use rule annotate_lead_snps_with_nearest_gene as annotate_igg_lead_snps_with_nea
 
 use rule finalise_lead_snp_annotations as finalise_igg_lead_snp_annotations with:
     input:
-        rules.annotate_igg_lead_snps_with_nearest_gene
+        lead = rules.annotate_igg_lead_snps_with_missense_and_qtl_info.output,
+        edb = rules.download_ensembl_db.output
     output:
         igg_root / "{window_size}_{threshold}_annotated_lead_snps.tsv"
 

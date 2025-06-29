@@ -3,7 +3,7 @@ library(ensembldb)
 
 edb <- EnsDb(snakemake@input$edb)
 
-daf <- read.table(snakemake@input[[1]], header = TRUE, sep = '\t')
+daf <- read.table(snakemake@input$lead, header = TRUE, sep = '\t')
 
 snps_gr <- GRanges(
   seqnames = daf$chromosome,
