@@ -83,7 +83,8 @@ use rule annotate_lead_snps_with_missense_and_qtl_info as annotate_igg_lead_snps
 
 use rule annotate_lead_snps_with_nearest_gene as annotate_igg_lead_snps_with_nearest_gene with:
     input:
-        rules.annotate_igg_lead_snps_with_missense_and_qtl_info.output
+        lead = rules.annotate_igg_lead_snps_with_missense_and_qtl_info.output,
+        edb = rules.download_ensembl_db.output
     output:
         igg_root / "{window_size}_{threshold}_lead_snps_with_nearest_gene.tsv"
 
