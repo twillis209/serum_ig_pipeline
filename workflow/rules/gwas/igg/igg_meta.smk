@@ -150,11 +150,11 @@ use rule subset_reference as subset_reference_for_igg_meta with:
         multiext("results/1kG/hg38/eur/{variant_type}/005/qc/all/merged", ".bed", ".bim", ".fam"),
         range_file = igg_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/matching_ids.txt"
     output:
-        temp(multiext(igg_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/merged", ".bed", ".bim", ".fam"))
+        temp(multiext(str(igg_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/merged"), ".bed", ".bim", ".fam"))
 
 use rule calculate_human_default_taggings as calculate_human_default_taggings_for_igg_meta with:
     input:
-        multiext(igg_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/merged", ".bed", ".bim", ".fam")
+        multiext(str(igg_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/merged"), ".bed", ".bim", ".fam")
     output:
         tagging_file = temp(igg_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/merged.tagging")
     log:
@@ -178,7 +178,7 @@ use rule estimate_h2_with_human_default as estimate_h2_with_human_default_for_ig
         gwas = igg_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/procd.assoc",
         tagging_file = igg_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/merged.tagging"
     output:
-        multiext(igg_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/sumher.", "cats", "cross", "enrich", "extra", "hers", "share", "taus", "progress")
+        multiext(str(igg_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/sumher."), "cats", "cross", "enrich", "extra", "hers", "share", "taus", "progress")
     log:
         log_file = igg_root / "{variant_set}/{variant_type}/{ighkl_inclusion}/sumher.log"
 
