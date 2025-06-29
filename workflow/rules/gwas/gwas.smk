@@ -90,18 +90,37 @@ rule draw_loci_from_distance_clump:
         "results/harmonised_gwas/{trait}/{window_size}_{threshold}/locus_plots.done"
     shell: "touch {output}"
 
-rule annotate_lead_snps:
+rule annotate_lead_snps_with_missense_and_qtl_info:
     input:
         "results/harmonised_gwas/{trait}/{window_size}_{threshold}_lead_snps.tsv"
     output:
-        "results/harmonised_gwas/{trait}/{window_size}_{threshold}_annotated_lead_snps.tsv"
-    params:
-        no_of_top_genes = 3
+        "results/harmonised_gwas/{trait}/{window_size}_{threshold}_lead_snps_with_missense_and_qtl.tsv"
     resources:
         runtime = 30
     group: "gwas"
-    script:
-        script_path("gwas/lead_snp_annotation.py")
+    script: script_path("gwas/annotate_with_missense_and_qtl_info.py")
+
+rule annotate_lead_snps_with_nearest_gene:
+    input:
+        rules.annotate_lead_snps_with_missense_and_qtl_info.output
+    output:
+        "results/harmonised_gwas/{trait}/{window_size}_{threshold}_lead_snps_with_nearest_gene.tsv"
+    resources:
+        runtime = 30
+    group: "gwas"
+    conda: env_path("global.yaml")
+    script: script_path("gwas/annotate_with_nearest_gene.R")
+
+rule finalise_lead_snp_annotations:
+    input:
+        rules.annotate_lead_snps_with_nearest_gene.output
+    output:
+        "results/harmonised_gwas/{trait}/{window_size}_{threshold}_annotated_lead_snps.tsv"
+    resources:
+        runtime = 30
+    group: "gwas"
+    conda: env_path("global.yaml")
+    script: script_path("gwas/finalise_lead_snp_annotations.R")
 
 rule draw_manhattan_with_lead_snp_annotation:
     input:
@@ -235,3 +254,13 @@ rule draw_locus_with_r2_from_LDlink:
         stop_pos = lambda w: config.get('loci').get(w.locus).get('stop')
     conda: env_path('global.yaml')
     script: script_path("gwas/locuszoomr/plot_locus.R")
+
+# NB: Needs to create cache when running AnnotationHub for the first time
+rule download_ensembl_db:
+    output:
+        "resources/gwas/ensembl_113_hsapiens_edb.sqlite"
+    params:
+        search_tokens = ["EnsDb", "Homo sapiens", "Ensembl 113"],
+        genome = "GRCh38",
+    conda: env_path("global.yaml")
+    script: script_path("gwas/download_edb.R")
