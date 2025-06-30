@@ -19,8 +19,8 @@ if('liu' %in% studies) {
 }
 
 if('willis' %in% studies) {
-  willis <- fread(snakemake@input$willis, select = c('CHR38', 'BP38', 'REF', 'ALT', 'rsID', 'genes', 'P.meta'))
-  willis <- willis[, .(chromosome = CHR38, base_pair_location = BP38, effect_allele = ALT, other_allele = REF, rsid = rsID, Genes = genes, p_value = P.meta)]
+  willis <- fread(snakemake@input$willis, select = c('CHR38', 'BP38', 'REF', 'ALT', 'rsID', 'topGene', 'P.meta'))
+  willis <- willis[, .(chromosome = CHR38, base_pair_location = BP38, effect_allele = ALT, other_allele = REF, rsid = rsID, Genes = topGene, p_value = P.meta)]
   willis[, dataset := 'willis']
   dats[['willis']] <- willis
 }
