@@ -90,7 +90,7 @@ use rule annotate_lead_snps_with_nearest_gene as annotate_igm_lead_snps_with_nea
 
 use rule finalise_lead_snp_annotations as finalise_igm_lead_snp_annotations with:
     input:
-        rules.annotate_igm_lead_snps_with_nearest_gene.output
+        rules.annotate_igm_lead_snps_with_nearest_gene.output,
     output:
         igm_root / "{window_size}_{threshold}_annotated_lead_snps.tsv"
 

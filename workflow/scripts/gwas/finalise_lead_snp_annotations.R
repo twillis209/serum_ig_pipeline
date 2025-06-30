@@ -1,7 +1,7 @@
 library(data.table)
 library(stringr)
 
-dat <- fread(snakemake@input, sep = "\t", header = T)
+dat <- fread(snakemake@input[[1]], sep = "\t", header = T)
 ## dat <- fread("results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_lead_snps_with_nearest_gene.tsv")
 dat[, genes := ""]
 
