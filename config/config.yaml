@@ -735,6 +735,9 @@ loci:
     chrom: 22
     start: 22026076
     stop: 22922913
+snp_to_gene:
+  missing_missense_variants:
+    iga-meta: {"rs34137879": "TEDC1"}
 coloc:
   igg_and_igm:
     hits: []
