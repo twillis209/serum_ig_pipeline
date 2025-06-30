@@ -12,7 +12,7 @@ iga[, rsID := paste0(rsid, ':', other_allele, '>', effect_allele)]
 igm[, rsID := paste0(rsid, ':', other_allele, '>', effect_allele)]
 igg[, rsID := paste0(rsid, ':', other_allele, '>', effect_allele)]
 
-dat <- rbindlist(lapply(list(iga, igm, igg), function(x) x[, .(Isotype, rsID, chromosome, base_pair_location, Novel, top_genes, iei_hgnc_symbol, distance_to_iei_gene, IEIs)]))
+dat <- rbindlist(lapply(list(iga, igm, igg), function(x) x[, .(Isotype, rsID, chromosome, base_pair_location, Novel, genes, iei_hgnc_symbol, distance_to_iei_gene, IEIs)]))
 
 dat <- dat[!(iei_hgnc_symbol %in% c('IGHM', 'IGKC'))]
 

@@ -4,16 +4,11 @@ lead <- fread(snakemake@input[[1]])
 
 lead[, rsID := paste(paste(rsid, other_allele, sep = ':'), effect_allele, sep = '>')]
 
-lead[nearest_gene == '' & top_genes != '', gene := top_genes]
-lead[nearest_gene != '' & top_genes == '', gene := nearest_gene]
-lead[nearest_gene == top_genes, gene := nearest_gene]
-lead[nearest_gene != '' & top_genes != '' & nearest_gene != top_genes, gene := paste(nearest_gene, top_genes, sep = ', ')]
-
 fwrite(lead[, .(rsID = rsID,
                Chromosome = chromosome,
                Position = base_pair_location,
                MAF = maf.meta,
-               `Gene(s)` = gene,
+               `Gene(s)` = genes,
                Novel = Novel,
                Beta = beta,
                `Standard error` = standard_error,

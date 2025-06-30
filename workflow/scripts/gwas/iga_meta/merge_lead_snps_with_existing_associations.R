@@ -2,7 +2,7 @@ library(data.table)
 
 existing <- fread(snakemake@input$existing, select = c('chromosome', 'base_pair_location', 'rsid', 'Genes', 'dataset'))
 
-meta <- fread(snakemake@input$meta, select = c('chromosome', 'base_pair_location', 'rsid', 'nearest_gene', 'top_genes'))
+meta <- fread(snakemake@input$meta, select = c('chromosome', 'base_pair_location', 'rsid', 'nearest_gene', 'genes'))
 
 bp_flank <- snakemake@params$window / 2
 
@@ -16,4 +16,4 @@ setkey(existing, chromosome, left, right)
 
 overlaps <- foverlaps(meta, existing)
 
-fwrite(overlaps[is.na(left), .(chromosome, base_pair_location = i.base_pair_location, nearest_gene, top_genes)], sep = '\t', file = snakemake@output[[1]])
+fwrite(overlaps[is.na(left), .(chromosome, base_pair_location = i.base_pair_location, nearest_gene, genes)], sep = '\t', file = snakemake@output[[1]])

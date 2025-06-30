@@ -63,7 +63,7 @@ if(!is.null(snakemake@input$lead_snps)) {
 
     manh_plot <- manh_plot+
       geom_point(size = 0.9, pch = 21, colour = 'black', data = merged)+
-      geom_text_repel(aes(label = top_genes), hjust = -0.2, size = 2, min.segment.length = 0, data = merged, colour = 'black')
+      geom_text_repel(aes(label = genes), hjust = -0.2, size = 2, min.segment.length = 0, data = merged, colour = 'black')
     }
 }
 
