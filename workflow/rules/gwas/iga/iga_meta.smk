@@ -56,7 +56,7 @@ rule copy_iga_meta_to_harmonised_gwas:
         "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/filtered_meta.tsv.gz"
     output:
         "resources/harmonised_gwas/iga-meta.tsv.gz"
-    localrule: True
+    group: "gwas"
     shell: "cp {input} {output}"
 
 checkpoint distance_clump_iga_meta:

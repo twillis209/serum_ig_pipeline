@@ -35,7 +35,7 @@ rule copy_igg_meta_to_harmonised_gwas:
         "results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/filtered_meta.tsv.gz"
     output:
         "resources/harmonised_gwas/igg-meta.tsv.gz"
-    localrule: True
+    group: "gwas"
     shell: "cp {input} {output}"
 
 checkpoint distance_clump_igg_meta:
