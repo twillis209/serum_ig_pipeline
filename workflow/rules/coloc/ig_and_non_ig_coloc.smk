@@ -48,6 +48,18 @@ rule run_coloc_for_ig_and_non_ig_pair:
     conda: env_path("coloc.yaml")
     script: script_path("coloc/run_coloc_for_ig_and_non_ig_pair.R")
 
+rule add_genes_and_r2_to_ig_and_non_ig_coloc_pair:
+    input:
+        ig = "results/coloc/{isotype}_and_{non_ig}/coloc_candidate_lead_snps.tsv",
+        coloc = "results/coloc/{isotype}_and_{non_ig}/results.tsv"
+    output:
+        "results/coloc/{isotype}_and_{non_ig}/results_with_genes_and_r2.tsv"
+    resources:
+        ldlink_calls = 1
+    localrule: True
+    conda: env_path("global.yaml")
+    script: script_path("coloc/add_genes_and_r2_to_ig_and_non_ig_coloc_pair.R")
+
 use rule run_coloc_for_all_ig_pairs as run_coloc_for_all_snps_for_ig_and_non_ig_pair with:
     input:
         lambda w: [f"results/coloc/{{isotype}}_and_{{non_ig}}/{isotype_rsid}/coloc.tsv" for isotype_rsid in get_rsids_from_candidate_lead_snps_for_ig_non_ig_pair(w)]
@@ -63,18 +75,6 @@ rule draw_locuszoom_plots_for_all_snps_for_ig_and_non_ig_pair:
         "results/coloc/{isotype}_and_{non_ig}/lz_plots.done"
     localrule: True
     shell: "touch {output}"
-
-rule add_genes_and_r2_to_ig_and_non_ig_coloc_pair:
-    input:
-        ig = "results/coloc/{isotype}_and_{non_ig}/coloc_candidate_lead_snps.tsv",
-        coloc = "results/coloc/{isotype}_and_{non_ig}/results.tsv"
-    output:
-        "results/coloc/{isotype}_and_{non_ig}/results_with_genes_and_r2.tsv"
-    resources:
-        ldlink_calls = 1
-    localrule: True
-    conda: env_path("global.yaml")
-    script: script_path("coloc/add_genes_and_r2_to_ig_and_non_ig_coloc_pair.R")
 
 use rule draw_locuszoomr_plot_for_coloc_ig_pair as draw_locuszoomr_plot_for_coloc_ig_and_non_ig_pair with:
     input:

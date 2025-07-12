@@ -110,20 +110,20 @@ use rule annotate_lead_snps_with_missense_and_qtl_info as annotate_iga_lead_snps
     input:
         rules.collapse_clumped_iga_lead_snps.output
     output:
-        str(iga_root  / "{window_size}_{threshold}_lead_snps_with_missense_and_qtl.tsv")
+        iga_root  / "{window_size}_{threshold}_lead_snps_with_missense_and_qtl.tsv"
 
 use rule annotate_lead_snps_with_nearest_gene as annotate_iga_lead_snps_with_nearest_gene with:
     input:
         lead = rules.annotate_iga_lead_snps_with_missense_and_qtl_info.output,
         edb = "resources/gwas/ensembl_113_hsapiens_edb.sqlite"
     output:
-        str(iga_root  / "{window_size}_{threshold}_lead_snps_with_nearest_gene.tsv")
+        iga_root  / "{window_size}_{threshold}_lead_snps_with_nearest_gene.tsv"
 
 use rule finalise_lead_snp_annotations as finalise_iga_lead_snp_annotations with:
     input:
         rules.annotate_iga_lead_snps_with_nearest_gene.output
     output:
-        str(iga_root  / "{window_size}_{threshold}_annotated_lead_snps.tsv")
+        iga_root  / "{window_size}_{threshold}_annotated_lead_snps.tsv"
     params:
         missing_missense_variants = config.get('snp_to_gene').get('missing_missense_variants').get('iga-meta')
 

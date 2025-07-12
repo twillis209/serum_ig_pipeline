@@ -43,6 +43,20 @@ rule run_coloc_for_ig_pair:
     conda: env_path("coloc.yaml")
     script: script_path("coloc/run_coloc.R")
 
+rule add_gene_and_r2_to_all_ig_coloc_pairs:
+    input:
+        all_pairs = "results/coloc/all_ig_pairs.tsv",
+        iga = "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps.tsv",
+        igg = "results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps.tsv",
+        igm = "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps.tsv"
+    output:
+        "results/coloc/all_ig_pairs_with_genes_and_r2.tsv"
+    resources:
+        ldlink_calls = 1
+    localrule: True
+    conda: env_path("global.yaml")
+    script: script_path("coloc/add_genes_and_r2_to_ig_coloc_pairs.R")
+
 rule draw_locuszoomr_plot_for_coloc_ig_pair:
     input:
         sumstats = "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/sumstats.tsv",
@@ -73,20 +87,6 @@ rule run_coloc_for_all_ig_pairs:
             daf = pd.concat([pd.read_csv(x, sep = '\t') for x in input])
 
         daf.to_csv(output[0], sep = '\t', index = False)
-
-rule add_gene_and_r2_to_all_ig_coloc_pairs:
-    input:
-        all_pairs = "results/coloc/all_ig_pairs.tsv",
-        iga = "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps.tsv",
-        igg = "results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps.tsv",
-        igm = "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps.tsv"
-    output:
-        "results/coloc/all_ig_pairs_with_genes_and_r2.tsv"
-    resources:
-        ldlink_calls = 1
-    localrule: True
-    conda: env_path("global.yaml")
-    script: script_path("coloc/add_genes_and_r2_to_ig_coloc_pairs.R")
 
 rule draw_locuszoomr_plots_for_all_ig_pairs:
     input:
