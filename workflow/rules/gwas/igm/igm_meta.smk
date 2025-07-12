@@ -74,6 +74,7 @@ use rule collapse_clumped_iga_lead_snps as collapse_clumped_igm_lead_snps with:
         igm_root / "{window_size}_{threshold}_collapsed_lead_snps.tsv"
     params:
         snps_to_remove = config.get('gwas_datasets').get('igm-meta').get('lead_snps_to_remove')
+    group: "gwas"
 
 use rule annotate_lead_snps_with_missense_and_qtl_info as annotate_igm_lead_snps_with_missense_and_qtl_info with:
     input:

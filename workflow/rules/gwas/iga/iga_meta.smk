@@ -102,7 +102,7 @@ rule collapse_clumped_iga_lead_snps:
         str(iga_root  / "{window_size}_{threshold}_collapsed_lead_snps.tsv")
     params:
         snps_to_remove = config.get('gwas_datasets').get('iga-meta').get('lead_snps_to_remove')
-    localrule: True
+    group: "gwas"
     run:
         pd.read_csv(input[0], sep = '\t').query("rsid not in @params.snps_to_remove").to_csv(output[0], sep = '\t', index = False)
 
