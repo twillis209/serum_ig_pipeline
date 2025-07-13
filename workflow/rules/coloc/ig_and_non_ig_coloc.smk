@@ -50,7 +50,13 @@ rule run_coloc_for_ig_and_non_ig_pair:
 
 rule add_genes_and_r2_to_ig_and_non_ig_coloc_pair:
     input:
-        ig = "results/coloc/{isotype}_and_{non_ig}/coloc_candidate_lead_snps.tsv",
+        ig = branch(evaluate("{isotype}"),
+                    cases = {
+                        "iga" : "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps.tsv",
+                        "igg" : "results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps.tsv",
+                        "igm" : "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps.tsv"
+                    }
+        ),
         coloc = "results/coloc/{isotype}_and_{non_ig}/results.tsv"
     output:
         "results/coloc/{isotype}_and_{non_ig}/results_with_genes_and_r2.tsv"
