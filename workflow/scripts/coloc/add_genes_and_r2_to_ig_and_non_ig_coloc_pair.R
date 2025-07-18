@@ -11,7 +11,7 @@ if(ig[, .N] == 0) {
   setkey(ig, rsid)
 
   setkey(coloc, ig_snp)
-  coloc[ig, `:=` (genes = genes, chromosome = chromosome, ig_snp_pos = base_pair_location)]
+  coloc[ig, `:=` (genes = i.genes, chromosome = i.chromosome, ig_snp_pos = base_pair_location)]
 
   coloc[, max_post := names(.SD)[max.col(.SD, ties.method = 'first')], .SDcols = patterns('PP.H')]
 
