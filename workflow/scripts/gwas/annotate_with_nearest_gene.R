@@ -11,7 +11,7 @@ snps_gr <- GRanges(
   rsid = daf$rsid
 )
 
-genes_gr <- genes(edb)
+genes_gr <- genes(edb, filter = GeneBiotypeFilter("protein_coding"))
 
 suppressWarnings(nearest_hits <- distanceToNearest(snps_gr, genes_gr))
 
