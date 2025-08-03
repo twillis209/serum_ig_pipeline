@@ -1,6 +1,6 @@
 library(data.table)
 setDTthreads(snakemake@threads)
-library(serumIgPipelineCode)
+library(tomics)
 
 se_col <- snakemake@config$se_col
 

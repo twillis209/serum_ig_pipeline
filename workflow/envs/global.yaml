@@ -23,7 +23,7 @@ dependencies:
 - r-ggnewscale
 - r-scales
 - r-ldlinkr
-- r-serum-ig-pipeline-code == 0.2.3
+- r-tomics == 0.10.0
 - r-httr
 - r-gridextra
 - r-locuszoomr

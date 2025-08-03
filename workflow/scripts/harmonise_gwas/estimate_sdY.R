@@ -1,4 +1,4 @@
-library(serumIgPipelineCode)
+library(tomics)
 library(data.table)
 setDTthreads(snakemake@threads)
 

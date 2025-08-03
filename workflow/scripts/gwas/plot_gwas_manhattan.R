@@ -3,7 +3,7 @@ setDTthreads(snakemake@threads)
 library(ggplot2)
 library(ggtext)
 library(ggrepel)
-library(serumIgPipelineCode)
+library(tomics)
 
 if(is.null(snakemake@params[['width']])) {
   width <- 8

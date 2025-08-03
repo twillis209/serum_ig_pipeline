@@ -1,6 +1,6 @@
 library(data.table)
 setDTthreads(snakemake@threads)
-library(serumIgPipelineCode)
+library(tomics)
 library(stringr)
 
 dat <- fread(snakemake@input[[1]])
