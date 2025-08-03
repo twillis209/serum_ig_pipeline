@@ -19,20 +19,27 @@ theme_set(theme_bw()+
           )
           )
 
+iga[, chromosome := as.character(chromosome)]
+iga[chromosome == '23', chromosome := 'X']
+igg[, chromosome := as.character(chromosome)]
+igg[chromosome == '23', chromosome := 'X']
+igm[, chromosome := as.character(chromosome)]
+igm[chromosome == '23', chromosome := 'X']
+
 iga <- fread(snakemake@input$iga, select = c('chromosome', 'base_pair_location', 'p_value'))
 ## iga <- fread('1e5_iga_meta.tsv.gz', select = c('chromosome', 'base_pair_location', 'p_value'))
-iga_procd_sumstats <- process_sumstats_for_manhattan(iga)
+iga_procd_sumstats <- process_sumstats_for_manhattan(iga, chromosomes = c(as.character(c(1:22)), 'X'))
 rm(iga)
 
 igg <- fread(snakemake@input$igg, select = c('chromosome', 'base_pair_location', 'p_value'))
 
 ## igg <- fread('1e5_igg_meta.tsv.gz', select = c('chromosome', 'base_pair_location', 'p_value'))
-igg_procd_sumstats <- process_sumstats_for_manhattan(igg)
+igg_procd_sumstats <- process_sumstats_for_manhattan(igg, chromosomes = c(as.character(c(1:22)), 'X'))
 rm(igg)
 
 igm <- fread(snakemake@input$igm, select = c('chromosome', 'base_pair_location', 'p_value'))
 ## igm <- fread('1e5_igm_meta.tsv.gz', select = c('chromosome', 'base_pair_location', 'p_value'))
-igm_procd_sumstats <- process_sumstats_for_manhattan(igm)
+igm_procd_sumstats <- process_sumstats_for_manhattan(igm, chromosomes = c(as.character(c(1:22)), 'X'))
 rm(igm)
 
 iga_plot <- draw_manhattan(iga_procd_sumstats, stat_col = "p_value", y_limits = snakemake@params$iga_ylim)
