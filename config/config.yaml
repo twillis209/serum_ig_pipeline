@@ -728,11 +728,12 @@ loci:
     # The coordinates below are the actual ones for the IGH locus, but to excise the full signal and remove all IGH hits, it was necessary to more cut more liberally
     #start: 105586437
     #stop: 106879844
-    start: 105000000
+    start: 104500000
     stop: 107000000
   igk:
     chrom: 2
-    start: 88857361
+    #start: 88857361
+    start: 88700000
     stop: 90235368
   igl:
     chrom: 22
