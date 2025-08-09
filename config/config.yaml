@@ -725,8 +725,11 @@ gwas_datasets:
 loci:
   igh:
     chrom: 14
-    start: 105586437
-    stop: 106879844
+    # The coordinates below are the actual ones for the IGH locus, but to excise the full signal and remove all IGH hits, it was necessary to more cut more liberally
+    #start: 105586437
+    #stop: 106879844
+    start: 105000000
+    stop: 107000000
   igk:
     chrom: 2
     start: 88857361

@@ -229,7 +229,7 @@ rule merge_sumstats_with_r2:
 
 rule draw_locuszoom_plot_without_r2:
     input:
-        gwas = "results/harmonised_gwas/{trait}/{variant_id}/{window_size}/sumstats.tsv.gz"
+        gwas = "results/harmonised_gwas/{trait}/{variant_id}/{window_size}/sumstats.tsv.gz",
     output:
         "results/harmonised_gwas/{trait}/{variant_id}/{window_size}/locuszoom_sans_r2_{gene_track}.png"
     params:
