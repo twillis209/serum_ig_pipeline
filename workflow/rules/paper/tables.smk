@@ -101,7 +101,6 @@ rule ig_and_non_ig_coloc_results:
             daf = pd.read_csv(x, sep = '\t')
 
             if(len(daf) > 0):
-                print(daf)
                 daf['first_trait'] = daf['first_trait'].map(config.get('pretty_isotypes'))
                 daf['second_trait'] = config.get('gwas_datasets').get(daf['second_trait'][0]).get('pretty_phenotype')
                 daf["genes"] = daf["genes"].apply(lambda s: ",".join(sorted(set(s.split(",")))) if pd.notna(s) else s)
@@ -116,6 +115,6 @@ rule ig_and_non_ig_coloc_results:
 
         int_cols = ["Chromosome", "Ig lead SNP position", "Non-Ig lead SNP position"]
 
-        daf[int_cols] = daf[int_cols].astype(int)
+        daf[int_cols] = daf[int_cols].astype("Int64")
 
         daf.to_csv(output[0], sep = '\t', index = False)
