@@ -96,3 +96,7 @@ rule ig_and_non_ig_coloc_tables_and_locuszoomr_plots:
                isotype = ["igg", "iga", "igm"],
                non_ig = config['imds'],
                filetype = ["lz_plots.done", "results_with_genes_and_r2.tsv"])
+
+rule run_to_tabulate_for_iga_and_non_ig:
+    input:
+        expand("results/coloc/iga_and_{non_ig}/coloc_candidate_lead_snps.tsv", non_ig = config['imds'])
