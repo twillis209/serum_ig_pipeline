@@ -3,11 +3,11 @@ library(LDlinkR)
 
 ig <- fread(snakemake@input$ig)
 
-if(ig[, .N] == 0) {
+coloc <- fread(snakemake@input$coloc, sep = '\t', header = T)
+
+if(ig[, .N] == 0 | coloc[, .N] == 0) {
   fwrite(data.table(nsnps = integer(), PP.H0.abf = numeric(), PP.H1.abf = numeric(), PP.H2.abf = numeric(), PP.H3.abf = numeric(), PP.H4.abf = numeric(), first_trait = character(), second_trait = character(), ig_snp = character(), non_ig_snp = character(), chromosome = character(), ig_snp_pos = integer(), non_ig_snp_pos = integer(), min_p.first = numeric(), min_p.second = numeric(), ig_snp_effect_ratio = numeric(), non_ig_snp_effect_ratio = numeric(), genes = character()), sep = '\t', file = snakemake@output[[1]])
 } else {
-  coloc <- fread(snakemake@input$coloc, sep = '\t', header = T)
-
   setkey(ig, rsid)
 
   setkey(coloc, ig_snp)
