@@ -84,6 +84,7 @@ rule draw_locuszoom_plots_for_all_snps_for_ig_and_non_ig_pair:
 
 use rule draw_locuszoomr_plot_for_coloc_ig_pair as draw_locuszoomr_plot_for_coloc_ig_and_non_ig_pair with:
     input:
+        edb = "resources/gwas/ensembl_113_hsapiens_edb.sqlite",
         sumstats = "results/coloc/{isotype}_and_{non_ig}/{isotype_rsid}/sumstats.tsv",
         coloc = "results/coloc/{isotype}_and_{non_ig}/{isotype_rsid}/coloc.tsv"
     output:

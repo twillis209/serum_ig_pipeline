@@ -59,6 +59,7 @@ rule add_gene_and_r2_to_all_ig_coloc_pairs:
 
 rule draw_locuszoomr_plot_for_coloc_ig_pair:
     input:
+        edb = "resources/gwas/ensembl_113_hsapiens_edb.sqlite",
         sumstats = "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/sumstats.tsv",
         coloc = "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/{trim}/coloc.tsv"
     output:

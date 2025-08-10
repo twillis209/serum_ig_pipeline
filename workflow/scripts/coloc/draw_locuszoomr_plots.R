@@ -1,10 +1,12 @@
 library(ggplot2)
 library(locuszoomr)
-library(EnsDb.Hsapiens.v86)
+library(ensembldb)
 library(data.table)
 library(gridExtra)
 
 theme_set(theme_bw())
+
+edb <- EnsDb(snakemake@input$edb)
 
 dat <- fread(snakemake@input$sumstats)
 
@@ -66,8 +68,8 @@ z_max <- dat[, max(z1, z2)]
 
 z_cor <- dat[, cor(z1, z2, use = 'pairwise.complete.obs')]
 
-loc_A <- locus(data = dat, chrom = 'chromosome', pos = 'base_pair_location', p = sprintf('p_value.%s', first_trait_label), labs = 'rsid', seqname = seqname, xrange = c(min_pos, max_pos), ens_db = 'EnsDb.Hsapiens.v86')
-loc_B <- locus(data = dat, chrom = 'chromosome', pos = 'base_pair_location', p = sprintf('p_value.%s', second_trait_label), labs = 'rsid', seqname = seqname, xrange = c(min_pos, max_pos), ens_db = 'EnsDb.Hsapiens.v86')
+loc_A <- locus(data = dat, chrom = 'chromosome', pos = 'base_pair_location', p = sprintf('p_value.%s', first_trait_label), labs = 'rsid', seqname = seqname, xrange = c(min_pos, max_pos), ens_db = edb)
+loc_B <- locus(data = dat, chrom = 'chromosome', pos = 'base_pair_location', p = sprintf('p_value.%s', second_trait_label), labs = 'rsid', seqname = seqname, xrange = c(min_pos, max_pos), ens_db = edb)
 
 pls <- list()
 
