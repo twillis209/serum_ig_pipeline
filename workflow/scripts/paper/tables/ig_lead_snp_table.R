@@ -4,6 +4,10 @@ lead <- fread(snakemake@input[[1]])
 
 lead[, rsID := paste(paste(rsid, other_allele, sep = ':'), effect_allele, sep = '>')]
 
+lead[, chromosome := as.character(chromosome)]
+
+lead[chromosome == '23', chromosome := 'X']
+
 fwrite(lead[, .(rsID = rsID,
                Chromosome = chromosome,
                Position = base_pair_location,
