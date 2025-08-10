@@ -5,6 +5,10 @@ edb <- EnsDb(snakemake@input$edb)
 
 daf <- read.table(snakemake@input$lead, header = TRUE, sep = '\t')
 
+daf$chromosome <- as.character(daf$chromosome)
+
+daf[daf$chromosome == '23', 'chromosome'] <- 'X'
+
 snps_gr <- GRanges(
   seqnames = daf$chromosome,
   ranges = IRanges(start = daf$base_pair_location, width = 1),
@@ -23,5 +27,7 @@ nearest_genes <- data.frame(
 )
 
 merged <- merge(daf, nearest_genes, by = 'rsid', all.x = TRUE)
+
+merged[merged$chromosome == 'X', 'chromosome'] <- '23'
 
 write.table(merged, file = snakemake@output[[1]], sep = '\t', row.names = FALSE, quote = FALSE)
