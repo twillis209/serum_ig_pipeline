@@ -8,7 +8,7 @@ lead[, chromosome := as.character(chromosome)]
 
 lead[chromosome == '23', chromosome := 'X']
 
-fwrite(lead[, .(rsID = rsID,
+fwrite(lead[, .(Variant = rsID,
                Chromosome = chromosome,
                Position = base_pair_location,
                MAF = maf.meta,
