@@ -26,7 +26,7 @@ dat[, rsID := paste0(rsid, ':', other_allele, '>', effect_allele)]
 
 dat[, `:=` (Study = pretty_study,
             Isotype = isotype,
-            rsID = rsID,
+            Variant = rsID,
             Chromosome = chromosome,
             Position = base_pair_location,
             Beta = beta,
