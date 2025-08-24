@@ -16,5 +16,5 @@ dat <- rbindlist(lapply(list(iga, igm, igg), function(x) x[, .(Isotype, rsID, ch
 
 dat <- dat[!(iei_hgnc_symbol %in% c('IGHM', 'IGKC'))]
 
-fwrite(dat[order(Isotype, chromosome, base_pair_location), .(Isotype, rsID, Chromosome = chromosome, Position = base_pair_location, Novel, `IEI gene` = iei_hgnc_symbol, `Distance to gene` = distance_to_iei_gene, IEIs)], sep = '\t', file = snakemake@output[[1]])
+fwrite(dat[order(Isotype, chromosome, base_pair_location), .(Isotype, Variant = rsID, Chromosome = chromosome, Position = base_pair_location, Novel, `IEI gene` = iei_hgnc_symbol, `Distance to gene` = distance_to_iei_gene, IEIs)], sep = '\t', file = snakemake@output[[1]])
 

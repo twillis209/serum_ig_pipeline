@@ -1,5 +1,9 @@
 library(data.table)
 library(stringr)
+library(GenomicRanges)
+library(ensembldb)
+
+edb = EnsDb(snakemake@input[['edb']])
 
 consequences <- data.table(most_severe_consequence = c('missense_variant', 'upstream_gene_variant', 'intron_variant', 'downstream_gene_variant', 'intergenic_variant'), variant_effect = c('missense', 'upstream', 'intronic', 'downstream', 'intergenic'))
 
@@ -24,6 +28,26 @@ dat <- merge(dat, consequences, all.x = T, by = 'most_severe_consequence')
 
 dat[, rsID := paste0(rsid, ':', other_allele, '>', effect_allele)]
 
+# Replace old nearest genes with Ensembl 113 ones
+snps_gr <- GRanges(
+  seqnames = dat$chromosome,
+  ranges = IRanges(start = dat$base_pair_location, width = 1),
+  rsid = dat$rsID
+)
+
+genes_gr <- genes(edb)
+
+suppressWarnings(nearest_hits <- distanceToNearest(snps_gr, genes_gr))
+
+nearest_genes <- data.table(
+  Variant = mcols(snps_gr[queryHits(nearest_hits)])$rsid,
+  nearest_gene_id        = names(genes_gr[subjectHits(nearest_hits)]),
+  nearest_gene_name      = genes_gr[subjectHits(nearest_hits)]$gene_name,
+  distance_bp    = mcols(nearest_hits)$distance
+)
+
+dat[nearest_genes, on = 'Variant', `:=` (nearest_gene = nearest_gene_name, distance_bp = distance_bp)]
+
 dat[, `:=` (Study = pretty_study,
             Isotype = isotype,
             Variant = rsID,
@@ -33,6 +57,7 @@ dat[, `:=` (Study = pretty_study,
             `Standard error` = standard_error,
             `p-value` = p_value,
             `Nearest gene` = nearest_gene,
+            `Distance to nearest gene` = distance_bp,
             `Variant effect` = variant_effect)]
 
 fwrite(dat[order(Isotype, Study), .(Study, Isotype, rsID, Chromosome, Position, Beta, `Standard error`, `p-value`, `Nearest gene`, `Variant effect`)], sep = '\t', file = snakemake@output[[1]])

@@ -1,5 +1,6 @@
 rule igh_associations_table:
     input:
+        edb = "resources/gwas/ensembl_113_hsapiens_edb.sqlite",
         igh = "results/ig/1000kb_study_and_meta_gws_igh_lead_snps.tsv",
         igk = "results/ig/1000kb_study_and_meta_gws_igk_lead_snps.tsv"
     output:
