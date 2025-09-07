@@ -41,6 +41,26 @@ rule ig_lead_snp_tables:
         "results/paper/tables/igg_lead_snps.tsv",
         "results/paper/tables/igm_lead_snps.tsv"
 
+rule ig_novel_lead_snp_table:
+    input:
+        iga = "results/paper/tables/iga_lead_snps.tsv",
+        igg = "results/paper/tables/igg_lead_snps.tsv",
+        igm = "results/paper/tables/igm_lead_snps.tsv"
+    output:
+        "results/paper/tables/ig_novel_lead_snps.tsv"
+    localrule: True
+    run:
+        iga = pd.read_csv(input.iga, sep = '\t')
+        iga['Isotype'] = 'IgA'
+        igg = pd.read_csv(input.igg, sep = '\t')
+        igg['Isotype'] = 'IgG'
+        igm = pd.read_csv(input.igm, sep = '\t')
+        igm['Isotype'] = 'IgM'
+
+        cat = pd.concat([iga, igg, igm])
+
+        cat[cat["Novel"] == True][['Isotype', 'rsID', 'Chromosome', 'Position', 'MAF', 'Gene(s)', 'Nearest gene', 'Distance to nearest gene', 'Missense gene', 'QTL genes', 'Beta', 'Standard error', 'p-value']].to_csv(output[0], sep = '\t', index = False)
+
 rule iei_table:
     input:
         iga = "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/1000kb_gws_annotated_lead_snps_with_ieis.tsv",
@@ -106,7 +126,7 @@ rule ig_and_non_ig_coloc_results:
                 daf['second_trait'] = config.get('gwas_datasets').get(daf['second_trait'][0]).get('pretty_phenotype')
                 daf["genes"] = daf["genes"].apply(lambda s: ",".join(sorted(set(s.split(",")))) if pd.notna(s) else s)
 
-                daf.rename(columns = {'nsnps': 'No. of SNPs', "first_trait": "Isotype", "second_trait": "Non-Ig trait", "ig_snp": "Isotype's lead SNP", "non_ig_snp": "Non-Ig trait's lead SNP", "chromosome": "Chromosome", "ig_snp_pos": "Ig lead SNP position", "non_ig_snp_pos": "Non-Ig lead SNP position", "min_p.first": "Min. locus p-value for isotype", "min_p.second": "Min. locus p-value for non-Ig trait", "max_post": "Max. posterior hypothesis", "pearson.cor": "Pearson correlation", "ig_snp_effect_ratio": "Effect ratio at Ig lead SNP", "non_ig_snp_effect_ratio": "Effect ratio at non-Ig lead SNP"}, inplace = True)
+                daf.rename(columns = {'nsnps': 'No. of SNPs', "first_trait": "Isotype", "second_trait": "Non-Ig trait", "ig_snp": "Isotype's lead SNP", "non_ig_snp": "Non-Ig trait's lead SNP","min_p.first": "Min. locus p-value for isotype", "min_p.second": "Min. locus p-value for non-Ig trait", "max_post": "Max. posterior hypothesis", "pearson.cor": "Pearson correlation", "ig_snp_effect_ratio": "Effect ratio at Ig lead SNP", "non_ig_snp_effect_ratio": "Effect ratio at non-Ig lead SNP"}, inplace = True)
 
                 dafs.append(daf)
 
@@ -114,8 +134,8 @@ rule ig_and_non_ig_coloc_results:
 
         daf['Posterior odds of H4'] = daf['PP.H4.abf']/(1. - daf['PP.H4.abf'])
 
-        int_cols = ["Chromosome", "Ig lead SNP position", "Non-Ig lead SNP position"]
+        # int_cols = ["Chromosome", "Ig lead SNP position", "Non-Ig lead SNP position"]
 
-        daf[int_cols] = daf[int_cols].astype("Int64")
+        # daf[int_cols] = daf[int_cols].astype("Int64")
 
         daf.to_csv(output[0], sep = '\t', index = False)
