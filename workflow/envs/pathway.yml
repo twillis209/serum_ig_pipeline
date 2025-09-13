@@ -1,0 +1,17 @@
+name: pathway
+channels:
+- conda-forge
+- bioconda
+dependencies:
+- r-base
+- r-data.table >= 1.17
+- r-stringr
+- r-r.utils
+- r-magrittr
+- r-dplyr
+- r-ggplot2
+- r-cowplot
+- r-pheatmap
+- bioconductor-reactomepa
+- bioconductor-clusterprofiler
+- bioconductor-org.hs.eg.db
