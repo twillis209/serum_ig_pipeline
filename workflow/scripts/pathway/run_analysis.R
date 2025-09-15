@@ -2,6 +2,9 @@ library(data.table)
 library(clusterProfiler)
 library(ReactomePA)
 library(ggplot2)
+library(ggtext)
+library(stringr)
+library(patchwork)
 library(cowplot)
 library(dplyr)
 library(magrittr)
@@ -9,19 +12,8 @@ library(pheatmap)
 library(org.Hs.eg.db)
 library(AnnotationDbi)
 
-draw_pathway_enrichment_plot <- function(pathway_results) {
-  tmp <- as.data.table(pathway_results)[qvalue < 0.05]
-  tmp <- tmp[order(-qvalue)]
-  tmp[, Description := factor(Description, levels = Description)]
-  # create a dotplot of tmp showing x=FoldEnrichment, y=Description, and the fill of the point p.adjust
-  cols <- enrichplot:::get_enrichplot_color(2)
-  ggplot(tmp, aes(x = FoldEnrichment, y = Description, fill = -log10(qvalue), size = Count)) +
-    geom_point(shape = 21) +
-    scale_fill_gradient(low = cols[2], high = cols[1]) +
-    scale_x_continuous(limits = c(1, max(tmp$FoldEnrichment) + .5)) +
-    theme_cowplot() +
-    labs(y = "") +
-    background_grid(major = "y") # , breaks=seq(1,13,2))
+get_gene_symbols <- function(entrezid, entrez_db) {
+  entrez_db[entrez_db[, "ENTREZID"] %in% entrezid, "SYMBOL"]
 }
 
 run_kk <- function(entrez_db) {
@@ -30,8 +22,6 @@ run_kk <- function(entrez_db) {
     organism = "hsa",
     qvalueCutoff = 0.1
   )
-  ## print(as.data.table(kk)[qvalue < 0.05, .(ID, Description, Count, FoldEnrichment, qvalue)])
-  ## print(draw_pathway_enrichment_plot(kk))
   invisible(kk)
 }
 run_react <- function(entrez_db) {
@@ -39,8 +29,6 @@ run_react <- function(entrez_db) {
     gene = entrez_db[, "ENTREZID"],
     pvalueCutoff = 0.05, readable = TRUE
   )
-  ## print(as.data.table(rct)[qvalue < 0.05, .(ID, Description, Count, FoldEnrichment, qvalue)])
-  ## print(draw_pathway_enrichment_plot(rct))
   invisible(rct)
 }
 
@@ -76,9 +64,9 @@ get_entrez_db <- function(xm) {
 }
 
 x <- fread(snakemake@input[[1]])
-# Used to produce Fig. 2a
+
 kk <- run_kk(get_entrez_db(x))
-# Used to produce Fig. 2b
+
 rct <- run_react(get_entrez_db(x))
 
 ## make data structure and group variants by pathway analysis
@@ -86,9 +74,6 @@ getM <- function(kk, trans = TRUE) {
   dt <- as.data.table(kk)[qvalue < 0.05]
   if (trans) {
     entrez_db <- get_entrez_db(x)
-    get_gene_symbols <- function(entrezid) {
-      entrez_db[entrez_db[, "ENTREZID"] %in% entrezid, "SYMBOL"]
-    }
     memgenes <- strsplit(dt$geneID, "/") %>%
       lapply(., get_gene_symbols)
   } else {
@@ -146,15 +131,7 @@ draw_pathway_heatmap <- function(kk, trans = TRUE, ...) {
   )
 }
 
-get_gene_symbols <- function(entrezid, entrez_db) {
-  entrez_db[entrez_db[, "ENTREZID"] %in% entrezid, "SYMBOL"]
-}
-
 entrez <- get_entrez_db(x)
-
-## draw_pathway_heatmap(rct, FALSE, main = "Reactome pathways", filename = "reactome_pathways.tiff", width = 10, height = 8)
-
-## draw_pathway_heatmap(kk, main = "KEGG pathways", filename = "kegg_pathways.tiff", width = 10, height = 8)
 
 memgenes <- strsplit(kk$geneID, "/") %>%
   lapply(., get_gene_symbols, entrez_db = entrez) %>%
@@ -163,8 +140,40 @@ kk2 <- as.data.table(kk)
 kk2$geneID <- memgenes
 m <- rbind(kk2, as.data.table(rct), fill = TRUE)
 
-draw_pathway_heatmap(m, FALSE, main = "Reactome + KEGG", filename = "combined_pathways.png", width = 12, height = 10, fontsize = 8)
+draw_pathway_heatmap(m, FALSE, main = "Reactome + KEGG", filename = snakemake@output$combined_pathways_heatmap, width = 12, height = 10, fontsize = 8)
 
-kk_pl <- draw_pathway_enrichment_plot(kk)
+kk_for_plot <- as.data.table(kk)[qvalue < 0.05]
+kk_for_plot <- kk_for_plot[order(-qvalue)]
+kk_for_plot[, Description := factor(Description, levels = Description)]
+cols <- enrichplot:::get_enrichplot_color(2)
+kk_pl <- ggplot(kk_for_plot, aes(x = FoldEnrichment, y = reorder(Description, FoldEnrichment), fill = -log10(qvalue), size = Count)) +
+  geom_point(shape = 21) +
+  scale_fill_gradient(low = cols[2], high = cols[1]) +
+  scale_x_continuous(limits = c(1, max(kk_for_plot$FoldEnrichment) + .5)) +
+  scale_y_discrete(labels = function(x) str_wrap(x, width = 20)) +
+  theme_cowplot() +
+  labs(y = "", x = "Fold enrichment") +
+  guides(fill = guide_colorbar(title = "-log10(q-value)"))+
+  background_grid(major = "y") +
+  theme(legend.position = "bottom", axis.text.y = element_text(size = 14))
 
-rct_pl <- draw_pathway_enrichment_plot(rct)
+rct_for_plot <- as.data.table(rct)[qvalue < 0.05]
+rct_for_plot <- rct_for_plot[order(-qvalue)]
+rct_for_plot[, Description := factor(Description, levels = Description)]
+rct_for_plot[, label_len := nchar(as.character(Description))]
+rct_for_plot[, label := gsub("\n", "<br>", sprintf("<span style='font-size:14pt;'>%s</span>", str_wrap(Description, width = 50)))]
+
+cols <- enrichplot:::get_enrichplot_color(2)
+rct_pl <- ggplot(rct_for_plot, aes(x = FoldEnrichment, y = reorder(label, FoldEnrichment), fill = -log10(qvalue), size = Count)) +
+  geom_point(shape = 21) +
+  scale_fill_gradient(low = cols[2], high = cols[1]) +
+  scale_x_continuous(limits = c(1, max(rct_for_plot$FoldEnrichment) + .5)) +
+  theme_cowplot() +
+  labs(y = "", x = "Fold enrichment") +
+  background_grid(major = "y") +
+  theme(axis.text.y = element_markdown())+
+  theme(legend.position = "none")
+
+enrichment_pls <- (kk_pl | rct_pl) + plot_annotation(tag_levels = "A")
+
+ggsave(enrichment_pls, filename = snakemake@output$combined_pathways_enrichment_plot, width = 12, height = 12)

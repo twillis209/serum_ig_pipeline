@@ -10,6 +10,7 @@ dependencies:
 - r-magrittr
 - r-dplyr
 - r-ggplot2
+- r-stringr
 - r-cowplot
 - r-pheatmap
 - bioconductor-reactomepa
