@@ -2,7 +2,6 @@ library(data.table)
 library(dplyr)
 library(magrittr)
 
-##' read in lead snps
 read_and_process_ig <- function(nm) {
   x <- fread(nm)
   setnames(x, make.names(names(x)))
