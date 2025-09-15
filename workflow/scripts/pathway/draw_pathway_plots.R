@@ -65,6 +65,8 @@ get_entrez_db <- function(xm) {
 
 x <- fread(snakemake@input[[1]])
 
+x[, rsID := gsub(":.+", "", Variant)]
+
 kk <- run_kk(get_entrez_db(x))
 
 rct <- run_react(get_entrez_db(x))

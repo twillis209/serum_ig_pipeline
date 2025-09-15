@@ -15,13 +15,13 @@ process_ig_and_coloc_results <- function(iga, igg, igm, ig_coloc) {
   igg[, what := "IgG"]
   igm[, what := "IgM"]
   x <- rbind(iga, igg, igm)
-  x[, vid := paste0(Chromosome, "_", gsub(",", "", Position), "_", gsub(".*>", "", rsID), "_", gsub(".*:|>.*", "", rsID))]
-  x[, avid := paste0(Chromosome, "_", gsub(",", "", Position), "_", gsub(".*:|>.*", "", rsID), "_", gsub(".*>", "", rsID))]
+  x[, vid := paste0(Chromosome, "_", gsub(",", "", Position), "_", gsub(".*>", "", Variant), "_", gsub(".*:|>.*", "", Variant))]
+  x[, avid := paste0(Chromosome, "_", gsub(",", "", Position), "_", gsub(".*:|>.*", "", Variant), "_", gsub(".*>", "", Variant))]
 
   ## merging colocalised Ig snps & their annotations
   setnames(ig_coloc, make.names(names(ig_coloc)))
-  ig_coloc <- merge(ig_coloc, unique(x[, .(rsID = sub(":.*", "", rsID), vid1 = vid)]), by.x = "First.isotype.s.lead.SNP", by.y = "rsID")
-  ig_coloc <- merge(ig_coloc, unique(x[, .(rsID = sub(":.*", "", rsID), vid2 = vid)]), by.x = "Second.isotype.s.lead.SNP", by.y = "rsID")
+  ig_coloc <- merge(ig_coloc, unique(x[, .(rsID = sub(":.*", "", Variant), vid1 = vid)]), by.x = "First.isotype.s.lead.SNP", by.y = "rsID")
+  ig_coloc <- merge(ig_coloc, unique(x[, .(rsID = sub(":.*", "", Variant), vid2 = vid)]), by.x = "Second.isotype.s.lead.SNP", by.y = "rsID")
   head(ig_coloc, 2)
 
   ## decision threshold
@@ -64,5 +64,6 @@ process_ig_and_coloc_results <- function(iga, igg, igm, ig_coloc) {
 iga <- read_and_process_ig(snakemake@input$iga)
 igg <- read_and_process_ig(snakemake@input$igg)
 igm <- read_and_process_ig(snakemake@input$igm)
+ig_coloc <- fread(snakemake@input$ig_coloc)
 
 fwrite(process_ig_and_coloc_results(iga, igg, igm, ig_coloc), sep = '\t', file = snakemake@output[[1]])

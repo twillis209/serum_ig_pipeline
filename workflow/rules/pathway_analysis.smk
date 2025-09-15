@@ -6,6 +6,7 @@ rule extract_gene_sets:
         ig_coloc = "results/paper/tables/ig_coloc.tsv"
     output:
         "results/pathway_analysis/ig_lead_snp_genes.txt"
+    conda: env_path("pathway.yml")
     script: script_path("pathway/prepare_inputs.R")
 
 rule draw_pathway_plots:
