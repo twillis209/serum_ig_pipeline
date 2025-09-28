@@ -5,9 +5,9 @@ The `snakemake` pipeline used to generate these data can be found [here](https:/
 ## `md5` checksums
 
 ```
-0ec8581e5b1ea36d9dbfbd374411e098  epic-iga.tsv.gz
-f2ae94fa49601845415e3a358bcc1f3b  epic-igg.tsv.gz
-fddee4207aab211b7840cbed2bd7be8c  epic-igm.tsv.gz
+4e972dc0b2951fd024295680dd49ae82  epic-iga.tsv.gz
+48586cacb8060c718d1a160d7e127d31  epic-igg.tsv.gz
+1a902f2e03eed3fb4d53021f8f73847a  epic-igm.tsv.gz
 f2d464f76d1f8d6e05e9c4873ab52bde  iga-meta.tsv.gz
 37874f5ed1aa74a25142a69d325fd7ad  igg-meta.tsv.gz
 7235b32e7879a75a6bd81450638aef84  igm-meta.tsv.gz
