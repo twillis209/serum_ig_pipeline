@@ -19,3 +19,7 @@ The tables and figures intended for publication are in the `smk` files under the
 I stipulate in the `Snakefile` that this pipeline requires a `snakemake` version >= 9.0. That is probably a bit strict but I like to keep up-to-date with new releases for the sake of bug fixes and new features.
 
 All other software dependencies should be handled by `snakemake` itself, which will install them in a `conda` environment. Details of these environments can be found in the files under `workflow/envs`.
+
+## 'It doesn't work'
+
+Please open an issue on GitHub, I'll do my best to fix it!
