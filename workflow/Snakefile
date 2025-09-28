@@ -1,5 +1,5 @@
 from snakemake.utils import min_version
-min_version("8.20")
+min_version("9.0")
 
 import datetime
 import re
