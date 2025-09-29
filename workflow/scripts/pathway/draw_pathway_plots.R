@@ -142,7 +142,8 @@ kk2 <- as.data.table(kk)
 kk2$geneID <- memgenes
 m <- rbind(kk2, as.data.table(rct), fill = TRUE)
 
-draw_pathway_heatmap(m, FALSE, main = "Reactome + KEGG", filename = snakemake@output$combined_pathways_heatmap, width = 12, height = 10, fontsize = 8)
+draw_pathway_heatmap(m, FALSE, main = "Reactome + KEGG", filename = snakemake@output$combined_pathways_heatmap_png, width = 12, height = 10, fontsize = 8)
+draw_pathway_heatmap(m, FALSE, main = "Reactome + KEGG", filename = snakemake@output$combined_pathways_heatmap_tiff, width = 12, height = 10, fontsize = 8)
 
 kk_for_plot <- as.data.table(kk)[qvalue < 0.05]
 kk_for_plot <- kk_for_plot[order(-qvalue)]
@@ -178,4 +179,5 @@ rct_pl <- ggplot(rct_for_plot, aes(x = FoldEnrichment, y = reorder(label, FoldEn
 
 enrichment_pls <- (kk_pl | rct_pl) + plot_annotation(tag_levels = "A")
 
-ggsave(enrichment_pls, filename = snakemake@output$combined_pathways_enrichment_plot, width = 12, height = 12)
+ggsave(enrichment_pls, filename = snakemake@output$combined_pathways_enrichment_png, width = 12, height = 12)
+ggsave(enrichment_pls, filename = snakemake@output$combined_pathways_enrichment_tiff, device = 'tiff', width = 12, height = 12)

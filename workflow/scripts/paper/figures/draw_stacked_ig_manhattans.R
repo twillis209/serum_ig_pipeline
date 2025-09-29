@@ -43,4 +43,5 @@ igg_plot <- draw_manhattan(igg_procd_sumstats, stat_col = "p_value", y_limits = 
 igm_plot <- draw_manhattan(igm_procd_sumstats, stat_col = "p_value", y_limits = snakemake@params$igm_ylim) +
   geom_hline(yintercept = 5e-8, linetype = 'dashed', col = 'black')
 
-ggsave((iga_plot / igg_plot / igm_plot)+plot_annotation(tag_levels = 'A'), file = snakemake@output[[1]], width = snakemake@params$width, height = snakemake@params$height)
+ggsave((iga_plot / igg_plot / igm_plot)+plot_annotation(tag_levels = 'A'), file = snakemake@output$png, width = snakemake@params$width, height = snakemake@params$height)
+ggsave((iga_plot / igg_plot / igm_plot)+plot_annotation(tag_levels = 'A'), file = snakemake@output$tiff, device = "tiff", width = snakemake@params$width, height = snakemake@params$height)

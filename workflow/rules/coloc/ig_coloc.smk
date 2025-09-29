@@ -63,7 +63,7 @@ rule draw_locuszoomr_plot_for_coloc_ig_pair:
         sumstats = "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/sumstats.tsv",
         coloc = "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/{trim}/coloc.tsv"
     output:
-        "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/{trim}/lz_plots.png"
+        "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/{trim}/lz_plots.{ext}"
     params:
         first_isotype_max_n = lambda w: config.get('gwas_datasets').get(w.first_isotype),
         second_isotype_max_n = lambda w: config.get('gwas_datasets').get(w.second_isotype)
@@ -99,7 +99,7 @@ rule draw_raw_vs_trimmed_coloc_pp_for_ig_pairs:
     input:
         "results/coloc/all_ig_pairs_with_genes_and_r2.tsv"
     output:
-        h4 = "results/coloc/raw_vs_trimmed_coloc_pp_h4_ig_pairs.png"
+        h4 = "results/coloc/raw_vs_trimmed_coloc_pp_h4_ig_pairs.{ext}"
     localrule: True
     conda: env_path("global.yaml")
     script: script_path("coloc/plot_raw_vs_trimmed_coloc_pp.R")

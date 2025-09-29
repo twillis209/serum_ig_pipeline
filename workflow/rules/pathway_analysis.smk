@@ -8,13 +8,3 @@ rule extract_gene_sets:
         "results/pathway_analysis/ig_lead_snp_genes.txt"
     conda: env_path("pathway.yml")
     script: script_path("pathway/prepare_inputs.R")
-
-rule draw_pathway_plots:
-    input:
-        "results/pathway_analysis/ig_lead_snp_genes.txt"
-    output:
-        combined_pathways_heatmap = "results/pub/figures/combined_pathways_heatmap.png",
-        combined_pathways_enrichment_plot = "results/pub/figures/combined_pathways_enrichment.png",
-    localrule: True
-    conda: env_path("pathway.yml")
-    script: script_path("pathway/draw_pathway_plots.R")
