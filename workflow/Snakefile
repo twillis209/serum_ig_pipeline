@@ -53,7 +53,6 @@ include: 'rules/mr.smk'
 include: 'rules/pathway_analysis.smk'
 include: 'rules/paper/tables.smk'
 include: 'rules/paper/figures.smk'
-include: 'rules/paper/export.smk'
 include: 'rules/python/export.py'
 
 module kGP_pipeline:
