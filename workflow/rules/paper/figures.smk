@@ -39,4 +39,4 @@ rule supp_figures:
         "results/coloc/iga_and_igg/rs3803800_and_rs758641530/trimmed/lz_plots.tiff",
         "results/coloc/iga_and_igg/rs3803800_and_rs758641530/untrimmed/lz_plots.tiff",
         "results/coloc/raw_vs_trimmed_coloc_pp_h4_ig_pairs.tiff",
-        "results/pub/figures/combined_pathways_heatmap.tiff"
+        "results/pub/figures/combined_pathways_heatmap.tiff",
