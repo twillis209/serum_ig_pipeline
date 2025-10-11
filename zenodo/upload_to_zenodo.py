@@ -1,8 +1,9 @@
 import os
 import requests
+import pandas as pd
 
 TOKEN = os.environ.get("ZENODO_TOKEN")
-deposition_id = 17010403
+deposition_id = 17329415
 
 headers = {
     "Authorization": f"Bearer {TOKEN}",
@@ -50,15 +51,22 @@ files_to_upload = [
     "scepanovic-iga.tsv.gz",
     "scepanovic-igg.tsv.gz",
     "scepanovic-igm.tsv.gz",
-    "iga-meta.tsv.gz",
-    "igg-meta.tsv.gz",
-    "igm-meta.tsv.gz",
-    "epic-iga.tsv.gz",
-    "epic-igg.tsv.gz",
-    "epic-igm.tsv.gz",
-    "README.md"
+    # "iga-meta.tsv.gz",
+    # "igg-meta.tsv.gz",
+    # "igm-meta.tsv.gz",
+    # "epic-iga.tsv.gz",
+    # "epic-igg.tsv.gz",
+    # "epic-igm.tsv.gz",
+    # "README.md"
 ]
 
-for file in files_to_upload:
-    r = upload_large_file(file)
-    print(f"Uploaded {file}: {r.status_code}")
+for f in files_to_upload[1:]:
+    r = upload_large_file(f)
+    print(f"Uploaded {f}: {r.status_code}")
+
+# Checking remote checksums against local checksums
+r = requests.get(
+    f"https://zenodo.org/api/deposit/depositions/{deposition_id}", headers=headers
+)
+daf = pd.DataFrame([{"name": x["filename"], "md5sum": x["checksum"]} for x in r.json()["files"]])
+daf = daf.sort_values(by = "name")

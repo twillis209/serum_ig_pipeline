@@ -2,9 +2,11 @@
 
 ## Data set availability
 
-Where possible, I've written the pipeline to download GWAS data sets from the EBI GWAS Catalog or other public URLs, but the `pietzner-*` and `eldjarn-*` data sets are not available. See the [Eldjarn](https://www.nature.com/articles/s41586-023-06563-x) and [Pietzner](https://www.science.org/doi/10.1126/science.abj1541) papers for details. In short, the Pietzner datasets can be downloaded from this [Synapse page](https://www.synapse.org/Synapse:syn51761394/wiki/622766) and you'll need to apply for access to the Eldjarn deCODE datasets then download them from AWS.
+Where possible, I've written the pipeline to download GWAS data sets from the EBI GWAS Catalog or other public URLs, but the `pietzner-*` and `eldjarn-*` data sets are not available. See the [Eldjarn](https://www.nature.com/articles/s41586-023-06563-x) and [Pietzner](https://www.science.org/doi/10.1126/science.abj1541) papers for details. In short, the raw Pietzner datasets can be downloaded from this [Synapse page](https://www.synapse.org/Synapse:syn51761394/wiki/622766) and you'll need to apply for access to the Eldjarn deCODE datasets then download them from AWS.
 
 In addition, you will need to download the GWAS performed in the EPIC cohort (`epic-*`) from Zenodo. I will make these available from the GWAS Catalog eventually along with the meta-analyses, but for now both can be obtained from [Zenodo](https://zenodo.org/records/17010403).
+
+I would like to upload all of the harmonised GWAS datasets used in the paper (including the immune-mediated disease datasets), but I'm yet to work out if that's allowed for all of them.
 
 ### Harmonising raw GWAS summary statistics
 
