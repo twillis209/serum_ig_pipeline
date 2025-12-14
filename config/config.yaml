@@ -93,6 +93,7 @@ gwas_datasets:
     samples: 22229
     sdY_est: 1.1675795
     rescale: True
+    phenotype_transformation: "standardised residuals obtained from regression of log-transformed values on age and sex"
     pretty_study: 'Liu et al.'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-08"
@@ -132,6 +133,7 @@ gwas_datasets:
     sdY_est: 0.9110791
     rescale: True
     pretty_study: 'Dennis et al.'
+    phenotype_transformation: 'rank-based inverse normal transformation'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -151,6 +153,7 @@ gwas_datasets:
     sdY_est: 0.9345117
     rescale: True
     pretty_study: 'Dennis et al.'
+    phenotype_transformation: 'rank-based inverse normal transformation'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -170,6 +173,7 @@ gwas_datasets:
     sdY_est: 0.4996091
     rescale: True
     pretty_study: 'EPIC'
+    phenotype_transformation: 'log transformation and standardisation'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -189,6 +193,7 @@ gwas_datasets:
     sdY_est: 0.2871838
     rescale: True
     pretty_study: 'EPIC'
+    phenotype_transformation: 'log transformation and standardisation'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -208,6 +213,7 @@ gwas_datasets:
     sdY_est: 0.5358721
     rescale: True
     pretty_study: 'EPIC'
+    phenotype_transformation: 'log transformation and standardisation'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -227,6 +233,7 @@ gwas_datasets:
     sdY_est: 0.0788076
     rescale: True
     pretty_study: 'Scepanovic et al.'
+    phenotype_transformation: 'log10 transformation'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -246,6 +253,7 @@ gwas_datasets:
     sdY_est: 0.1933939
     rescale: True
     pretty_study: 'Scepanovic et al.'
+    phenotype_transformation: 'log10 transformation'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -265,6 +273,7 @@ gwas_datasets:
     sdY_est: 0.1712270
     rescale: True
     pretty_study: 'Scepanovic et al.'
+    phenotype_transformation: 'log10 transformation'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -284,6 +293,7 @@ gwas_datasets:
     sdY_est: 0.9821195
     rescale: False
     pretty_study: 'Pietzner et al.'
+    phenotype_transformation: 'rank-based inverse normal transformation'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -303,6 +313,7 @@ gwas_datasets:
     sdY_est: 1.0155681
     rescale: False
     pretty_study: 'Pietzner et al.'
+    phenotype_transformation: 'rank-based inverse normal transformation'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -322,6 +333,7 @@ gwas_datasets:
     sdY_est: 1.0145151
     rescale: False
     pretty_study: 'Pietzner et al.'
+    phenotype_transformation: 'rank-based inverse normal transformation'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -398,6 +410,7 @@ gwas_datasets:
     sdY_est: 1.0449364
     rescale: False
     pretty_study: 'Eldjarn et al.'
+    phenotype_transformation: 'rank-based inverse normal transformation'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -417,6 +430,7 @@ gwas_datasets:
     sdY_est: 1.1091828
     rescale: True
     pretty_study: 'Eldjarn et al.'
+    phenotype_transformation: 'rank-based inverse normal transformation'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37
@@ -436,6 +450,7 @@ gwas_datasets:
     sdY_est: 1.0969310
     rescale: True
     pretty_study: 'Eldjarn et al.'
+    phenotype_transformation: 'rank-based inverse normal transformation'
     gwas_ssf:
         date_metadata_last_modified: "2024-11-11"
         genome_assembly: GRCh37

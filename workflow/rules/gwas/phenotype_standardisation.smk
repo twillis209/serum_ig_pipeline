@@ -17,7 +17,7 @@ rule estimate_sdY_for_all_datasets:
         [f"results/{trait}/{{variant_set}}/{{variant_type}}/{{window_size}}_1_{{r2}}/{seed}_sdY.tsv" for trait, seed in zip(config.get('gwas_datasets'), range(10, 10+len(config.get('gwas_datasets'))))]
     output:
         all_estimates = "results/restandardised_gwas/{variant_set}/{variant_type}/{window_size}_1_{r2}/sdY_estimates.tsv",
-        medians = "results/restandardised_gwas/{variant_set}/{variant_type}/{window_size}_1_{r2}/median_sdY_estimates.tsv"
+        sumstats = "results/restandardised_gwas/{variant_set}/{variant_type}/{window_size}_1_{r2}/sdY_estimate_sumstats.tsv"
     localrule: True
     run:
         dafs = []
@@ -29,7 +29,7 @@ rule estimate_sdY_for_all_datasets:
 
         pd.concat(dafs).to_csv(output.all_estimates, sep = '\t', index = False)
 
-        daf.groupby('dataset')['sdY.est'].median().reset_index().to_csv(output.medians, sep = '\t', index = False)
+        daf.groupby('dataset', as_index = False)['sdY.est'].agg(['median', 'min', 'max', 'mean']).to_csv(output.sumstats, sep = '\t', index = False)
 
 rule restandardise_beta_and_se_using_sdY_estimate:
     input:
