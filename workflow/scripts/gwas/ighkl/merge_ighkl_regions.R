@@ -36,7 +36,7 @@ for (x in studies) {
         snakemake@config$loci[["igl"]]$stop + snakemake@params$flank
       )))]
 
-  names(dat)[names(dat) %like% stat_cols] <- paste(names(dat)[names(dat) %in% stat_cols], x, sep = ".")
+  names(dat)[names(dat) %like% stat_cols] <- paste(names(dat)[names(dat) %like% stat_cols], x, sep = ".")
 
   dats[[x]] <- dat
 }
