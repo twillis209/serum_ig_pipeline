@@ -13,3 +13,14 @@ rule combine_ighkl_regions_from_gwas:
     threads: 16
     conda: env_path("global.yaml")
     script: script_path("gwas/ighkl/merge_ighkl_regions.R")
+
+rule draw_stacked_ig_loci_manhattans:
+    input:
+        sumstats = rules.combine_ighkl_regions_from_gwas.output,
+        edb = rules.download_ensembl_edb.output
+    output:
+        "results/gwas/ighkl/{isotype}_{ighkl_locus}.png"
+    conda: env_path("global.yaml")
+    script: script_path("gwas/ighkl/draw_stacked_ig_loci_manhattans.R")
+
+

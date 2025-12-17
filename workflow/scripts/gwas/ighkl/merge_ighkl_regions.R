@@ -36,9 +36,15 @@ for (x in studies) {
         snakemake@config$loci[["igl"]]$stop + snakemake@params$flank
       )))]
 
-  names(dat)[names(dat) %like% stat_cols] <- paste(names(dat)[names(dat) %like% stat_cols], x, sep = ".")
+      cols_to_append_isotype <- str_subset(names(dat), regex(paste(stat_cols, collapse = "|"), ignore_case = TRUE))
 
-  dats[[x]] <- dat
+      new_stat_cols <- paste(cols_to_append_isotype, x, sep = ".")
+
+      setnames(dat, cols_to_append_isotype, new_stat_cols)
+
+      cols <- c(coord_cols, new_stat_cols)
+
+  dats[[x]] <- dat[..cols]
 }
 
 merged <- Reduce(function(x, y) merge(x, y, by = coord_cols, all = TRUE), dats)

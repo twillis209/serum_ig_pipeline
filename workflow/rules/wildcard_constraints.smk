@@ -31,4 +31,5 @@ wildcard_constraints:
     isotype = "iga|igg|igm",
     first_isotype = "iga|igg|igm",
     second_isotype = "iga|igg|igm",
-    non_ig = "|".join(config["imds"])
+    non_ig = "|".join(config["imds"]),
+    ighkl_locus = "igh|igk|igl"
