@@ -44,7 +44,7 @@ for (x in studies) {
 
       cols <- c(coord_cols, new_stat_cols)
 
-  dats[[x]] <- dat[..cols]
+      dats[[x]] <- dat[, ..cols]
 }
 
 merged <- Reduce(function(x, y) merge(x, y, by = coord_cols, all = TRUE), dats)

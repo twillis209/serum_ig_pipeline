@@ -17,10 +17,12 @@ rule combine_ighkl_regions_from_gwas:
 rule draw_stacked_ig_loci_manhattans:
     input:
         sumstats = rules.combine_ighkl_regions_from_gwas.output,
-        edb = rules.download_ensembl_edb.output
+        edb = rules.download_ensembl_db.output
     output:
-        "results/gwas/ighkl/{isotype}_{ighkl_locus}.png"
+        "results/gwas/ighkl/{isotype}_{ighkl_locus}.{ext}"
     conda: env_path("global.yaml")
-    script: script_path("gwas/ighkl/draw_stacked_ig_loci_manhattans.R")
+    script: script_path("gwas/ighkl/draw_stacked_ighkl_plots.R")
 
-
+rule draw_ighkl_manhattans: 
+    input:
+        expand(rules.draw_stacked_ig_loci_manhattans.output[0], isotype = ["iga", "igm", "igg"], ighkl_locus = ["igh", "igk", "igl"], ext = ["pdf"])
