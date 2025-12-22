@@ -51,12 +51,12 @@ files_to_upload = [
     "scepanovic-iga.tsv.gz",
     "scepanovic-igg.tsv.gz",
     "scepanovic-igm.tsv.gz",
-    # "iga-meta.tsv.gz",
-    # "igg-meta.tsv.gz",
-    # "igm-meta.tsv.gz",
-    # "epic-iga.tsv.gz",
-    # "epic-igg.tsv.gz",
-    # "epic-igm.tsv.gz",
+    "iga-meta.tsv.gz",
+    "igg-meta.tsv.gz",
+    "igm-meta.tsv.gz",
+    "epic-iga.tsv.gz",
+    "epic-igg.tsv.gz",
+    "epic-igm.tsv.gz"
     # "README.md"
 ]
 

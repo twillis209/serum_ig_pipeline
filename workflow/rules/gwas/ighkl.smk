@@ -23,6 +23,6 @@ rule draw_stacked_ig_loci_manhattans:
     conda: env_path("global.yaml")
     script: script_path("gwas/ighkl/draw_stacked_ighkl_plots.R")
 
-rule draw_ighkl_manhattans: 
+rule draw_ighkl_manhattans:
     input:
         expand(rules.draw_stacked_ig_loci_manhattans.output[0], isotype = ["iga", "igm", "igg"], ighkl_locus = ["igh", "igk", "igl"], ext = ["pdf"])

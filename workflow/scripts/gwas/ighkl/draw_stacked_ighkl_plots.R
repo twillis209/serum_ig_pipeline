@@ -4,9 +4,6 @@ library(ensembldb)
 library(patchwork)
 library(locuszoomr)
 
-#save.image('ighkl.RData')
-#stop()
-
 edb <- EnsDb(snakemake@input$edb)
 ighkl_dat <- fread(snakemake@input$sumstats)
 
@@ -30,6 +27,6 @@ loc <- locus(na.omit(ighkl_dat, p_value_label), ens_db = edb, chrom = "chromosom
 
 pls[[length(pls)+1]] <- gg_genetracks(loc, filter_gene_biotype = c("protein_coding", "IG_V_gene", "IG_C_gene", "IG_J_gene", "IG_D_gene"))
 
-p <- wrap_plots(pls, ncol = 1)
+p <- wrap_plots(pls, ncol = 1, heights = c(rep(1, length(pls)-1), 3))
 
 ggsave(p, width = 6, height = 2.5 * length(pls), file = snakemake@output[[1]])

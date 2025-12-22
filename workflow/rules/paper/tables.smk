@@ -124,6 +124,9 @@ rule ig_coloc_results:
 
         daf['Posterior odds of H4'] = daf['PP.H4.abf']/(1. - daf['PP.H4.abf'])
 
+        # No hard cut-off but this suffices to pick out those we identified as colocalised
+        daf['Colocalisation'] = daf['PP.H4.abf'] >= 0.75 & daf['Filtered'] == False
+
         daf.to_csv(output[0], sep = '\t', index = False)
 
 rule ig_and_non_ig_coloc_results:
