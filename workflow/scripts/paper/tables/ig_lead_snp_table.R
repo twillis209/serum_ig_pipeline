@@ -2,7 +2,7 @@ library(data.table)
 
 lead <- fread(snakemake@input[[1]])
 
-lead[, rsID := paste(paste(rsid, other_allele, sep = ':'), effect_allele, sep = '>')]
+## lead[, rsID := paste(paste(rsid, other_allele, sep = ':'), effect_allele, sep = '>')]
 
 lead[, chromosome := as.character(chromosome)]
 
@@ -49,10 +49,13 @@ lead[, c("Q", "df", "I2") :=
   )]
 
 
-fwrite(lead[, .(Variant = rsID,
+fwrite(lead[, .(rsID = rsid,
                Chromosome = chromosome,
                Position = base_pair_location,
+               `Effect allele` = effect_allele,
+                `Other allele` = other_allele,
                MAF = maf.meta,
+               `Sample size` = sample_size,
                `Gene(s)` = genes,
                `Nearest gene` = nearest_gene_name,
                `Distance to nearest gene` = distance_bp,
