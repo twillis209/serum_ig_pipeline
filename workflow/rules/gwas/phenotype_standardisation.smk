@@ -29,7 +29,7 @@ rule estimate_sdY_for_all_datasets:
 
         pd.concat(dafs).to_csv(output.all_estimates, sep = '\t', index = False)
 
-        daf.groupby('dataset', as_index = False)['sdY.est'].agg(['median', 'min', 'max', 'mean']).to_csv(output.sumstats, sep = '\t', index = False)
+        daf.groupby('dataset', as_index = False)['sdY.est'].agg(['median', 'min', 'max', 'mean', 'std']).to_csv(output.sumstats, sep = '\t', index = False)
 
 rule restandardise_beta_and_se_using_sdY_estimate:
     input:
