@@ -7,7 +7,7 @@ rule phenotype_standardisation_table:
     run:
         daf = pd.read_csv(input[0], sep = '\t')
 
-        daf.rename(columns = {'median': 'Median sd(Y) estimate', 'min': 'Min. sd(Y) estimate', 'max': 'Max. sd(Y) estimate', 'mean': 'Mean sd(Y) estimate'}, inplace = True)
+        daf.rename(columns = {'median': 'Median sd(Y) estimate', 'min': 'Min. sd(Y) estimate', 'max': 'Max. sd(Y) estimate', 'mean': 'Mean sd(Y) estimate', 'std': 'sd(Y) estimate standard error'}, inplace = True)
 
         daf['Antibody isotype'] = daf['dataset'].apply(lambda s: s.split('-')[1]).map(config.get('pretty_isotypes'))
         daf['Phenotype transformation'] = daf['dataset'].apply(lambda s: config.get('gwas_datasets').get(s).get('phenotype_transformation'))
@@ -15,7 +15,7 @@ rule phenotype_standardisation_table:
         daf['Restandardised?'] = daf['dataset'].apply(lambda s: config.get('gwas_datasets').get(s).get('rescale'))
 
         # NB: includes the Gudjonsson and Liu studies we didn't use
-        daf[['Study', 'Phenotype transformation', 'Antibody isotype', 'Median sd(Y) estimate', 'Min. sd(Y) estimate', 'Max. sd(Y) estimate', 'Mean sd(Y) estimate', 'Restandardised?']].sort_values(['Study', 'Antibody isotype']).to_csv(output[0], sep = '\t', index = False)
+        daf[['Study', 'Phenotype transformation', 'Antibody isotype', 'Median sd(Y) estimate', 'Min. sd(Y) estimate', 'Max. sd(Y) estimate', 'Mean sd(Y) estimate', 'sd(Y) estimate standard deviation', 'Restandardised?']].sort_values(['Study', 'Antibody isotype']).to_csv(output[0], sep = '\t', index = False)
 
 rule igh_associations_table:
     input:

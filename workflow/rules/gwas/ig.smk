@@ -16,13 +16,9 @@ rule ig_novel_hits:
 
 rule ig_h2_estimates:
     input:
-        ["results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/with_mhc/snps_only/sans_ighkl/sumher.hers",
-         "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/sans_mhc/snps_only/sans_ighkl/sumher.hers",
-         "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/with_mhc/snps_only/sans_ighkl/sumher.hers",
-         "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/sans_mhc/snps_only/sans_ighkl/sumher.hers",
-         "results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/with_mhc/snps_only/sans_ighkl/sumher.hers",
-         "results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/sans_mhc/snps_only/sans_ighkl/sumher.hers"
-         ]
+        expand("<iga_root>/{variant_set}/snps_only/sans_ighkl/sumher.hers", variant_set = ['sans_mhc', 'with_mhc'], ighkl_inclusion = ['with_ighkl', 'sans_ighkl']),
+        expand("<igg_root>/{variant_set}/snps_only/sans_ighkl/sumher.hers", variant_set = ['sans_mhc', 'with_mhc'], ighkl_inclusion = ['with_ighkl', 'sans_ighkl']),
+        expand("<igm_root>/{variant_set}/snps_only/sans_ighkl/sumher.hers", variant_set = ['sans_mhc', 'with_mhc'], ighkl_inclusion = ['with_ighkl', 'sans_ighkl'])
     output:
         "results/ig/h2_estimates.tsv"
     localrule: True
