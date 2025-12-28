@@ -2,9 +2,6 @@ library(data.table)
 setDTthreads(snakemake@threads)
 library(magrittr)
 
-#save.image('clump.RData')
-#stop()
-
 chr_col <- snakemake@config$chr_col
 bp_col <- snakemake@config$bp_col
 ref_col <- snakemake@config$ref_col
@@ -17,7 +14,7 @@ rsid_col <- snakemake@config$rsid_col
 distance_window <- snakemake@params[['distance_window']]
 index_threshold <- snakemake@params[['index_threshold']]
 
-dat <- fread(snakemake@input[[1]], sep = '\t', select = c(chr_col, bp_col, ref_col, alt_col, rsid_col, p_col, beta_col, se_col))
+dat <- fread(snakemake@input[[1]], sep = '\t', select = c(chr_col, bp_col, ref_col, alt_col, rsid_col, p_col, beta_col, se_col, 'sample_size'))
 
 if(!snakemake@params$mhc) {
   dat <- dat[!(get(chr_col) == 6 & get(bp_col) %between% c(24e6, 45e6))]

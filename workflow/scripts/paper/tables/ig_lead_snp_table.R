@@ -6,7 +6,48 @@ lead[, rsID := paste(paste(rsid, other_allele, sep = ':'), effect_allele, sep = 
 
 lead[, chromosome := as.character(chromosome)]
 
-lead[chromosome == '23', chromosome := 'X']
+lead[chromosome == "23", chromosome := "X"]
+
+cohorts <- gsub("beta.", "", names(lead)[names(lead) %like% "beta\\.\\w+"])
+
+beta_cols <- paste0("beta.", cohorts)
+
+se_cols <- paste0("standard_error.", cohorts)
+
+calc_Q_I2 <- function(row) {
+  beta_cols <- paste0("beta.", cohorts)
+  se_cols <- paste0("standard_error.", cohorts)
+
+  beta <- as.numeric(unlist(row[, ..beta_cols]))
+  se <- as.numeric(unlist(row[, ..se_cols]))
+
+  # Remove missing studies
+  keep <- !is.na(beta) & !is.na(se)
+  beta <- beta[keep]
+  se <- se[keep]
+
+  k <- length(beta)
+
+  if (k < 2) {
+    c(Q = NA_real_, df = k, I2 = NA_real_)
+  } else {
+    w <- 1 / se^2
+    Q <- sum(w * (beta - row[, beta])^2)
+
+    df <- k - 1
+    I2 <- max(0, (Q - df) / Q) * 100
+
+    c(Q = Q, df = df, I2 = I2)
+  }
+}
+
+lead[, c("Q", "df", "I2") :=
+  as.list(
+    as.data.table(
+      t(vapply(.I, function(i) calc_Q_I2(lead[i]), numeric(3)))
+    )
+  )]
+
 
 fwrite(lead[, .(Variant = rsID,
                Chromosome = chromosome,
@@ -20,7 +61,10 @@ fwrite(lead[, .(Variant = rsID,
                Novel = Novel,
                Beta = beta,
                `Standard error` = standard_error,
-               `p-value` = p_value
+               `p-value` = p_value,
+               Q = Q,
+               `Degrees of freedom` = df,
+               I2 = I2
                )],
        file = snakemake@output[[1]],
        sep = '\t')
