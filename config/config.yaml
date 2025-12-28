@@ -63,9 +63,9 @@ se_col: 'standard_error'
 rsid_col: 'rsid'
 id_col: 'variant_id'
 pathvars:
-  iga_root = "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn"
-  igm_root = "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn"
-  igg_root = "results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn"
+  iga_root: "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn"
+  igm_root: "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn"
+  igg_root: "results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn"
 pretty_isotypes: {"igm": "IgM", "igm-meta": "IgM", "iga": "IgA", "iga-meta": "IgA", "igg": "IgG", "igg-meta": "IgG"}
 imds: ['asthma', 'pbc', 'psc', 'ra', 'sle', 'crohns', 't1d', 'uc', 'ms', 'derm', 'hypothy', 'celiac', 'igan', 'lymphocyte-counts']
 iga_studies: ['epic', 'liu', 'dennis', 'scepanovic', 'pietzner', 'eldjarn']
