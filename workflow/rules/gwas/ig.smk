@@ -33,6 +33,7 @@ rule ig_h2_estimates:
             daf = daf.rename({'Heritability': 'Heritability estimate', 'Her_SD': 'Standard error'}, axis = 1)
             daf['Heritability model'] = 'Human Default'
             daf['MHC'] = True if 'with_mhc' in x else False
+            daf['IGHKL'] = True if 'with_ighkl' in x else False
             dafs.append(daf)
 
             pd.concat(dafs)[['Isotype', 'Heritability model', 'MHC', 'Heritability estimate', 'Standard error']].to_csv(output[0], sep = '\t', index = False)
