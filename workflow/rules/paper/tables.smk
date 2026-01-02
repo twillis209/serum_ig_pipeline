@@ -78,7 +78,7 @@ rule ig_novel_lead_snp_table:
 
         cat = pd.concat([iga, igg, igm])
 
-        cat[cat["Novel"] == True][['Isotype', 'rsID', 'Chromosome', 'Position', 'Effect allele', 'Other allele', 'MAF', 'Sample size', 'Gene(s)', 'Nearest gene', 'Distance to nearest gene', 'Missense gene', 'QTL genes', 'Beta', 'Standard error', 'p-value']].to_csv(output[0], sep = '\t', index = False)
+        cat[cat["Novel"] == True][['Isotype', 'rsID', 'Chromosome', 'Position', 'Effect allele', 'Other allele', 'MAF', 'Sample size', 'Gene(s)', 'Nearest gene', 'Distance to nearest gene', 'Missense gene', 'QTL genes', 'Beta', 'Standard error', 'p-value', 'Q', 'Degrees of freedom', 'I2']].to_csv(output[0], sep = '\t', index = False)
 
 rule iei_table:
     input:
