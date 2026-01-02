@@ -16,9 +16,9 @@ rule ig_novel_hits:
 
 rule ig_h2_estimates:
     input:
-        expand("<iga_root>/{variant_set}/snps_only/sans_ighkl/sumher.hers", variant_set = ['sans_mhc', 'with_mhc'], ighkl_inclusion = ['with_ighkl', 'sans_ighkl']),
-        expand("<igg_root>/{variant_set}/snps_only/sans_ighkl/sumher.hers", variant_set = ['sans_mhc', 'with_mhc'], ighkl_inclusion = ['with_ighkl', 'sans_ighkl']),
-        expand("<igm_root>/{variant_set}/snps_only/sans_ighkl/sumher.hers", variant_set = ['sans_mhc', 'with_mhc'], ighkl_inclusion = ['with_ighkl', 'sans_ighkl'])
+        expand("<iga_root>/{variant_set}/snps_only/{ighkl_inclusion}/sumher.hers", variant_set = ['sans_mhc', 'with_mhc'], ighkl_inclusion = ['with_ighkl', 'sans_ighkl']),
+        expand("<igg_root>/{variant_set}/snps_only/{ighkl_inclusion}/sumher.hers", variant_set = ['sans_mhc', 'with_mhc'], ighkl_inclusion = ['with_ighkl', 'sans_ighkl']),
+        expand("<igm_root>/{variant_set}/snps_only/{ighkl_inclusion}/sumher.hers", variant_set = ['sans_mhc', 'with_mhc'], ighkl_inclusion = ['with_ighkl', 'sans_ighkl'])
     output:
         "results/ig/h2_estimates.tsv"
     localrule: True
@@ -36,7 +36,7 @@ rule ig_h2_estimates:
             daf['IGHKL'] = True if 'with_ighkl' in x else False
             dafs.append(daf)
 
-            pd.concat(dafs)[['Isotype', 'Heritability model', 'MHC', 'Heritability estimate', 'Standard error']].to_csv(output[0], sep = '\t', index = False)
+            pd.concat(dafs)[['Isotype', 'Heritability model', 'MHC', 'IGHKL', 'Heritability estimate', 'Standard error']].to_csv(output[0], sep = '\t', index = False)
 
 rule ig_imd_rg_estimates:
     input:
