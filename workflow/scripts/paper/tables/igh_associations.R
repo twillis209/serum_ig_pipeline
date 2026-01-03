@@ -26,13 +26,13 @@ dat[most_severe_consequence == '', most_severe_consequence := 'intergenic_varian
 
 dat <- merge(dat, consequences, all.x = T, by = 'most_severe_consequence')
 
-dat[, rsID := paste0(rsid, ':', other_allele, '>', effect_allele)]
+## dat[, rsID := paste0(rsid, ':', other_allele, '>', effect_allele)]
 
 # Replace old nearest genes with Ensembl 113 ones
 snps_gr <- GRanges(
   seqnames = dat$chromosome,
   ranges = IRanges(start = dat$base_pair_location, width = 1),
-  rsid = dat$rsID
+  rsid = dat$rsid
 )
 
 genes_gr <- genes(edb)
@@ -48,16 +48,24 @@ nearest_genes <- data.table(
 
 dat[nearest_genes, on = 'Variant', `:=` (nearest_gene = nearest_gene_name, distance_bp = distance_bp)]
 
-dat[, `:=` (Study = pretty_study,
-            Isotype = isotype,
-            Variant = rsID,
-            Chromosome = chromosome,
-            Position = base_pair_location,
-            Beta = beta,
-            `Standard error` = standard_error,
-            `p-value` = p_value,
-            `Nearest gene` = nearest_gene,
-            `Distance to nearest gene` = distance_bp,
-            `Variant effect` = variant_effect)]
+dat[, `:=`(
+  Study = pretty_study,
+  Isotype = isotype,
+  rsID = rsid,
+  Chromosome = chromosome,
+  Position = base_pair_location,
+  `Effect allele` = effect_allele,
+  `Other allele` = other_allele,
+  Beta = beta,
+  `Standard error` = standard_error,
+  `p-value` = p_value,
+  `Nearest gene` = nearest_gene,
+  `Distance to nearest gene` = distance_bp,
+  `Variant effect` = variant_effect
+)]
 
-fwrite(dat[order(Isotype, Study), .(Study, Isotype, rsID, Chromosome, Position, Beta, `Standard error`, `p-value`, `Nearest gene`, `Variant effect`)], sep = '\t', file = snakemake@output[[1]])
+# Drop dubious variants still in LD with lead SNP
+# IgA IGH
+dat <- dat[rsID != "rs115597735"]
+
+fwrite(dat[order(Isotype, Study), .(Study, Isotype, rsID, Chromosome, Position, `Effect allele`, `Other allele`, Beta, `Standard error`, `p-value`, `Nearest gene`, `Variant effect`)], sep = '\t', file = snakemake@output[[1]])
