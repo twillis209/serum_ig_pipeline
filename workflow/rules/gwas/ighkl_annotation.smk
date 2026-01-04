@@ -49,19 +49,19 @@ use rule finalise_lead_snp_annotations as finalise_ighkl_lead_snp_annotations wi
     output:
         ighkl_root / "{study}/{window_size}_{threshold}_annotated_lead_snps.tsv"
 
-ighkl_studies = ["iga_meta", "igm_meta", "igg_meta", "eldjarn_igm", "epic_iga", "pietzner_iga", "eldjarn_iga", "epic_igg", "eldjarn_igg", "pietzner_igg"]
-
 rule annotate_ighkl_lead_snps_in_relevant_studies:
     input:
-        expand(ighkl_root / "{study}/5000kb_gws_annotated_lead_snps.tsv", study = ighkl_studies)
+        expand(ighkl_root / "{study}/5000kb_gws_annotated_lead_snps.tsv", study = ["iga_meta", "igm_meta", "igg_meta", "eldjarn_igm", "epic_iga", "pietzner_iga", "eldjarn_iga", "epic_igg", "eldjarn_igg", "pietzner_igg"])
     output:
         "results/gwas/ighkl/0/combined_annotated_lead_snps.tsv"
     localrule: True
     run:
         import pandas as pd
         from pathlib import Path
+
+        studies = ["iga_meta", "igm_meta", "igg_meta", "eldjarn_igm", "epic_iga", "pietzner_iga", "eldjarn_iga", "epic_igg", "eldjarn_igg", "pietzner_igg"]
         dfs = []
-        for study in ighkl_studies:
+        for study in studies:
             path = Path(f"results/gwas/ighkl/0/{study}/5000kb_gws_annotated_lead_snps.tsv")
             if path.exists():
                 df = pd.read_csv(path, sep = '\t')
