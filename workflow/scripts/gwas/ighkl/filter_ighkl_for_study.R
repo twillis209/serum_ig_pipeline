@@ -2,8 +2,6 @@ library(data.table)
 setDTthreads(snakemake@threads)
 library(stringr)
 
-isotype <- snakemake@params[['isotype']]
-
 dat <- fread(snakemake@input[[1]], sep = '\t')
 
 base_cols <- c('rsid', 'chromosome', 'base_pair_location', 'other_allele', 'effect_allele')
