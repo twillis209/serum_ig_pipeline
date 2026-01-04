@@ -60,7 +60,6 @@ rule annotate_ighkl_lead_snps_in_relevant_studies:
     run:
         import pandas as pd
         from pathlib import Path
-
         dfs = []
         for study in ighkl_studies:
             path = Path(f"results/gwas/ighkl/0/{study}/5000kb_gws_annotated_lead_snps.tsv")
@@ -69,6 +68,5 @@ rule annotate_ighkl_lead_snps_in_relevant_studies:
                 df['Study'] = config.get('gwas_datasets').get(study.replace('_', '-').get('pretty_study')
                 df['Isotype'] = config.get('pretty_isotypes').get(study.split('_')[0])
                 dfs.append(df)
-
         combined_df = pd.concat(dfs, ignore_index = True)
         combined_df.to_csv(output[0], sep = '\t', index = False)
