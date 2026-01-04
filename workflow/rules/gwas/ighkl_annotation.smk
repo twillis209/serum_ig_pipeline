@@ -64,7 +64,8 @@ rule annotate_ighkl_lead_snps_in_relevant_studies:
             if path.exists():
                 df = pd.read_csv(path, sep = '\t')
                 df['Study'] = config.get('gwas_datasets').get(study.replace('_', '-')).get('pretty_study')
-                df['Isotype'] = config.get('pretty_isotypes').get(study.split('_')[0])
+
+                df['Isotype'] = config.get('pretty_isotypes').get(study.split('_')[0]) if 'meta' in study else config.get('pretty_isotypes').get(study.split('_')[1])
                 dfs.append(df)
         combined_df = pd.concat(dfs, ignore_index = True)
         combined_df.to_csv(output[0], sep = '\t', index = False)
