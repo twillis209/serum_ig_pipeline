@@ -16,7 +16,7 @@ if (!str_detect(study, "meta")) {
   dat[, sample_size := snakemake@config$gwas_datasets[[study_with_dash]][["samples"]]]
   setnames(dat, "sample_size", paste0("sample_size", suffix))
 } else {
-  suffix <- study
+  suffix <- paste0(".", study)
 }
 
 cols_to_keep <- c(
