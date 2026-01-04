@@ -15,7 +15,7 @@ use rule merge_iga_gwas as merge_igm_gwas with:
     output:
         "results/igm_meta/merged.tsv.gz"
 
-use rule run_iga_meta_analysis as run_igm_meta_meta_analysis with:
+use rule run_iga_meta_analysis as run_igm_meta_analysis with:
     input:
         "results/igm_meta/merged.tsv.gz"
     output:
