@@ -35,7 +35,7 @@ rule distance_clump_ighkl:
 
 use rule annotate_lead_snps_with_missense_and_qtl_info as annotate_ighkl_lead_snps_with_missense_and_qtl_info with:
     input:
-        ighkl_root / "{isotype}/{window_size}_{threshold}_collapsed_lead_snps.tsv"
+        ighkl_root / "{isotype}/{window_size}_{threshold}_lead_snps.tsv"
     output:
         ighkl_root / "{isotype}/{window_size}_{threshold}_lead_snps_with_missense_and_qtl.tsv"
 
