@@ -51,10 +51,10 @@ include: 'rules/coloc/ig_and_non_ig_coloc.smk'
 include: 'rules/zscore_plots.smk'
 include: 'rules/mr.smk'
 include: 'rules/pathway_analysis.smk'
-include: 'rules/paper/tables.smk'
-include: 'rules/paper/figures.smk'
 include: 'rules/gwas/ighkl.smk'
 include: 'rules/gwas/ighkl_annotation.smk'
+include: 'rules/paper/tables.smk'
+include: 'rules/paper/figures.smk'
 include: 'rules/python/export.py'
 
 module kGP_pipeline:
