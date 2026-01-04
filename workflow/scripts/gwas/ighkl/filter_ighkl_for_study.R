@@ -11,6 +11,7 @@ study <- snakemake@wildcards$study
 # Non-meta-analysis dataset
 if (!str_detect(study, "meta")) {
   suffix <- gsub("_", ".", study)
+  suffix <- paste0(".", suffix)
   study_with_dash <- gsub("_", "-", study)
   dat[, sample_size := snakemake@config$gwas_datasets[[study_with_dash]][["samples"]]]
   setnames(dat, "sample_size", paste0("sample_size", suffix))
