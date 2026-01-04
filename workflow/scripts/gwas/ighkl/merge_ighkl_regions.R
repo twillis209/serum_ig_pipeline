@@ -12,7 +12,7 @@ se_col <- snakemake@config$se_col
 p_col <- snakemake@config$p_col
 
 coord_cols <- c(rsid_col, chr_col, bp_col, ref_col, alt_col)
-stat_cols <- c(beta_col, se_col, p_col)
+stat_cols <- c(beta_col, se_col, p_col, 'sample_size')
 
 studies <- names(snakemake@input)[names(snakemake@input) != ""]
 
