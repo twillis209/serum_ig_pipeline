@@ -13,14 +13,16 @@ cols_to_keep <- c(
   base_cols,
   paste0('beta', suffix),
   paste0('standard_error', suffix),
-  paste0('p_value', suffix)
+  paste0("p_value", suffix),
+  paste0("sample_size", suffix)
 )
 
 dat <- dat[, ..cols_to_keep]
 
 setnames(dat, 
-         old = c(paste0('beta', suffix), paste0('standard_error', suffix), paste0('p_value', suffix)),
-         new = c('beta', 'standard_error', 'p_value'))
+         old = c(paste0('beta', suffix), paste0('standard_error', suffix), paste0('p_value', suffix), paste0('sample_size', suffix)),
+         new = c('beta', 'standard_error', 'p_value', 'sample_size')
+         )
 
 dat <- dat[!is.na(p_value)]
 
