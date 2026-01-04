@@ -2,7 +2,7 @@ ighkl_root = Path("results/gwas/ighkl/0")
 
 # Filter combined IGHKL regions for each isotype
 
-rule filter_ighkl_for_isotype_meta:
+rule filter_ighkl_for_study:
     input:
         ighkl_root / "combined_ighkl_regions.tsv.gz"
     output:
@@ -12,7 +12,7 @@ rule filter_ighkl_for_isotype_meta:
     threads: 8
     group: "gwas"
     conda: env_path("global.yaml")
-    script: script_path("gwas/ighkl/filter_ighkl_for_isotype.R")
+    script: script_path("gwas/ighkl/filter_ighkl_for_study.R")
 
 # IgA IGHKL lead SNP annotation
 

@@ -1,5 +1,6 @@
 library(data.table)
 setDTthreads(snakemake@threads)
+library(stringr)
 
 isotype <- snakemake@params[['isotype']]
 
@@ -7,7 +8,15 @@ dat <- fread(snakemake@input[[1]], sep = '\t')
 
 base_cols <- c('rsid', 'chromosome', 'base_pair_location', 'other_allele', 'effect_allele')
 
-suffix <- paste0('.', isotype, '_meta')
+study <- snakemake@wildcards$study
+
+# Non-meta-analysis dataset
+if (!str_detect(study, "meta")) {
+  suffix <- gsub("_", ".", study)
+  study_with_dash <- gsub("_", "-", study)
+  dat[, sample_size := snakemake@config$gwas_datasets[[study_with_dash]][["samples"]]]
+  setnames(dat, "sample_size", paste0("sample_size", suffix))
+}
 
 cols_to_keep <- c(
   base_cols,
