@@ -1,10 +1,10 @@
-ighkl_root = Path("results/gwas/ighkl")
+ighkl_root = Path("results/gwas/ighkl/0")
 
 # Filter combined IGHKL regions for each isotype
 
 rule filter_ighkl_for_isotype_meta:
     input:
-        "results/gwas/ighkl/combined_ighkl_regions.tsv.gz"
+        ighkl_root / "combined_ighkl_regions.tsv.gz"
     output:
         ighkl_root / "{isotype}/filtered_ighkl_regions.tsv.gz"
     params:

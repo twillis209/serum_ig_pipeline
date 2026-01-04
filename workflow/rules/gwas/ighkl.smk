@@ -7,16 +7,16 @@ rule combine_ighkl_regions_from_gwas:
         igm = "results/igm_meta/merged.tsv.gz",
         igm_meta = "resources/harmonised_gwas/igm-meta.tsv.gz"
     output:
-        "results/gwas/ighkl/combined_ighkl_regions.tsv.gz"
+        "results/gwas/ighkl/{ighkl_flank}/combined_ighkl_regions.tsv.gz"
     params:
-        flank = 1000000
+        flank = lambda w: int(w.ighkl_flank)
     threads: 16
     conda: env_path("global.yaml")
     script: script_path("gwas/ighkl/merge_ighkl_regions.R")
 
 rule draw_stacked_ig_loci_manhattans:
     input:
-        sumstats = rules.combine_ighkl_regions_from_gwas.output,
+        sumstats = "results/gwas/ighkl/1000000/combined_ighkl_regions.tsv.gz",
         edb = rules.download_ensembl_db.output
     output:
         "results/gwas/ighkl/{isotype}_{ighkl_locus}.{ext}"
@@ -29,7 +29,7 @@ rule draw_ighkl_manhattans:
 
 rule draw_igh_iga_associations:
     input:
-        sumstats = rules.combine_ighkl_regions_from_gwas.output,
+        sumstats = "results/gwas/ighkl/1000000/combined_ighkl_regions.tsv.gz",
         edb = rules.download_ensembl_db.output
     output:
         "results/paper/figures/igh_iga_associations.png"
@@ -38,7 +38,7 @@ rule draw_igh_iga_associations:
 
 rule draw_igh_igg_associations:
     input:
-        sumstats = rules.combine_ighkl_regions_from_gwas.output,
+        sumstats = "results/gwas/ighkl/1000000/combined_ighkl_regions.tsv.gz",
         edb = rules.download_ensembl_db.output
     output:
         "results/paper/figures/igh_igg_associations.png"
