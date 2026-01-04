@@ -19,14 +19,32 @@ rule phenotype_standardisation_table:
 
 rule igh_associations_table:
     input:
-        edb = "resources/gwas/ensembl_113_hsapiens_edb.sqlite",
-        igh = "results/ig/1000kb_study_and_meta_gws_igh_lead_snps.tsv",
-        igk = "results/ig/1000kb_study_and_meta_gws_igk_lead_snps.tsv"
+        rules.annotate_ighkl_lead_snps_in_relevant_studies.output
     output:
         "results/paper/tables/igh_and_igk_associations.tsv"
     localrule: True
-    conda: env_path("global.yaml")
-    script: script_path("paper/tables/igh_associations.R")
+    run:
+        daf = pd.read_csv(input[0], sep = '\t')
+
+        daf.rename(columns = {'rsid': 'rsID',
+                                'chromosome': 'Chromosome',
+                                'base_pair_location': 'Position',
+                                'effect_allele': 'Effect allele',
+                                'other_allele': 'Other allele',
+                                'sample_size': 'Sample size',
+                                'genes': 'Gene(s)',
+                                'nearest_gene': 'Nearest gene',
+                                'distance_bp': 'Distance to nearest gene',
+                                'missense_gene': 'Missense gene',
+                                'qtl_genes': 'QTL genes',
+                                'beta': 'Beta',
+                                'standard_error': 'Standard error',
+                                'p_value': 'p-value',
+                                },
+                                inplace = True)
+
+        daf[['Study', 'Isotype', 'rsID', 'Chromosome', 'Position', 'Effect allele', 'Other allele', 'Sample size', 'Gene(s)', 'Nearest gene', 'Distance to nearest gene', 'Missense gene', 'QTL genes',  'Beta', 'Standard error', 'p-value']].to_csv(output[0], sep = '\t', index = False)
+
 
 rule h2_and_rg_estimates:
     input:
