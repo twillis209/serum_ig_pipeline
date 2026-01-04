@@ -1,7 +1,5 @@
 ighkl_root = Path("results/gwas/ighkl/0")
 
-# Filter combined IGHKL regions for each isotype
-
 rule filter_ighkl_for_study:
     input:
         ighkl_root / "combined_ighkl_regions.tsv.gz"
@@ -11,8 +9,6 @@ rule filter_ighkl_for_study:
     group: "gwas"
     conda: env_path("global.yaml")
     script: script_path("gwas/ighkl/filter_ighkl_for_study.R")
-
-# IgA IGHKL lead SNP annotation
 
 rule distance_clump_ighkl:
     input:
@@ -50,9 +46,11 @@ use rule finalise_lead_snp_annotations as finalise_ighkl_lead_snp_annotations wi
     output:
         ighkl_root / "{study}/{window_size}_{threshold}_annotated_lead_snps.tsv"
 
+studies_with_ighkl_hits = ["iga_meta", "igm_meta", "igg_meta", "eldjarn_igm", "epic_iga", "pietzner_iga", "eldjarn_iga", "epic_igg", "eldjarn_igg", "pietzner_igg"]
+
 rule annotate_ighkl_lead_snps_in_relevant_studies:
     input:
-        expand(ighkl_root / "{study}/5000kb_gws_annotated_lead_snps.tsv", study = ["iga_meta", "igm_meta", "igg_meta", "eldjarn_igm", "epic_iga", "pietzner_iga", "eldjarn_iga", "epic_igg", "eldjarn_igg", "pietzner_igg"])
+        expand(ighkl_root / "{study}/5000kb_gws_annotated_lead_snps.tsv", study = studies_with_ighkl_hits)
     output:
         "results/gwas/ighkl/0/combined_annotated_lead_snps.tsv"
     localrule: True
@@ -60,13 +58,12 @@ rule annotate_ighkl_lead_snps_in_relevant_studies:
         import pandas as pd
         from pathlib import Path
 
-        studies = ["iga_meta", "igm_meta", "igg_meta", "eldjarn_igm", "epic_iga", "pietzner_iga", "eldjarn_iga", "epic_igg", "eldjarn_igg", "pietzner_igg"]
         dfs = []
-        for study in studies:
+        for study in studies_with_ighkl_hits:
             path = Path(f"results/gwas/ighkl/0/{study}/5000kb_gws_annotated_lead_snps.tsv")
             if path.exists():
                 df = pd.read_csv(path, sep = '\t')
-                df['Study'] = config.get('gwas_datasets').get(study.replace('_', '-').get('pretty_study')
+                df['Study'] = config.get('gwas_datasets').get(study.replace('_', '-')).get('pretty_study')
                 df['Isotype'] = config.get('pretty_isotypes').get(study.split('_')[0])
                 dfs.append(df)
         combined_df = pd.concat(dfs, ignore_index = True)
