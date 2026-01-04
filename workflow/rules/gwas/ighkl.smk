@@ -1,11 +1,11 @@
 rule combine_ighkl_regions_from_gwas:
     input:
-        iga = "results/iga_meta/merged.tsv.gz",
-        iga_meta = "resources/harmonised_gwas/iga-meta.tsv.gz",
-        igg = "results/igg_meta/merged.tsv.gz",
-        igg_meta = "resources/harmonised_gwas/igg-meta.tsv.gz",
-        igm = "results/igm_meta/merged.tsv.gz",
-        igm_meta = "resources/harmonised_gwas/igm-meta.tsv.gz"
+        iga = rules.merge_iga_gwas.output,
+        iga_meta = rules.run_iga_meta_analysis.output,
+        igg = rules.merge_igg_gwas.output,
+        igg_meta = rules.run_igg_meta_analysis.output,
+        igm = rules.merge_igm_gwas.output,
+        igm_meta = rules.run_igm_meta_analysis.output,
     output:
         "results/gwas/ighkl/{ighkl_flank}/combined_ighkl_regions.tsv.gz"
     params:
