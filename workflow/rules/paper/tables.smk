@@ -33,7 +33,7 @@ rule igh_associations_table:
                                 'other_allele': 'Other allele',
                                 'sample_size': 'Sample size',
                                 'genes': 'Gene(s)',
-                                'nearest_gene': 'Nearest gene',
+                                'nearest_gene_name': 'Nearest gene',
                                 'distance_bp': 'Distance to nearest gene',
                                 'missense_gene': 'Missense gene',
                                 'qtl_genes': 'QTL genes',
