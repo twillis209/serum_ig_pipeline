@@ -71,8 +71,7 @@ checkpoint distance_clump_igg_ighkl:
         mhc = lambda w: False,
         index_threshold = lambda w: 5e-8 if w.threshold == 'gws' else 1e-5,
         distance_window = lambda w: int(w.window_size.split('kb')[0])*1e3,
-        snps_to_ignore = [],
-        p_value_col = "p_value.igg_meta"
+        snps_to_ignore = []
     threads: 16
     resources:
         runtime = 5
@@ -119,7 +118,6 @@ checkpoint distance_clump_igm_ighkl:
         index_threshold = lambda w: 5e-8 if w.threshold == 'gws' else 1e-5,
         distance_window = lambda w: int(w.window_size.split('kb')[0])*1e3,
         snps_to_ignore = [],
-        p_value_col = "p_value.igm_meta"
     threads: 16
     resources:
         runtime = 5
