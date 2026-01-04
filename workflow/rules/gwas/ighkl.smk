@@ -1,11 +1,11 @@
 rule combine_ighkl_regions_from_gwas:
     input:
-        iga = rules.merge_iga_gwas.output,
-        iga_meta = rules.run_iga_meta_analysis.output,
-        igg = rules.merge_igg_gwas.output,
-        igg_meta = rules.run_igg_meta_analysis.output,
-        igm = rules.merge_igm_gwas.output,
-        igm_meta = rules.run_igm_meta_analysis.output,
+        iga = "results/iga_meta/merged.tsv.gz",
+        iga_meta = "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/meta.tsv.gz",
+        igg = "results/igg_meta/merged.tsv.gz",
+        igg_meta = "results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/meta.tsv.gz",
+        igm = "results/igm_meta/merged.tsv.gz",
+        igm_meta = "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/meta.tsv.gz"
     output:
         "results/gwas/ighkl/{ighkl_flank}/combined_ighkl_regions.tsv.gz"
     params:
