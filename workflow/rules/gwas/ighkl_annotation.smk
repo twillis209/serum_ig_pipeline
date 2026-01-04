@@ -39,6 +39,8 @@ use rule annotate_lead_snps_with_nearest_gene as annotate_ighkl_lead_snps_with_n
         edb = "resources/gwas/ensembl_113_hsapiens_edb.sqlite"
     output:
         ighkl_root / "{study}/{window_size}_{threshold}_lead_snps_with_nearest_gene.tsv"
+    params:
+        filter_biotype = "all"
 
 use rule finalise_lead_snp_annotations as finalise_ighkl_lead_snp_annotations with:
     input:
