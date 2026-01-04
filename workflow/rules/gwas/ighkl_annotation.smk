@@ -49,6 +49,26 @@ use rule finalise_lead_snp_annotations as finalise_ighkl_lead_snp_annotations wi
     output:
         ighkl_root / "{study}/{window_size}_{threshold}_annotated_lead_snps.tsv"
 
+ighkl_studies = ["iga_meta", "igm_meta", "igg_meta", "eldjarn_igm", "epic_iga", "pietzner_iga", "eldjarn_iga", "epic_igg", "eldjarn_igg", "pietzner_igg"]
+
 rule annotate_ighkl_lead_snps_in_relevant_studies:
     input:
-        expand(ighkl_root / "{study}/5000kb_gws_annotated_lead_snps.tsv", study = ["iga_meta", "igm_meta", "igg_meta", "eldjarn_igm", "epic_iga", "pietzner_iga", "eldjarn_iga", "epic_igg", "eldjarn_igg", "pietzner_igg"])
+        expand(ighkl_root / "{study}/5000kb_gws_annotated_lead_snps.tsv", study = ighkl_studies)
+    output:
+        "results/gwas/ighkl/0/combined_annotated_lead_snps.tsv"
+    localrule: True
+    run:
+        import pandas as pd
+        from pathlib import Path
+
+        dfs = []
+        for study in ighkl_studies:
+            path = Path(f"results/gwas/ighkl/0/{study}/5000kb_gws_annotated_lead_snps.tsv")
+            if path.exists():
+                df = pd.read_csv(path, sep = '\t')
+                df['Study'] = config.get('gwas_datasets').get(study.replace('_', '-').get('pretty_study')
+                df['Isotype'] = config.get('pretty_isotypes').get(study.split('_')[0])
+                dfs.append(df)
+
+        combined_df = pd.concat(dfs, ignore_index = True)
+        combined_df.to_csv(output[0], sep = '\t', index = False)
