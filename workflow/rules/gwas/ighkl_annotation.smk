@@ -48,3 +48,7 @@ use rule finalise_lead_snp_annotations as finalise_ighkl_lead_snp_annotations wi
         rules.annotate_ighkl_lead_snps_with_nearest_gene.output
     output:
         ighkl_root / "{study}/{window_size}_{threshold}_annotated_lead_snps.tsv"
+
+rule annotate_ighkl_lead_snps_in_relevant_studies:
+    input:
+        expand(ighkl_root / "{study}/5000kb_gws_annotated_lead_snps.tsv", study = ["iga_meta", "igm_meta", "igg_meta", "eldjarn_igm", "epic_iga", "pietzner_iga", "eldjarn_iga", "epic_igg", "eldjarn_igg", "pietzner_igg"])
