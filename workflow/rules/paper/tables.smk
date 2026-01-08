@@ -43,7 +43,7 @@ rule igh_associations_table:
                                 },
                                 inplace = True)
 
-        daf.sort_values(['Isotype', 'Chromosome'], inplace = True)
+        daf.sort_values(['Isotype', 'Chromosome', 'Study'], inplace = True)
 
         daf[['Study', 'Isotype', 'rsID', 'Chromosome', 'Position', 'Effect allele', 'Other allele', 'Sample size', 'Gene(s)', 'Nearest gene', 'Distance to nearest gene', 'Missense gene', 'QTL genes',  'Beta', 'Standard error', 'p-value']].to_csv(output[0], sep = '\t', index = False)
 
