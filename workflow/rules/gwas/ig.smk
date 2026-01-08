@@ -40,8 +40,8 @@ rule ig_h2_estimates:
 
 rule ig_imd_rg_estimates:
     input:
-        cor = [f"results/ldak/ldak-thin/{x}-meta_and_{y}/inner/sans_mhc/snps_only/sumher.cors.full" for x in ["iga", "igg", "igm"] for y in config.get('imds')],
-        log = [f"results/ldak/ldak-thin/{x}-meta_and_{y}/inner/sans_mhc/snps_only/sumher.log" for x in ["iga", "igg", "igm"] for y in config.get('imds')]
+        cor = [f"results/ldak/ldak-thin/{x}-meta_and_{y}/inner/sans_mhc/{z}/snps_only/sumher.cors.full" for x in ["iga", "igg", "igm"] for y in config.get('imds') for z in ['with_ighkl', 'sans_ighkl']],
+        log = [f"results/ldak/ldak-thin/{x}-meta_and_{y}/inner/sans_mhc/{z}/snps_only/sumher.log" for x in ["iga", "igg", "igm"] for y in config.get('imds') for z in ['with_ighkl', 'sans_ighkl']]
     output:
         neat = "results/ig/imd_rg_estimates.tsv",
         with_nsnps = "results/ig/imd_rg_estimates_with_nsnps.tsv"
@@ -60,13 +60,14 @@ rule ig_imd_rg_estimates:
             daf = daf.rename({'Correlation': 'Genetic correlation estimate', 'SD': 'Standard error'}, axis = 1)
             daf['Heritability model'] = 'LDAK-Thin'
             daf['MHC'] = True if 'with_mhc' in x else False
+            daf['IGHKL'] = True if 'with_ighkl' in x else False
             dafs.append(daf)
 
         daf = pd.concat(dafs)
 
         daf['FDR'] = false_discovery_control(daf['p-value'], method = 'bh')
 
-        daf = daf[['Isotype', 'Immune phenotype', 'Heritability model', 'MHC', 'Genetic correlation estimate', 'Standard error', 'p-value', 'FDR']]
+        daf = daf[['Isotype', 'Immune phenotype', 'Heritability model', 'MHC', 'IGHKL', 'Genetic correlation estimate', 'Standard error', 'p-value', 'FDR']]
 
         daf.to_csv(output.neat, sep = '\t', index = False)
 
@@ -76,7 +77,7 @@ rule ig_imd_rg_estimates:
 
 rule ig_rg_estimates:
     input:
-        [f"results/ldak/ldak-thin/{x}/inner/{y}/snps_only/sumher.cors.full" for x in ["iga_and_igm", "iga_and_igg", "igg_and_igm"] for y in ['sans_mhc', 'with_mhc']]
+        [f"results/ldak/ldak-thin/{x}/inner/{y}/{z}/snps_only/sumher.cors.full" for x in ["iga_and_igm", "iga_and_igg", "igg_and_igm"] for y in ['sans_mhc', 'with_mhc'] for z in ['with_ighkl', 'sans_ighkl']]
     output:
         "results/ig/rg_estimates.tsv"
     localrule: True
@@ -94,9 +95,10 @@ rule ig_rg_estimates:
             daf = daf.rename({'Correlation': 'Genetic correlation estimate', 'SD': 'Standard error'}, axis = 1)
             daf['Heritability model'] = 'LDAK-Thin'
             daf['MHC'] = True if 'with_mhc' in x else False
+            daf['IGHKL'] = True if 'with_ighkl' in x else False
             dafs.append(daf)
 
-        pd.concat(dafs)[['First isotype', 'Second isotype', 'Heritability model', 'MHC', 'Genetic correlation estimate', 'Standard error', 'p-value']].to_csv(output[0], sep = '\t', index = False)
+        pd.concat(dafs)[['First isotype', 'Second isotype', 'Heritability model', 'MHC', 'IGHKL', 'Genetic correlation estimate', 'Standard error', 'p-value']].to_csv(output[0], sep = '\t', index = False)
 
 rule compile_igh_gws_hits:
     input:
