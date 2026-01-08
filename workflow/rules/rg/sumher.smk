@@ -4,12 +4,12 @@ import re
 # NB: LDAK-Thin model only
 rule thin_predictors_for_merged_gwas:
     input:
-        multiext("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type}/merged", ".bed", ".bim", ".fam")
+        multiext("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{ighkl_inclusion}/{variant_type}/merged", ".bed", ".bim", ".fam")
     output :
-        thin_file = temp("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type,snps_only}/ldak/thin.in"),
-        weights_file = temp("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type,snps_only}/ldak/weights.thin")
+        thin_file = temp("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{ighkl_inclusion}/{variant_type,snps_only}/ldak/thin.in"),
+        weights_file = temp("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{ighkl_inclusion}/{variant_type,snps_only}/ldak/weights.thin")
     log:
-        log_file = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type,snps_only}/ldak/thin.log"
+        log_file = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{ighkl_inclusion}/{variant_type,snps_only}/ldak/thin.log"
     params:
         in_stem = subpath(input[0], strip_suffix = '.bed'),
         out_stem = subpath(output.thin_file, strip_suffix = '.in')
@@ -46,12 +46,12 @@ rule calculate_human_default_taggings:
 
 rule calculate_ldak_thin_taggings_for_merged_gwas:
     input:
-        multiext("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type}/merged", ".bed", ".bim", ".fam"),
-        weights_file = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type}/ldak/weights.thin"
+        multiext("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{ighkl_inclusion}/{variant_type}/merged", ".bed", ".bim", ".fam"),
+        weights_file = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{ighkl_inclusion}/{variant_type}/ldak/weights.thin"
     output:
-        tagging_file = temp("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type,snps_only}/ldak/merged.tagging")
+        tagging_file = temp("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{ighkl_inclusion}/{variant_type,snps_only}/ldak/merged.tagging")
     log:
-        log_file = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type}/ldak/merged.tagging.log"
+        log_file = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{ighkl_inclusion}/{variant_type}/ldak/merged.tagging.log"
     params:
         in_stem = subpath(input[0], strip_suffix = '.bed'),
         out_stem = subpath(output[0], strip_suffix = '.tagging')
@@ -78,10 +78,10 @@ rule process_sum_stats:
 
 rule process_sum_stats_for_merged_gwas:
     input:
-        gwas_file = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/merged.tsv.gz",
+        gwas_file = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{ighkl_inclusion}/merged.tsv.gz",
     output:
-        gwas_file_A = temp("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{trait_A}.assoc"),
-        gwas_file_B = temp("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{trait_B}.assoc")
+        gwas_file_A = temp("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{ighkl_inclusion}/{trait_A}.assoc"),
+        gwas_file_B = temp("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{ighkl_inclusion}/{trait_B}.assoc")
     params:
         beta_a_col = lambda w: f'{config.get('beta_col')}.{w.trait_A}',
         beta_b_col = lambda w: f'{config.get('beta_col')}.{w.trait_B}',
@@ -115,13 +115,13 @@ rule estimate_h2_with_human_default:
 
 rule estimate_rg_with_ldak_thin:
     input:
-        tagging_file = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type}/ldak/merged.tagging",
-        gwas_file_A = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{trait_A}.assoc",
-        gwas_file_B = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{trait_B}.assoc"
+        tagging_file = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{ighkl_inclusion}/{variant_type}/ldak/merged.tagging",
+        gwas_file_A = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{ighkl_inclusion}/{trait_A}.assoc",
+        gwas_file_B = "results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{ighkl_inclusion}/{trait_B}.assoc"
     output:
-        cors_full_file = "results/ldak/ldak-thin/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type,snps_only}/sumher.cors.full"
+        cors_full_file = "results/ldak/ldak-thin/{trait_A}_and_{trait_B}/{join}/{variant_set}/{ighkl_inclusion}/{variant_type,snps_only}/sumher.cors.full"
     log:
-        log_file = "results/ldak/ldak-thin/{trait_A}_and_{trait_B}/{join}/{variant_set}/{variant_type,snps_only}/sumher.log"
+        log_file = "results/ldak/ldak-thin/{trait_A}_and_{trait_B}/{join}/{variant_set}/{ighkl_inclusion}/{variant_type,snps_only}/sumher.log"
     params:
         output_stem = subpath(output[0], strip_suffix = '.cors.full')
     threads: 8

@@ -1,27 +1,58 @@
 use rule merge_iga_gwas as merge_iga_and_igg_meta with:
     input:
-        iga = "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/filtered_meta.tsv.gz",
-        igg = "results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/filtered_meta.tsv.gz"
+        iga = branch(evaluate("{ighkl_inclusion}"),
+                     cases = {
+                         "sans_ighkl": "<iga_root>/filtered_meta.tsv.gz",
+                         "with_ighkl": "<iga_root>/meta.tsv.gz"
+                         }
+                     ),
+        igg = branch(evaluate("{ighkl_inclusion}"),
+                     cases = {
+                         "sans_ighkl": "<igg_root>/filtered_meta.tsv.gz",
+                         "with_ighkl": "<igg_root>/meta.tsv.gz"
+                         }
+                     ),
     output:
-        "results/merged_gwas/iga_and_igg/{join,inner}/{variant_set}/merged.tsv.gz"
+        "results/merged_gwas/iga_and_igg/{join,inner}/{variant_set}/{ighkl_inclusion}/merged.tsv.gz"
     params:
         include_sample_size = True
 
 use rule merge_iga_gwas as merge_iga_and_igm_meta with:
     input:
-        iga = "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/filtered_meta.tsv.gz",
-        igm = "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/filtered_meta.tsv.gz"
+    input:
+        iga = branch(evaluate("{ighkl_inclusion}"),
+                     cases = {
+                         "sans_ighkl": "<iga_root>/filtered_meta.tsv.gz",
+                         "with_ighkl": "<iga_root>/meta.tsv.gz"
+                         }
+                     ),
+        igm = branch(evaluate("{ighkl_inclusion}"),
+                     cases = {
+                         "sans_ighkl": "<igm_root>/filtered_meta.tsv.gz",
+                         "with_ighkl": "<igm_root>/meta.tsv.gz"
+                         }
+                     ),
     output:
-        "results/merged_gwas/iga_and_igm/{join,inner}/{variant_set}/merged.tsv.gz"
+        "results/merged_gwas/iga_and_igm/{join,inner}/{variant_set}/{ighkl_inclusion}/merged.tsv.gz"
     params:
         include_sample_size = True
 
 use rule merge_iga_gwas as merge_igg_and_igm_meta with:
     input:
-        igg = "results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/filtered_meta.tsv.gz",
-        igm = "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/filtered_meta.tsv.gz"
+        igg = branch(evaluate("{ighkl_inclusion}"),
+                     cases = {
+                         "sans_ighkl": "<igg_root>/filtered_meta.tsv.gz",
+                         "with_ighkl": "<igg_root>/meta.tsv.gz"
+                         }
+                     ),
+        igm = branch(evaluate("{ighkl_inclusion}"),
+                     cases = {
+                         "sans_ighkl": "<igm_root>/filtered_meta.tsv.gz",
+                         "with_ighkl": "<igm_root>/meta.tsv.gz"
+                         }
+                     ),
     output:
-        "results/merged_gwas/igg_and_igm/{join,inner}/{variant_set}/merged.tsv.gz"
+        "results/merged_gwas/igg_and_igm/{join,inner}/{variant_set}/{ighkl_inclusion}/merged.tsv.gz"
     params:
         include_sample_size = True
 

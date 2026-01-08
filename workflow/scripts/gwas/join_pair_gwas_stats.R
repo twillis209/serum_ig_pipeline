@@ -43,6 +43,14 @@ if(!mhc) {
   merged_dat <- merged_dat[!(get(chr_col) == 6 & get(bp_col) %between% c(24e6, 45e6))]
 }
 
+if (!ighkl) {
+  for (x in snakemake@params$loci_to_drop) {
+    merged_dat <- merged_dat[!(chr == snakemake@config$loci[[x]]$chrom &
+      pos %between% c(snakemake@config$loci[[x]]$start, snakemake@config$loci[[x]]$stop)
+    ), env = list(chr = chr_col, pos = bp_col)]
+  }
+}
+
 rsid_col_a <- paste0(rsid_col, suffix_A)
 rsid_col_b <- paste0(rsid_col, suffix_B)
 

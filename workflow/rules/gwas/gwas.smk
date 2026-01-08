@@ -11,12 +11,13 @@ rule join_pair_gwas:
         A = "resources/harmonised_gwas/{trait_A}.tsv.gz",
         B = "resources/harmonised_gwas/{trait_B}.tsv.gz"
     output:
-        AB = temp("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/merged.tsv.gz")
+        AB = temp("results/merged_gwas/{trait_A}_and_{trait_B}/{join}/{variant_set}/{ighkl_inclusion}/merged.tsv.gz")
     threads: 8
     resources:
         runtime = 15
     params:
         mhc = lambda wildcards: False if wildcards.variant_set == 'sans_mhc' else True,
+        ighkl = lambda wildcards: True if wildcards.ighkl_inclusion == 'with_ighkl' else False,
         join = lambda wildcards: wildcards.join,
     group: "gwas"
     conda: env_path("global.yaml")
