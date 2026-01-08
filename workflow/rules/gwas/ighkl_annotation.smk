@@ -52,7 +52,7 @@ studies_with_ighkl_hits = ["iga_meta", "igm_meta", "igg_meta", "eldjarn_igm", "e
 
 rule annotate_ighkl_lead_snps_in_relevant_studies:
     input:
-        expand(ighkl_root / "{study}/5000kb_gws_annotated_lead_snps.tsv", study = studies_with_ighkl_hits)
+        lead_snps = expand(ighkl_root / "{study}/5000kb_gws_annotated_lead_snps.tsv", study = studies_with_ighkl_hits)
     output:
         "results/gwas/ighkl/0/combined_annotated_lead_snps.tsv"
     localrule: True
@@ -71,3 +71,13 @@ rule annotate_ighkl_lead_snps_in_relevant_studies:
                 dfs.append(df)
         combined_df = pd.concat(dfs, ignore_index = True)
         combined_df.to_csv(output[0], sep = '\t', index = False)
+
+rule add_q_and_i2_to_ighkl_lead_snps:
+    input:
+        lead_snps = rules.annotate_ighkl_lead_snps_in_relevant_studies.output,
+        sumstats = "results/gwas/ighkl/0/combined_ighkl_regions.tsv.gz"
+    output:
+        "results/paper/tables/ighkl_lead_snps.tsv"
+    localrule: True
+    conda: env_path("global.yaml")
+    script: script_path("gwas/ighkl/add_hetero_stats_to_lead_snps.R")
