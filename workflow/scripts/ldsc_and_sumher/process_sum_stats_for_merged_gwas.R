@@ -1,4 +1,6 @@
 library(data.table)
+# If tmp fills up, get truncated files which don't produce errors; that's bad!
+options(warn = 2)
 setDTthreads(snakemake@threads)
 
 gwas_file <- snakemake@input[['gwas_file']]

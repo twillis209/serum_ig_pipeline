@@ -1,5 +1,8 @@
 library(data.table)
 
+# If tmp fills up, get truncated files which don't produce errors; that's bad!
+options(warn = 2)
+
 gwas_file_a <- snakemake@input[['A']]
 gwas_file_b <- snakemake@input[['B']]
 chr_col <- snakemake@config$chr_col

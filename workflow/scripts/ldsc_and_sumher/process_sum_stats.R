@@ -1,5 +1,7 @@
 library(data.table)
 
+# If tmp fills up, get truncated files which don't produce errors; that's bad!
+options(warn = 2)
 setDTthreads(snakemake@threads)
 
 chr_col <- snakemake@config$chr_col
@@ -10,12 +12,12 @@ p_col <- snakemake@config$p_col
 beta_col <- snakemake@config$beta_col
 se_col <- snakemake@config$se_col
 
-gwas <- fread(snakemake@input$gwas_file, sep = '\t', header = T, select = c(chr_col, bp_col, ref_col, alt_col, p_col, beta_col, se_col))
-bim_ids <- fread(snakemake@input$range_file, sep = ' ', header = F)
-names(bim_ids) <- 'SNPID'
+gwas <- fread(snakemake@input$gwas_file, sep = "\t", header = T, select = c(chr_col, bp_col, ref_col, alt_col, p_col, beta_col, se_col))
+bim_ids <- fread(snakemake@input$range_file, sep = " ", header = F)
+names(bim_ids) <- "SNPID"
 
-gwas[, SNPID := paste(chr, bp, ref, alt, sep = ':'), env = list(chr = chr_col, bp = bp_col, ref = ref_col, alt = alt_col)]
-gwas <- merge(gwas, bim_ids, by = 'SNPID')
+gwas[, SNPID := paste(chr, bp, ref, alt, sep = ":"), env = list(chr = chr_col, bp = bp_col, ref = ref_col, alt = alt_col)]
+gwas <- merge(gwas, bim_ids, by = "SNPID")
 
 # The SumHer documentation states that A1 is the 'test allele' and A2 is the 'other allele', so I take this to mean A1 is the effect allele and A2 the reference/other allele
 
