@@ -53,7 +53,7 @@ rule drop_selected_loci_from_iga_meta_analysis:
 
 rule copy_iga_meta_to_harmonised_gwas:
     input:
-        "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/filtered_meta.tsv.gz"
+        "<iga_root>/meta.tsv.gz"
     output:
         "resources/harmonised_gwas/iga-meta.tsv.gz"
     group: "gwas"
@@ -261,7 +261,7 @@ rule draw_igh_locus_for_iga_datasets:
 
 use rule preprocess_sumstats_for_ldsc_munging as preprocess_iga_meta_sumstats_for_ldsc_munging with:
     input:
-        sumstats = "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/filtered_meta.tsv.gz",
+        sumstats = "<iga_root>/filtered_meta.tsv.gz",
         maf = "results/1kG/hg38/eur/snps_only/005/merged.afreq"
     output:
         temp("results/ldsc/iga/preprocessed_sumstats.tsv.gz")

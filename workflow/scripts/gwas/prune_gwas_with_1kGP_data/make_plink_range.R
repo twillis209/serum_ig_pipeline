@@ -25,8 +25,16 @@ bim_join <- merge(bim_dat, gwas_dat, by.x = c('CHR38', 'BP38'), by.y = c(chr_col
 # Make sure alleles match
 bim_join <- bim_join[(get(ref_col) == A1 & get(alt_col) == A2) | (get(ref_col) == A2 & get(alt_col) == A1)]
 
-if(snakemake@params$mhc == F) {
+if (snakemake@params$mhc == F) {
   bim_join <- bim_join[!(CHR38 == 6 & BP38 %between% c(24e6, 45e6))]
+}
+
+if(snakemake@params$ighkl == F) {
+  for (x in snakemake@params$loci_to_drop) {
+    bim_join <- bim_join[!(chr == snakemake@config$loci[[x]]$chrom &
+      pos %between% c(snakemake@config$loci[[x]]$start, snakemake@config$loci[[x]]$stop)
+    ), env = list(chr = 'CHR38', pos = 'BP38')]
+  }
 }
 
 fwrite(bim_join[, .(ID)], file = snakemake@output[[1]], row.names = F, sep = ' ', col.names = F, quote = F)

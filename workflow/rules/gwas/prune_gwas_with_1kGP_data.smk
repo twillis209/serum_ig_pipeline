@@ -3,9 +3,10 @@ rule make_plink_range:
         bim_file = "results/1kG/hg38/eur/{variant_type}/005/qc/all/merged.bim",
         gwas_file = "resources/harmonised_gwas/{trait}.tsv.gz"
     output:
-        "results/{trait}/{variant_set}/{variant_type}/matching_ids.txt"
+        "results/{trait}/{variant_set}/{ighkl_inclusion}/{variant_type}/matching_ids.txt"
     params:
         mhc = lambda wildcards: False if wildcards.variant_set == 'sans_mhc' else True,
+        ighkl = lambda wildcards: True if wildcards.ighkl_inclusion == 'with_ighkl' else True,
     threads: 8
     resources:
         runtime = 15

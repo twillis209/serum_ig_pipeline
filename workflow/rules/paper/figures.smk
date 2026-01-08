@@ -1,9 +1,9 @@
 # Figure 1
 rule draw_stacked_ig_manhattans:
     input:
-        iga = "results/iga_meta/with_epic/with_liu/with_scepanovic/with_dennis/with_pietzner/without_gudjonsson/with_eldjarn/filtered_meta.tsv.gz",
-        igg = "results/igg_meta/with_epic/with_dennis/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/filtered_meta.tsv.gz",
-        igm = "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/filtered_meta.tsv.gz"
+        iga = "<iga_root>/filtered_meta.tsv.gz",
+        igg = "<igg_root>/filtered_meta.tsv.gz",
+        igm = "<igm_root>/filtered_meta.tsv.gz"
     output:
         png = "results/paper/figures/ig_manhattans.png",
         tiff = "results/paper/figures/ig_manhattans.tiff"

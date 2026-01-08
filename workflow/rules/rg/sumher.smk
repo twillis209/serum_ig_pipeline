@@ -25,11 +25,11 @@ rule thin_predictors_for_merged_gwas:
 
 rule calculate_human_default_taggings:
     input:
-        multiext("results/{trait}/{variant_set}/{variant_type}/merged", ".bed", ".bim", ".fam")
+        multiext("results/{trait}/{variant_set}/{ighkl_inclusion}/{variant_type}/merged", ".bed", ".bim", ".fam")
     output :
-        tagging_file = temp("results/{trait}/{variant_set}/{variant_type}/ldak/human_default/merged.tagging"),
+        tagging_file = temp("results/{trait}/{variant_set}/{ighkl_inclusion}/{variant_type}/ldak/human_default/merged.tagging"),
     log:
-        log_file = "results/{trait}/{variant_set}/{variant_type}/ldak/human_default/merged.tagging.log"
+        log_file = "results/{trait}/{variant_set}/{ighkl_inclusion}/{variant_type}/ldak/human_default/merged.tagging.log"
     params:
         in_stem = subpath(input[0], strip_suffix = '.bed'),
         out_stem = subpath(output.tagging_file, strip_suffix = '.tagging')
@@ -65,9 +65,9 @@ rule calculate_ldak_thin_taggings_for_merged_gwas:
 rule process_sum_stats:
     input:
         gwas_file = "results/harmonised_gwas/{trait}.tsv.gz",
-        range_file = "results/{trait}/{variant_set}/{variant_type}/matching_ids.txt"
+        range_file = "results/{trait}/{variant_set}/{ighkl_inclusion}/{variant_type}/matching_ids.txt"
     output:
-        "results/{trait}/{variant_set}/{variant_type}/merged.assoc"
+        "results/{trait}/{variant_set}/{ighkl_inclusion}/{variant_type}/merged.assoc"
     params:
         N = lambda w: config.get('gwas_datasets').get(w.trait).get('samples')
     threads: 8
@@ -98,12 +98,12 @@ rule process_sum_stats_for_merged_gwas:
 
 rule estimate_h2_with_human_default:
     input:
-        gwas = "results/{trait}/{variant_set}/{variant_type}/merged.assoc",
-        tagging_file = "results/{trait}/{variant_set}/{variant_type}/ldak/human_default/merged.tagging"
+        gwas = "results/{trait}/{variant_set}/{ighkl_inclusion}/{variant_type}/merged.assoc",
+        tagging_file = "results/{trait}/{variant_set}/{ighkl_inclusion}/{variant_type}/ldak/human_default/merged.tagging"
     output:
-        multiext("results/ldak/human_default/{trait}/{variant_set}/{variant_type}/sumher.", "cats", "cross", "enrich", "extra", "hers", "share", "taus", "progress")
+        multiext("results/ldak/human_default/{trait}/{variant_set}/{ighkl_inclusion}/{variant_type}/sumher.", "cats", "cross", "enrich", "extra", "hers", "share", "taus", "progress")
     log:
-        log_file = "results/ldak/human_default/{trait}/{variant_set}/{variant_type}/sumher.log"
+        log_file = "results/ldak/human_default/{trait}/{variant_set}/{ighkl_inclusion}/{variant_type}/sumher.log"
     params:
         out_stem = subpath(output[0], strip_suffix = '.cats')
     threads: 12

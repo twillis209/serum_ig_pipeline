@@ -31,7 +31,7 @@ use rule drop_selected_loci_from_iga_meta_analysis as drop_selected_loci_from_ig
 
 rule copy_igm_meta_to_harmonised_gwas:
     input:
-        "results/igm_meta/with_epic/with_scepanovic/with_pietzner/without_gudjonsson/with_eldjarn/filtered_meta.tsv.gz"
+        "<igm_root>/meta.tsv.gz"
     output:
         "resources/harmonised_gwas/igm-meta.tsv.gz"
     group: "gwas"
