@@ -19,7 +19,7 @@ rule phenotype_standardisation_table:
 
 rule igh_associations_table:
     input:
-        rules.annotate_ighkl_lead_snps_in_relevant_studies.output
+        rules.add_q_and_i2_to_ighkl_lead_snps.output
     output:
         "results/paper/tables/igh_and_igk_associations.tsv"
     localrule: True
