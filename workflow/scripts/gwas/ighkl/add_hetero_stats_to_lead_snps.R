@@ -19,7 +19,7 @@ calc_Q_I2 <- function(row) {
   k <- length(beta)
 
   if (k < 2) {
-    c(Q = NA_real_, df = k, I2 = NA_real_)
+    c(Q = NA_real_, df = k, I2 = NA_real_, Q.p_value = NA_real_)
   } else {
     w <- 1 / se^2
     Q <- sum(w * (beta - row[, beta])^2)
