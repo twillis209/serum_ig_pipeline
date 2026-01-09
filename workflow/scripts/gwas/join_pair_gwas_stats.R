@@ -13,7 +13,6 @@ p_col <- snakemake@config$p_col
 beta_col <- snakemake@config$beta_col
 se_col <- snakemake@config$se_col
 rsid_col <- snakemake@config$rsid_col
-mhc <- snakemake@params[['mhc']]
 join <- snakemake@params[['join']]
 
 setDTthreads(snakemake@threads)
@@ -42,11 +41,11 @@ if(join == 'inner') {
 }
 
 # Removes the MHC
-if(!mhc) {
+if(!snakemake@params$mhc) {
   merged_dat <- merged_dat[!(get(chr_col) == 6 & get(bp_col) %between% c(24e6, 45e6))]
 }
 
-if (!ighkl) {
+if (!snakemake@params$ighkl) {
   for (x in snakemake@params$loci_to_drop) {
     merged_dat <- merged_dat[!(chr == snakemake@config$loci[[x]]$chrom &
       pos %between% c(snakemake@config$loci[[x]]$start, snakemake@config$loci[[x]]$stop)
