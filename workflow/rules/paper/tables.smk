@@ -40,12 +40,14 @@ rule igh_associations_table:
                                 'beta': 'Beta',
                                 'standard_error': 'Standard error',
                                 'p_value': 'p-value',
+                                'df': 'Degrees of freedom',
+                                'Q.p_value': 'Q p-value'
                                 },
                                 inplace = True)
 
         daf.sort_values(['Isotype', 'Chromosome', 'Study'], inplace = True)
 
-        daf[['Study', 'Isotype', 'rsID', 'Chromosome', 'Position', 'Effect allele', 'Other allele', 'Sample size', 'Gene(s)', 'Nearest gene', 'Distance to nearest gene', 'Missense gene', 'QTL genes',  'Beta', 'Standard error', 'p-value']].to_csv(output[0], sep = '\t', index = False)
+        daf[['Study', 'Isotype', 'rsID', 'Chromosome', 'Position', 'Effect allele', 'Other allele', 'Sample size', 'Gene(s)', 'Nearest gene', 'Distance to nearest gene', 'Missense gene', 'QTL genes',  'Beta', 'Standard error', 'p-value', 'Q', 'Degrees of freedom', 'I2', 'Q p-value']].to_csv(output[0], sep = '\t', index = False)
 
 
 rule h2_and_rg_estimates:
