@@ -33,7 +33,8 @@ calc_Q_I2 <- function(row) {
 }
 
 lead_snps <- fread(snakemake@input[['lead_snps']], sep = '\t')
-sumstats <- fread(snakemake@input[['sumstats']], sep = '\t')
+sumstats <- fread(snakemake@input[["sumstats"]], sep = "\t")
+sumstats[, c('chromosome', 'base_pair_location', 'other_allele', 'effect_allele') := NULL]
 
 merged <- merge(lead_snps, sumstats, by = "rsid", all.x = T)
 
