@@ -25,9 +25,10 @@ calc_Q_I2 <- function(row) {
     Q <- sum(w * (beta - row[, beta])^2)
 
     df <- k - 1
+    p_value <- pchisq(Q, df, lower.tail = FALSE)
     I2 <- max(0, (Q - df) / Q) * 100
 
-    c(Q = Q, df = df, I2 = I2)
+    c(Q = Q, df = df, I2 = I2, Q.p_value = p_value)
   }
 }
 
@@ -39,7 +40,7 @@ merged <- merge(lead_snps, sumstats, by = "rsid", all.x = T)
 merged[Study == "Meta-analysis", c("Q", "df", "I2") :=
   as.list(
     as.data.table(
-      t(vapply(.I, function(i) calc_Q_I2(lead[i]), numeric(3)))
+      t(vapply(.I, function(i) calc_Q_I2(lead_snps[i]), numeric(3)))
     )
   )]
 
