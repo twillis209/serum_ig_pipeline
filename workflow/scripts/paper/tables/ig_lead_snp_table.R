@@ -35,16 +35,17 @@ calc_Q_I2 <- function(row) {
     Q <- sum(w * (beta - row[, beta])^2)
 
     df <- k - 1
+    p_value <- pchisq(Q, df, lower.tail = FALSE)
     I2 <- max(0, (Q - df) / Q) * 100
 
-    c(Q = Q, df = df, I2 = I2)
+    c(Q = Q, df = df, I2 = I2, Q.p_value = p_value)
   }
 }
 
-lead[, c("Q", "df", "I2") :=
+lead[, c("Q", "df", "I2", "Q.p_value") :=
   as.list(
     as.data.table(
-      t(vapply(.I, function(i) calc_Q_I2(lead[i]), numeric(3)))
+      t(vapply(.I, function(i) calc_Q_I2(lead[i]), numeric(4)))
     )
   )]
 
@@ -67,7 +68,8 @@ fwrite(lead[, .(rsID = rsid,
                `p-value` = p_value,
                Q = Q,
                `Degrees of freedom` = df,
-               I2 = I2
+               I2 = I2,
+                `Q p-value` = Q.p_value
                )],
        file = snakemake@output[[1]],
        sep = '\t')

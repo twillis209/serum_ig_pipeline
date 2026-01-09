@@ -37,13 +37,13 @@ sumstats <- fread(snakemake@input[['sumstats']], sep = '\t')
 
 merged <- merge(lead_snps, sumstats, by = "rsid", all.x = T)
 
-merged[Study == "Meta-analysis", c("Q", "df", "I2") :=
+merged[Study == "Meta-analysis", c("Q", "df", "I2", "Q.p_value") :=
   as.list(
     as.data.table(
-      t(vapply(.I, function(i) calc_Q_I2(lead_snps[i]), numeric(3)))
+      t(vapply(.I, function(i) calc_Q_I2(lead_snps[i]), numeric(4)))
     )
   )]
 
-cols_to_keep <- c(names(lead_snps), "Q", "df", "I2")
+cols_to_keep <- c(names(lead_snps), "Q", "df", "I2", "Q.p_value")
 
 fwrite(merged[, ..cols_to_keep], file = snakemake@output[[1]], sep = "\t")
