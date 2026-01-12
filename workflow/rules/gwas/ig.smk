@@ -1,4 +1,4 @@
-from scipy.stats import chi2, false_discovery_control
+from scipy.stats import chi2, false_discovery_control, norm
 
 rule ig_manhattans:
     input:
@@ -231,3 +231,30 @@ rule estimate_phenotypic_correlations_for_epic_ig:
     localrule: True
     conda: env_path("boot.yaml")
     script: script_path("gwas/ig/estimate_phenotypic_correlations_for_epic_ig.R")
+
+rule z_test_h2_estimate_differences:
+    input:
+        "results/ig/h2_estimates.tsv"
+    output:
+        "results/ig/h2_estimate_z_tests.tsv"
+    localrule: True
+    run:
+        df = pd.read_csv(input[0], sep = '\t')
+
+        pivot = df.pivot_table(index=["Isotype", "MHC"], columns="IGHKL", values=["Heritability estimate", "Standard error"])
+
+        h2_diff = pivot['Heritability estimate'][True] - pivot['Heritability estimate'][False]
+        se_diff = np.sqrt(pivot['Standard error'][True]**2 + pivot['Standard error'][False]**2)
+        z_score = h2_diff / se_diff
+        p_values = 2 * (1 - norm.cdf(np.abs(z_score)))
+
+        # 4. Format the final table
+        results = pd.DataFrame({
+            'h2_with_IGHKL': pivot['Heritability estimate'][True],
+            'h2_no_IGHKL': pivot['Heritability estimate'][False],
+            'Difference': h2_diff,
+            'SE_diff': se_diff,
+            'P_Value': p_values
+        }).reset_index()
+
+        results.to_csv(output[0], sep = '\t', index = False)

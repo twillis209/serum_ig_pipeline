@@ -46,7 +46,7 @@ if(!snakemake@params$mhc) {
 }
 
 if (!snakemake@params$ighkl) {
-  for (x in snakemake@params$loci_to_drop) {
+  for (x in snakemake@params$loci) {
     merged_dat <- merged_dat[!(chr == snakemake@config$loci[[x]]$chrom &
       pos %between% c(snakemake@config$loci[[x]]$start, snakemake@config$loci[[x]]$stop)
     ), env = list(chr = chr_col, pos = bp_col)]
