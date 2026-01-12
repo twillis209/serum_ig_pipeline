@@ -46,9 +46,10 @@ if(!snakemake@params$mhc) {
 }
 
 if (!snakemake@params$ighkl) {
-  for (x in snakemake@params$loci) {
-    merged_dat <- merged_dat[!(chr == as.character(snakemake@config$loci[[x]]$chrom) &
-      pos %between% c(as.integer(snakemake@config$loci[[x]]$start), as.integer(snakemake@config$loci[[x]]$stop))
+  for (x in snakemake@config$loci) {
+    merged_dat <- merged_dat[!(
+      chr == as.character(x$chrom) &
+      pos %between% c(as.integer(x$start), as.integer(x$stop))
     ), env = list(chr = chr_col, pos = bp_col)]
   }
 }
