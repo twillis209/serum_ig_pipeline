@@ -19,7 +19,6 @@ use rule merge_iga_gwas as merge_iga_and_igg_meta with:
 
 use rule merge_iga_gwas as merge_iga_and_igm_meta with:
     input:
-    input:
         iga = branch(evaluate("{ighkl_inclusion}"),
                      cases = {
                          "sans_ighkl": "<iga_root>/filtered_meta.tsv.gz",
