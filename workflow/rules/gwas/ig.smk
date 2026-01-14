@@ -78,7 +78,7 @@ rule ig_imd_rg_estimates:
         # Using the flattened column name 'p-value_IGHKL_False'
         df_wide['FDR'] = false_discovery_control(df_wide['p-value_IGHKL_False'], method='bh')
 
-        df_wide.rename()(columns={
+        df_wide.rename(columns={
             'Genetic correlation estimate_IGHKL_True': 'Genetic correlation estimate (with IGHKL)',
             'Genetic correlation estimate_IGHKL_False': 'Genetic correlation estimate (without IGHKL)',
             'Standard error_IGHKL_True': 'Standard error (with IGHKL)',
