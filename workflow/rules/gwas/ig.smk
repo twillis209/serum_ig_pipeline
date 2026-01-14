@@ -43,8 +43,7 @@ rule ig_imd_rg_estimates:
         cor = [f"results/ldak/ldak-thin/{x}-meta_and_{y}/inner/sans_mhc/{z}/snps_only/sumher.cors.full" for x in ["iga", "igg", "igm"] for y in config.get('imds') for z in ['with_ighkl', 'sans_ighkl']],
         log = [f"results/ldak/ldak-thin/{x}-meta_and_{y}/inner/sans_mhc/{z}/snps_only/sumher.log" for x in ["iga", "igg", "igm"] for y in config.get('imds') for z in ['with_ighkl', 'sans_ighkl']]
     output:
-        neat = "results/ig/imd_rg_estimates.tsv",
-        with_nsnps = "results/ig/imd_rg_estimates_with_nsnps.tsv"
+        "results/ig/imd_rg_estimates.tsv",
     localrule: True
     run:
         dafs = []
@@ -65,15 +64,36 @@ rule ig_imd_rg_estimates:
 
         daf = pd.concat(dafs)
 
-        daf['FDR'] = false_discovery_control(daf['p-value'], method = 'bh')
+        df_wide = daf.pivot(
+            index=['Isotype', 'Immune phenotype', 'Heritability model', 'MHC'],
+            columns='IGHKL',
+            values=['rg', 'se', 'p-value']
+        )
 
-        daf = daf[['Isotype', 'Immune phenotype', 'Heritability model', 'MHC', 'IGHKL', 'Genetic correlation estimate', 'Standard error', 'p-value', 'FDR']]
+        # Flatten the MultiIndex columns (e.g., ('rg', True) -> 'rg_IGHKL_True')
+        df_wide.columns = [f"{val}_IGHKL_{col}" for val, col in df_wide.columns]
+        df_wide = df_wide.reset_index()
 
-        daf.to_csv(output.neat, sep = '\t', index = False)
+        # Calculate FDR based specifically on the IGHKL = False p-values
+        # Using the flattened column name 'p-value_IGHKL_False'
+        df_wide['FDR'] = false_discovery_control(df_wide['p-value_IGHKL_False'], method='bh')
 
-        nsnps_daf = tally_predictors_from_log_files(input.log)
+        df_wide.rename()(columns={
+            'rg_IGHKL_True': 'Genetic correlation estimate (with IGHKL)',
+            'rg_IGHKL_False': 'Genetic correlation estimate (without IGHKL)',
+            'se_IGHKL_True': 'Standard error (with IGHKL)',
+            'se_IGHKL_False': 'Standard error (without IGHKL)',
+            'p-value_IGHKL_True': 'p-value (with IGHKL)',
+            'p-value_IGHKL_False': 'p-value (without IGHKL)'
+        }, inplace=True)
 
-        daf.merge(nsnps_daf, left_on = ['Isotype', 'Immune phenotype'], right_on = ['trait.A', 'trait.B']).to_csv(output.with_nsnps, sep = '\t', index = False)
+        df_wide = df_wide[['Isotype', 'Immune phenotype',
+                           'Genetic correlation estimate (with IGHKL)', 'Standard error (with IGHKL)', 'p-value (with IGHKL)',
+                           'Genetic correlation estimate (without IGHKL)', 'Standard error (without IGHKL)', 'p-value (without IGHKL)',
+                           'FDR']]
+
+        # Save to output
+        df_wide.to_csv(output[0], sep='\t', index=False)
 
 rule ig_rg_estimates:
     input:
