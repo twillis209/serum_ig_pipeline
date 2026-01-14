@@ -67,7 +67,7 @@ rule ig_imd_rg_estimates:
         df_wide = daf.pivot(
             index=['Isotype', 'Immune phenotype', 'Heritability model', 'MHC'],
             columns='IGHKL',
-            values=['rg', 'se', 'p-value']
+            values=['Genetic correlation estimate', 'Standard error', 'p-value']
         )
 
         # Flatten the MultiIndex columns (e.g., ('rg', True) -> 'rg_IGHKL_True')
@@ -79,10 +79,10 @@ rule ig_imd_rg_estimates:
         df_wide['FDR'] = false_discovery_control(df_wide['p-value_IGHKL_False'], method='bh')
 
         df_wide.rename()(columns={
-            'rg_IGHKL_True': 'Genetic correlation estimate (with IGHKL)',
-            'rg_IGHKL_False': 'Genetic correlation estimate (without IGHKL)',
-            'se_IGHKL_True': 'Standard error (with IGHKL)',
-            'se_IGHKL_False': 'Standard error (without IGHKL)',
+            'Genetic correlation estimate_IGHKL_True': 'Genetic correlation estimate (with IGHKL)',
+            'Genetic correlation estimate_IGHKL_False': 'Genetic correlation estimate (without IGHKL)',
+            'Standard error_IGHKL_True': 'Standard error (with IGHKL)',
+            'Standard error_IGHKL_False': 'Standard error (without IGHKL)',
             'p-value_IGHKL_True': 'p-value (with IGHKL)',
             'p-value_IGHKL_False': 'p-value (without IGHKL)'
         }, inplace=True)
