@@ -12,7 +12,7 @@ checkpoint tabulate_ig_and_non_ig_coloc_candidates:
                         "igm" : "<igm_root>/1000kb_gws_annotated_lead_snps.tsv"
                     }
         ),
-        merged = "results/merged_gwas/{isotype}-meta_and_{non_ig}/inner/sans_mhc/merged.tsv.gz"
+        merged = "results/merged_gwas/{isotype}-meta_and_{non_ig}/inner/with_mhc/merged.tsv.gz"
     output:
         "results/coloc/{isotype}_and_{non_ig}/coloc_candidate_lead_snps.tsv"
     params:
@@ -24,7 +24,7 @@ checkpoint tabulate_ig_and_non_ig_coloc_candidates:
 rule subset_ig_and_non_ig_pair_for_coloc:
     input:
         lead_snps = "results/coloc/{isotype}_and_{non_ig}/coloc_candidate_lead_snps.tsv",
-        merged = "results/merged_gwas/{isotype}-meta_and_{non_ig}/inner/sans_mhc/merged.tsv.gz"
+        merged = "results/merged_gwas/{isotype}-meta_and_{non_ig}/inner/with_mhc/merged.tsv.gz"
     output:
         "results/coloc/{isotype}_and_{non_ig}/{isotype_rsid}/sumstats.tsv"
     params:
@@ -76,7 +76,7 @@ rule add_genes_and_r2_to_ig_and_non_ig_coloc_pair:
 
 rule draw_locuszoom_plots_for_all_snps_for_ig_and_non_ig_pair:
     input:
-        lambda w: [f"results/coloc/{{isotype}}_and_{{non_ig}}/{isotype_rsid}/lz_plots.png" for isotype_rsid in get_rsids_from_candidate_lead_snps_for_ig_non_ig_pair(w)] or []
+        lambda w: [f"results/coloc/{{isotype}}_and_{{non_ig}}/{isotype_rsid}/lz_plots.png" for isotype_rsid in get_rsids_from_candidate_lead_snps_for_ig_non_ig_pair(w)]
     output:
         "results/coloc/{isotype}_and_{non_ig}/lz_plots.done"
     localrule: True
