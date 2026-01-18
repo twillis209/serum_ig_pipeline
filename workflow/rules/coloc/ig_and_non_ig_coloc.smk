@@ -93,12 +93,12 @@ use rule draw_locuszoomr_plot_for_coloc_ig_pair as draw_locuszoomr_plot_for_colo
         first_isotype_max_n = None,
         second_isotype_max_n = None
 
-rule ig_and_non_ig_coloc_tables_and_locuszoomr_plots:
+rule ig_and_non_ig_coloc_locuszoomr_plots:
     input:
         expand("results/coloc/{isotype}_and_{non_ig}/{filetype}",
                isotype = ["igg", "iga", "igm"],
                non_ig = config['imds'],
-               filetype = ["lz_plots.done", "results_with_genes_and_r2.tsv"])
+               filetype = ["lz_plots.done"])
 
 rule run_to_tabulate_for_iga_and_non_ig:
     input:
