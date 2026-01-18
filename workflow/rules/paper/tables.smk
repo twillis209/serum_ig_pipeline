@@ -188,7 +188,7 @@ rule ig_h2_diff:
     input:
         "results/ig/h2_estimates.tsv"
     output:
-        ighkl = "results/ig/h2_estimates_with_ighkl_diff.tsv"
+        ighkl = "results/ig/h2_estimates_with_ighkl_diff.tsv",
         mhc = "results/ig/h2_estimates_with_mhc_diff.tsv"
     localrule: True
     run:
@@ -237,7 +237,7 @@ rule ig_rg_diff:
     input:
         "results/ig/rg_estimates.tsv"
     output:
-        ighkl = "results/ig/rg_estimates_with_ighkl_diff.tsv"
+        ighkl = "results/ig/rg_estimates_with_ighkl_diff.tsv",
         mhc = "results/ig/rg_estimates_with_mhc_diff.tsv"
     localrule: True
     run:
