@@ -62,3 +62,21 @@ rule draw_igk_igg_associations:
         "results/paper/figures/igk_igg_associations.png"
     conda: env_path("global.yaml")
     script: script_path("gwas/ighkl/draw_igk_igg_associations.R")
+
+rule draw_igh_meta_analysis_associations:
+    input:
+        sumstats = "results/gwas/ighkl/1000000/combined_ighkl_regions.tsv.gz",
+        edb = rules.download_ensembl_db.output
+    output:
+        "results/paper/figures/igh_meta_analysis_associations.png"
+    conda: env_path("global.yaml")
+    script: script_path("gwas/ighkl/draw_igh_meta_analysis_associations.R")
+
+rule draw_igk_meta_analysis_associations:
+    input:
+        sumstats = "results/gwas/ighkl/1000000/combined_ighkl_regions.tsv.gz",
+        edb = rules.download_ensembl_db.output
+    output:
+        "results/paper/figures/igk_meta_analysis_associations.png"
+    conda: env_path("global.yaml")
+    script: script_path("gwas/ighkl/draw_igk_meta_analysis_associations.R")

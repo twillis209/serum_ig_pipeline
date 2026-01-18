@@ -286,3 +286,27 @@ rule ig_rg_diff:
         ) * 100
 
         df_wide_mhc.to_csv(output.mhc, sep='\t', index=False)
+
+rule calculate_assay_sample_proportions:
+    # TODO place this table under version control if there's not a rule to make it
+    input:
+        "results/paper/tables/ig_datasets.tsv"
+    output:
+        "results/paper/tables/ig_datasets_by_assay_sample_proportion.tsv"
+    localrule: True
+    run:
+        daf = pd.read_csv(input[0], sep = '\t')
+
+        daf = daf[daf['Study'] != 'Gudjonsson et al.']
+
+        daf['no_samples'] = daf['No. of samples'].str.replace(',', '').astype(int)
+
+        grouped = daf.groupby(['Antibody isotype', 'Antibody quantification method'])['no_samples'].sum().reset_index()
+
+        # 3. Calculate proportions within each Isotype
+        # 'transform' allows us to divide the specific row sum by the total for that group
+        grouped['proportion'] = grouped['no_samples'] / grouped.groupby('Antibody isotype')['no_samples'].transform('sum')
+
+        grouped['percentage'] = grouped['proportion'].apply(lambda col: 100 * round(col, 2))
+
+        grouped.to_csv(output[0], sep = '\t', index = False)
