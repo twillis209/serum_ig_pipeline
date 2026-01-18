@@ -22,7 +22,7 @@ checkpoint merge_ig_lead_snps:
 rule subset_ig_pair_for_coloc:
     input:
         lead_snps = "results/coloc/{first_isotype}_and_{second_isotype}/merged_lead_snps.tsv",
-        merged = "results/merged_gwas/{first_isotype}_and_{second_isotype}/inner/with_mhc/merged.tsv.gz"
+        merged = "results/merged_gwas/{first_isotype}_and_{second_isotype}/inner/sans_mhc/sans_ighkl/merged.tsv.gz"
     output:
         "results/coloc/{first_isotype}_and_{second_isotype}/{first_rsid}_and_{second_rsid}/sumstats.tsv"
     params:
