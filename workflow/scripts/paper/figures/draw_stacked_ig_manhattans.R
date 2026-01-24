@@ -21,7 +21,21 @@ theme_set(theme_bw()+
 
 iga <- fread(snakemake@input$iga, select = c('chromosome', 'base_pair_location', 'p_value'))
 igg <- fread(snakemake@input$igg, select = c('chromosome', 'base_pair_location', 'p_value'))
-igm <- fread(snakemake@input$igm, select = c('chromosome', 'base_pair_location', 'p_value'))
+igm <- fread(snakemake@input$igm, select = c("chromosome", "base_pair_location", "p_value"))
+
+drop_selected_loci <- function(dat, loci_to_drop = c('igh')) {
+  for(x in loci_to_drop) {
+    dat <- dat[!(chr == snakemake@config$loci[[x]]$chrom &
+                pos %between% c(snakemake@config$loci[[x]]$start, snakemake@config$loci[[x]]$stop)
+  ), env = list(chr = 'chromosome', pos = 'base_pair_location')]
+  }
+
+  dat
+}
+
+iga <- drop_selected_loci(iga)
+igg <- drop_selected_loci(igg)
+igm <- drop_selected_loci(igm)
 
 iga_procd_sumstats <- process_sumstats_for_manhattan(iga)
 iga_procd_sumstats$axis_set$chr <- c(as.character(1:22), 'X')

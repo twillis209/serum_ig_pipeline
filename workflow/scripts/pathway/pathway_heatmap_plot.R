@@ -159,7 +159,7 @@ width <- 12
 cellwidth <- 13
 cellheight <- 10
 fontsize_row <- 10
-fontsize_col <- 8
+fontsize_col <- 9
 
 for (x in c(snakemake@output[snakemake@output != ""])) {
   draw_pathway_heatmap(m, FALSE,

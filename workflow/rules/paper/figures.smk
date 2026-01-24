@@ -1,9 +1,9 @@
 # Figure 1
 rule draw_stacked_ig_manhattans:
     input:
-        iga = "<iga_root>/filtered_meta.tsv.gz",
-        igg = "<igg_root>/filtered_meta.tsv.gz",
-        igm = "<igm_root>/filtered_meta.tsv.gz"
+        iga = "<iga_root>/meta.tsv.gz",
+        igg = "<igg_root>/meta.tsv.gz",
+        igm = "<igm_root>/meta.tsv.gz"
     output:
         png = "results/paper/figures/ig_manhattans.png",
         tiff = "results/paper/figures/ig_manhattans.tiff"
