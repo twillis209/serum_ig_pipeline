@@ -15,23 +15,23 @@ process_ig_and_coloc_results <- function(iga, igg, igm, ig_coloc) {
   igg[, what := "IgG"]
   igm[, what := "IgM"]
   x <- rbind(iga, igg, igm)
-  x[, vid := paste0(Chromosome, "_", gsub(",", "", Position), "_", gsub(".*>", "", Variant), "_", gsub(".*:|>.*", "", Variant))]
-  x[, avid := paste0(Chromosome, "_", gsub(",", "", Position), "_", gsub(".*:|>.*", "", Variant), "_", gsub(".*>", "", Variant))]
+  x[, vid := paste0(Chromosome, "_", Position, "_", Effect.allele, "_", Other.allele)]
+  x[, avid := paste0(Chromosome, "_", Position, "_", Other.allele, "_", Effect.allele)]
 
   ## merging colocalised Ig snps & their annotations
   setnames(ig_coloc, make.names(names(ig_coloc)))
-  ig_coloc <- merge(ig_coloc, unique(x[, .(rsID = sub(":.*", "", Variant), vid1 = vid)]), by.x = "First.isotype.s.lead.SNP", by.y = "rsID")
-  ig_coloc <- merge(ig_coloc, unique(x[, .(rsID = sub(":.*", "", Variant), vid2 = vid)]), by.x = "Second.isotype.s.lead.SNP", by.y = "rsID")
+  ig_coloc <- merge(ig_coloc, unique(x[, .(rsID, vid1 = vid)]), by.x = "First.isotype.s.lead.SNP", by.y = "rsID")
+  ig_coloc <- merge(ig_coloc, unique(x[, .(rsID, vid2 = vid)]), by.x = "Second.isotype.s.lead.SNP", by.y = "rsID")
   head(ig_coloc, 2)
 
-  ## decision threshold
-  thr <- seq(0, 1, by = 0.01)
-  fdr <- sapply(thr, function(a) with(ig_coloc[PP.H4.abf > a & Filtered == FALSE], mean(1 - PP.H4.abf)))
-  ## plot(thr,fdr)
-  which(fdr < 0.05) # 81 up
-  thr[which(fdr < 0.05)] # 0.80 up
-  ## hist(ig_coloc[Filtered==FALSE]$PP.H4.abf)
-  ## use 0.8 to be safe
+  ## ## decision threshold
+  ## thr <- seq(0, 1, by = 0.01)
+  ## fdr <- sapply(thr, function(a) with(ig_coloc[PP.H4.abf > a & Filtered == FALSE], mean(1 - PP.H4.abf)))
+  ## ## plot(thr,fdr)
+  ## which(fdr < 0.05) # 81 up
+  ## thr[which(fdr < 0.05)] # 0.80 up
+  ## ## hist(ig_coloc[Filtered==FALSE]$PP.H4.abf)
+  ## ## use 0.8 to be safe
   setnames(ig_coloc, "First.isotype.s.lead.SNP", "rsid1")
   setnames(ig_coloc, "Second.isotype.s.lead.SNP", "rsid2")
   ig_coloc <- ig_coloc[PP.H4.abf >= 0.8 & Filtered == FALSE, .(vid1, vid2, rsid1, rsid2, First.isotype, Second.isotype, Pearson.correlation, PP.H4.abf)]
@@ -66,4 +66,9 @@ igg <- read_and_process_ig(snakemake@input$igg)
 igm <- read_and_process_ig(snakemake@input$igm)
 ig_coloc <- fread(snakemake@input$ig_coloc)
 
-fwrite(process_ig_and_coloc_results(iga, igg, igm, ig_coloc), sep = '\t', file = snakemake@output[[1]])
+res <- process_ig_and_coloc_results(iga, igg, igm, ig_coloc)
+
+# Remove dubious colocalisation with discordant filtered/unfiltered result
+res <- res[rsID != "rs3803800"]
+
+fwrite(res, sep = '\t', file = snakemake@output[[1]])
